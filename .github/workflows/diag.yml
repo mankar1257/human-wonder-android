@@ -1,0 +1,9 @@
+name: Diagnostic (no actions)
+on:
+  push:
+    branches: [diag]
+jobs:
+  hello:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Actions can start jobs in this repo"
