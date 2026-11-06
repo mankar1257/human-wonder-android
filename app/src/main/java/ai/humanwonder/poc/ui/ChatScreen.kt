@@ -1,5 +1,7 @@
 package ai.humanwonder.poc.ui
 
+import android.os.Build
+import android.view.HapticFeedbackConstants
 import ai.humanwonder.poc.ChatMessage
 import ai.humanwonder.poc.Perspective
 import ai.humanwonder.poc.R
@@ -85,6 +87,7 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -144,6 +147,18 @@ fun ChatScreen(
             onSend(text)
             onInput("")
         }
+    }
+
+    // A soft "transmission received" tap when Orbit finishes a reply.
+    val view = LocalView.current
+    var wasGenerating by remember { mutableStateOf(false) }
+    LaunchedEffect(state.generating) {
+        if (wasGenerating && !state.generating && state.messages.lastOrNull()?.fromUser == false) {
+            view.performHapticFeedback(
+                if (Build.VERSION.SDK_INT >= 30) HapticFeedbackConstants.CONFIRM else HapticFeedbackConstants.CONTEXT_CLICK
+            )
+        }
+        wasGenerating = state.generating
     }
 
     Box(Modifier.fillMaxSize()) {
