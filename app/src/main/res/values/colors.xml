@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Phthalo night, from the Stitch "Human Wonder" design system -->
+    <color name="hw_background">#FF061617</color>
+    <color name="ic_launcher_background">#FF061617</color>
+</resources>

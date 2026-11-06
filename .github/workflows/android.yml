@@ -1,0 +1,72 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write # publish the APK as a GitHub Release
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+
+    steps:
+      - name: Check out (with the pinned llama.cpp submodule)
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+
+      # Same SDK setup action (pinned) that llama.cpp's own Android CI uses.
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+        with:
+          log-accepted-android-sdk-licenses: false
+
+      - name: Build release APK
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:assembleRelease --no-daemon --stacktrace
+
+      - name: Collect APK
+        id: apk
+        run: |
+          APK="human-wonder-poc-${{ github.run_number }}.apk"
+          cp app/build/outputs/apk/release/app-release.apk "$APK"
+          cp "$APK" human-wonder-poc.apk
+          sha256sum "$APK" human-wonder-poc.apk
+          ls -la *.apk
+          unzip -l "$APK" | grep "lib/arm64-v8a" || true
+          echo "file=$APK" >> "$GITHUB_OUTPUT"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: human-wonder-poc-apk
+          path: human-wonder-poc.apk
+
+      - name: Publish GitHub Release
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="poc-${{ github.run_number }}"
+          gh release create "$TAG" human-wonder-poc.apk "${{ steps.apk.outputs.file }}" \
+            --target "${{ github.sha }}" \
+            --title "Human Wonder POC #${{ github.run_number }}" \
+            --notes "On-device chatbot POC (Qwen3-0.6B via llama.cpp). Built from ${{ github.sha }}.
+
+          Install: download human-wonder-poc.apk on an Android phone (Android 9+, 64-bit), open it, and allow installing from this source. On first launch the app asks before downloading the 429 MB model; after that it works offline." \
+            --latest

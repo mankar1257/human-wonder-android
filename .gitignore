@@ -1,0 +1,15 @@
+.gradle/
+build/
+**/build/
+.cxx/
+**/.cxx/
+.externalNativeBuild/
+local.properties
+.idea/
+*.iml
+.DS_Store
+captures/
+.kotlin/
+*.apk
+*.gguf
+.transfer/
