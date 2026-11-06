@@ -89,10 +89,14 @@ class ModelStore(context: Context) {
     suspend fun download(onProgress: (done: Long, total: Long) -> Unit) = withContext(Dispatchers.IO) {
         var attempt = 0
         while (true) {
+            val before = partialBytes()
             try {
                 downloadOnce(onProgress)
                 return@withContext
             } catch (e: IOException) {
+                // Only count attempts that made no progress, so a long download on a flaky
+                // connection keeps going as long as bytes keep arriving.
+                if (partialBytes() > before) attempt = 0
                 attempt++
                 if (attempt >= MAX_ATTEMPTS) throw e
                 delay(2_000L * attempt)
@@ -121,7 +125,15 @@ class ModelStore(context: Context) {
         }
         try {
             val append = when (val code = conn.responseCode) {
-                HttpURLConnection.HTTP_PARTIAL -> true
+                HttpURLConnection.HTTP_PARTIAL -> {
+                    // Make sure the server really resumed where we asked it to.
+                    val range = conn.getHeaderField("Content-Range") ?: ""
+                    if (!range.startsWith("bytes $existing-")) {
+                        partFile.delete()
+                        throw IOException("Unexpected resume range '$range'; restarting download")
+                    }
+                    true
+                }
                 HttpURLConnection.HTTP_OK -> false // server ignored Range: start over
                 416 -> {
                     partFile.delete()

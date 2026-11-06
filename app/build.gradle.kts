@@ -31,10 +31,12 @@ android {
         // set HW_KEYSTORE / HW_KEYSTORE_PASSWORD / HW_KEY_ALIAS / HW_KEY_PASSWORD
         // (e.g. from GitHub secrets) to sign with a private key instead.
         create("poc") {
-            storeFile = file(System.getenv("HW_KEYSTORE") ?: "../keystore/poc-release.jks")
-            storePassword = System.getenv("HW_KEYSTORE_PASSWORD") ?: "humanwonder-poc"
-            keyAlias = System.getenv("HW_KEY_ALIAS") ?: "humanwonder-poc"
-            keyPassword = System.getenv("HW_KEY_PASSWORD") ?: "humanwonder-poc"
+            // Unset GitHub secrets arrive as empty strings, so treat blank as "not provided".
+            fun env(name: String): String? = System.getenv(name)?.takeIf { it.isNotBlank() }
+            storeFile = file(env("HW_KEYSTORE") ?: "../keystore/poc-release.jks")
+            storePassword = env("HW_KEYSTORE_PASSWORD") ?: "humanwonder-poc"
+            keyAlias = env("HW_KEY_ALIAS") ?: "humanwonder-poc"
+            keyPassword = env("HW_KEY_PASSWORD") ?: "humanwonder-poc"
         }
     }
 

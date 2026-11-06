@@ -23,6 +23,12 @@ class MainActivity : ComponentActivity() {
 
     private val vm: ChatViewModel by viewModels()
 
+    override fun onResume() {
+        super.onResume()
+        // The user may have switched Wi-Fi on or freed space while away.
+        vm.refreshConsentCheck()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -53,6 +59,7 @@ class MainActivity : ComponentActivity() {
                             check = phase.check,
                             onAllow = vm::startDownload,
                             onImport = importModel,
+                            onRecheck = vm::refreshConsentCheck,
                         )
 
                         is Phase.Downloading -> ProgressScreen(

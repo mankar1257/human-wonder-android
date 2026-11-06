@@ -35,6 +35,9 @@ jobs:
         with:
           log-accepted-android-sdk-licenses: false
 
+      - name: Install NDK r29 and CMake 3.31.6
+        run: sdkmanager "ndk;29.0.14206865" "cmake;3.31.6"
+
       - name: Build release APK
         run: |
           chmod +x gradlew
@@ -62,7 +65,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG="poc-${{ github.run_number }}"
+          TAG="poc-${{ github.run_number }}-${{ github.run_attempt }}"
           gh release create "$TAG" human-wonder-poc.apk "${{ steps.apk.outputs.file }}" \
             --target "${{ github.sha }}" \
             --title "Human Wonder POC #${{ github.run_number }}" \

@@ -96,7 +96,9 @@ internal class InferenceEngineImpl private constructor(
 
     private external fun processUserPrompt(userPrompt: String, predictLength: Int): Int
 
-    private external fun generateNextToken(): String?
+    // Human Wonder change: returns complete UTF-8 bytes (empty while a character is still
+    // incomplete, null when generation ends) instead of a String built with NewStringUTF.
+    private external fun generateNextToken(): ByteArray?
 
     private external fun unload()
 
@@ -117,6 +119,10 @@ internal class InferenceEngineImpl private constructor(
     private val llamaDispatcher = Dispatchers.IO.limitedParallelism(1)
     private val llamaScope = CoroutineScope(llamaDispatcher + SupervisorJob())
 
+    /** Human Wonder change: tracks whether the JNI library loaded, so cleanup never calls into it otherwise. */
+    @Volatile
+    private var nativeLoaded = false
+
     init {
         llamaScope.launch {
             try {
@@ -126,13 +132,17 @@ internal class InferenceEngineImpl private constructor(
                 _state.value = InferenceEngine.State.Initializing
                 Log.i(TAG, "Loading native library...")
                 System.loadLibrary("ai-chat")
+                nativeLoaded = true
                 init(nativeLibDir)
                 _state.value = InferenceEngine.State.Initialized
                 Log.i(TAG, "Native library loaded! System info: \n${systemInfo()}")
 
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to load native library", e)
-                throw e
+            } catch (t: Throwable) {
+                // Human Wonder change: upstream rethrew here, which crashed the whole app from a
+                // background coroutine (and UnsatisfiedLinkError is not an Exception at all).
+                // Report it through the state instead so the UI can explain it.
+                Log.e(TAG, "Failed to load native library", t)
+                _state.value = InferenceEngine.State.Error(RuntimeException(t))
             }
         }
     }
@@ -223,16 +233,17 @@ internal class InferenceEngineImpl private constructor(
 
             processUserPrompt(message, predictLength).let { result ->
                 if (result != 0) {
-                    Log.e(TAG, "Failed to process user prompt: $result")
-                    return@flow
+                    // Human Wonder change: upstream returned silently and left the engine stuck
+                    // in ProcessingUserPrompt forever. Fail loudly; the catch below sets Error.
+                    throw IllegalStateException("Failed to process user prompt: $result")
                 }
             }
 
             Log.i(TAG, "User prompt processed. Generating assistant prompt...")
             _state.value = InferenceEngine.State.Generating
             while (!_cancelGeneration) {
-                generateNextToken()?.let { utf8token ->
-                    if (utf8token.isNotEmpty()) emit(utf8token)
+                generateNextToken()?.let { utf8bytes ->
+                    if (utf8bytes.isNotEmpty()) emit(String(utf8bytes, Charsets.UTF_8))
                 } ?: break
             }
             if (_cancelGeneration) {
@@ -289,7 +300,10 @@ internal class InferenceEngineImpl private constructor(
 
                 is InferenceEngine.State.Error -> {
                     Log.i(TAG, "Resetting error states...")
-                    _state.value = InferenceEngine.State.Initialized
+                    // Human Wonder change: free whatever a failed load/prompt left behind;
+                    // upstream leaked the model here (native unload() is now idempotent).
+                    if (nativeLoaded) unload()
+                    _state.value = if (nativeLoaded) InferenceEngine.State.Initialized else state
                     Log.i(TAG, "States reset!")
                     Unit
                 }
@@ -309,7 +323,7 @@ internal class InferenceEngineImpl private constructor(
             when(_state.value) {
                 is InferenceEngine.State.Uninitialized -> {}
                 is InferenceEngine.State.Initialized -> shutdown()
-                else -> { unload(); shutdown() }
+                else -> if (nativeLoaded) { unload(); shutdown() }
             }
         }
         llamaScope.cancel()

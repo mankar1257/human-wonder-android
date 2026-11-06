@@ -79,7 +79,7 @@ private fun PrimaryButton(text: String, enabled: Boolean = true, onClick: () -> 
  * The permission step. Nothing is downloaded until the user explicitly agrees here.
  */
 @Composable
-fun ConsentScreen(check: DeviceCheck, onAllow: () -> Unit, onImport: () -> Unit) {
+fun ConsentScreen(check: DeviceCheck, onAllow: () -> Unit, onImport: () -> Unit, onRecheck: () -> Unit) {
     val resuming = check.alreadyDownloaded > 0
     val remaining = ModelSpec.SIZE_BYTES - check.alreadyDownloaded
     Column(
@@ -129,6 +129,7 @@ fun ConsentScreen(check: DeviceCheck, onAllow: () -> Unit, onImport: () -> Unit)
         Spacer(Modifier.height(16.dp))
         if (!check.online) {
             Notice("You're offline. Connect to Wi-Fi to download.", HW.Gold)
+            TextButton(onClick = onRecheck) { Text("Check again", color = HW.Primary) }
         } else if (check.onMeteredNetwork) {
             Notice("You're on mobile data. Wi-Fi is recommended for a ${mb(remaining)} download.", HW.Gold)
         }

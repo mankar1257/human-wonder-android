@@ -268,13 +268,19 @@ constexpr const char *ROLE_ASSISTANT    = "assistant";
 static std::vector<common_chat_msg> chat_msgs;
 static llama_pos system_prompt_position;
 static llama_pos current_position;
+// Human Wonder change: declared here (was further down) so shift_context() can move it.
+static llama_pos stop_generation_position;
+// Human Wonder change: true while an assistant reply has been started but not finished with an
+// end-of-turn token (user pressed Stop, or the reply hit the length cap).
+static bool assistant_turn_open = false;
 
 static void reset_long_term_states(const bool clear_kv_cache = true) {
     chat_msgs.clear();
     system_prompt_position = 0;
     current_position = 0;
+    assistant_turn_open = false;
 
-    if (clear_kv_cache)
+    if (clear_kv_cache && g_context)   // Human Wonder change: unload() may run with no context
         llama_memory_clear(llama_get_memory(g_context), false);
 }
 
@@ -286,13 +292,17 @@ static void reset_long_term_states(const bool clear_kv_cache = true) {
  * - take half of the last (system_prompt_position - system_prompt_position) tokens
  * - recompute the logits in batches
  */
-static void shift_context() {
+// Human Wonder change: returns how far positions moved back, and moves the stop position with
+// them, so callers that are part-way through a batch can keep positions consecutive.
+static int shift_context() {
     const int n_discard = (current_position - system_prompt_position) / 2;
     LOGi("%s: Discarding %d tokens", __func__, n_discard);
     llama_memory_seq_rm(llama_get_memory(g_context), 0, system_prompt_position, system_prompt_position + n_discard);
     llama_memory_seq_add(llama_get_memory(g_context), 0, system_prompt_position + n_discard, current_position, -n_discard);
     current_position -= n_discard;
+    stop_generation_position -= n_discard;
     LOGi("%s: Context shifting done! Current position: %d", __func__, current_position);
+    return n_discard;
 }
 
 static std::string chat_add_and_format(const std::string &role, const std::string &content) {
@@ -312,7 +322,6 @@ static std::string chat_add_and_format(const std::string &role, const std::strin
  * - token chars caching
  * - current assistant message being generated
  */
-static llama_pos stop_generation_position;
 static std::string cached_token_chars;
 static std::ostringstream assistant_ss;
 
@@ -326,17 +335,20 @@ static int decode_tokens_in_batches(
         llama_context *context,
         common_batch &batch,
         const llama_tokens &tokens,
-        const llama_pos start_pos,
         const bool compute_last_logit = false) {
-    // Process tokens in batches using the global batch
-    LOGd("%s: Decode %d tokens starting at position %d", __func__, (int) tokens.size(), start_pos);
+    // Human Wonder change: upstream took a start_pos and kept using it after shift_context()
+    // had moved the KV cache back, so positions became non-consecutive and every later decode
+    // failed once a chat filled the context window. current_position is now the single source
+    // of truth: it is advanced batch by batch, so a shift also covers tokens decoded earlier in
+    // this same call.
+    LOGd("%s: Decode %d tokens starting at position %d", __func__, (int) tokens.size(), current_position);
     for (int i = 0; i < (int) tokens.size(); i += BATCH_SIZE) {
         const int cur_batch_size = std::min((int) tokens.size() - i, BATCH_SIZE);
         batch.clear();
         LOGv("%s: Preparing a batch size of %d starting at: %d", __func__, cur_batch_size, i);
 
         // Shift context if current batch cannot fit into the context
-        if (start_pos + i + cur_batch_size >= DEFAULT_CONTEXT_SIZE - OVERFLOW_HEADROOM) {
+        if (current_position + cur_batch_size >= DEFAULT_CONTEXT_SIZE - OVERFLOW_HEADROOM) {
             LOGw("%s: Current batch won't fit into context! Shifting...", __func__);
             shift_context();
         }
@@ -344,8 +356,8 @@ static int decode_tokens_in_batches(
         // Add tokens to the batch with proper positions
         for (int j = 0; j < cur_batch_size; j++) {
             const llama_token token_id = tokens[i + j];
-            const llama_pos position = start_pos + i + j;
-            const bool want_logit = compute_last_logit && (i + j == tokens.size() - 1);
+            const llama_pos position = current_position + j;
+            const bool want_logit = compute_last_logit && (i + j == (int) tokens.size() - 1);
             batch.add(token_id, position, 0, want_logit);
         }
 
@@ -355,6 +367,7 @@ static int decode_tokens_in_batches(
             LOGe("%s: llama_decode failed w/ %d", __func__, decode_result);
             return 1;
         }
+        current_position += cur_batch_size;
     }
     return 0;
 }
@@ -398,13 +411,13 @@ Java_com_arm_aichat_internal_InferenceEngineImpl_processSystemPrompt(
     }
 
     // Decode system tokens in batches
-    if (decode_tokens_in_batches(g_context, g_batch, system_tokens, current_position)) {
+    if (decode_tokens_in_batches(g_context, g_batch, system_tokens)) {
         LOGe("%s: llama_decode() failed!", __func__);
         return 2;
     }
 
     // Update position
-    system_prompt_position = current_position = (int) system_tokens.size();
+    system_prompt_position = current_position;
     return 0;
 }
 
@@ -416,6 +429,26 @@ Java_com_arm_aichat_internal_InferenceEngineImpl_processUserPrompt(
         jstring juser_prompt,
         jint n_predict
 ) {
+    // Human Wonder change: if the previous reply was stopped early or hit the length cap, it
+    // never got its end-of-turn token or a place in the chat history, so the next prompt would
+    // continue a malformed conversation. Close that turn properly first.
+    if (assistant_turn_open) {
+        const auto *vocab = llama_model_get_vocab(g_model);
+        llama_token eot = llama_vocab_eot(vocab);
+        if (eot == LLAMA_TOKEN_NULL) eot = llama_vocab_eos(vocab);
+        if (eot != LLAMA_TOKEN_NULL) {
+            const llama_tokens closing = {eot};
+            if (decode_tokens_in_batches(g_context, g_batch, closing)) {
+                LOGe("%s: failed to close the previous assistant turn", __func__);
+                return 2;
+            }
+        }
+        if (common_chat_templates_was_explicit(g_chat_templates.get())) {
+            chat_add_and_format(ROLE_ASSISTANT, assistant_ss.str());
+        }
+        assistant_turn_open = false;
+    }
+
     // Reset short-term states
     reset_short_term_states();
 
@@ -437,25 +470,24 @@ Java_com_arm_aichat_internal_InferenceEngineImpl_processUserPrompt(
         LOGv("token: `%s`\t -> `%d`", common_token_to_piece(g_context, id).c_str(), id);
     }
 
-    // Ensure user prompt doesn't exceed the context size by truncating if necessary.
-    const int user_prompt_size = (int) user_tokens.size();
-    const int max_batch_size = DEFAULT_CONTEXT_SIZE - OVERFLOW_HEADROOM;
-    if (user_prompt_size > max_batch_size) {
-        const int skipped_tokens = user_prompt_size - max_batch_size;
-        user_tokens.resize(max_batch_size);
-        LOGw("%s: User prompt too long! Skipped %d tokens!", __func__, skipped_tokens);
+    // Ensure the user prompt fits. Human Wonder change: cap it at half of the space after the
+    // system prompt, so that one context shift is always enough to make room for it and the
+    // reply. (Upstream allowed nearly the whole window and miscounted after truncating.)
+    const int max_user_tokens = std::max(16, (DEFAULT_CONTEXT_SIZE - OVERFLOW_HEADROOM - system_prompt_position) / 2);
+    if ((int) user_tokens.size() > max_user_tokens) {
+        LOGw("%s: User prompt too long! Skipped %d tokens!", __func__, (int) user_tokens.size() - max_user_tokens);
+        user_tokens.resize(max_user_tokens);
     }
 
-    // Decode user tokens in batches
-    if (decode_tokens_in_batches(g_context, g_batch, user_tokens, current_position, true)) {
+    // Decode user tokens in batches (advances current_position)
+    if (decode_tokens_in_batches(g_context, g_batch, user_tokens, true)) {
         LOGe("%s: llama_decode() failed!", __func__);
         return 2;
     }
 
-    // Update position
-    current_position += user_prompt_size;
-    // Human Wonder change: upstream added user_prompt_size twice here.
+    // Human Wonder change: upstream added the prompt size twice here.
     stop_generation_position = current_position + n_predict;
+    assistant_turn_open = true;
     return 0;
 }
 
@@ -494,7 +526,7 @@ static bool is_valid_utf8(const char *string) {
 }
 
 extern "C"
-JNIEXPORT jstring JNICALL
+JNIEXPORT jbyteArray JNICALL
 Java_com_arm_aichat_internal_InferenceEngineImpl_generateNextToken(
         JNIEnv *env,
         jobject /*unused*/
@@ -530,6 +562,7 @@ Java_com_arm_aichat_internal_InferenceEngineImpl_generateNextToken(
     if (llama_vocab_is_eog(llama_model_get_vocab(g_model), new_token_id)) {
         LOGd("id: %d,\tIS EOG!\nSTOP.", new_token_id);
         chat_add_and_format(ROLE_ASSISTANT, assistant_ss.str());
+        assistant_turn_open = false;
         return nullptr;
     }
 
@@ -537,17 +570,20 @@ Java_com_arm_aichat_internal_InferenceEngineImpl_generateNextToken(
     auto new_token_chars = common_token_to_piece(g_context, new_token_id);
     cached_token_chars += new_token_chars;
 
-    // Create and return a valid UTF-8 Java string
-    jstring result = nullptr;
+    // Human Wonder change: hand complete UTF-8 back as bytes and decode in Kotlin.
+    // NewStringUTF() expects "modified" UTF-8, and CheckJNI aborts on 4-byte sequences (emoji).
+    jbyteArray result = nullptr;
     if (is_valid_utf8(cached_token_chars.c_str())) {
-        result = env->NewStringUTF(cached_token_chars.c_str());
+        const auto n = (jsize) cached_token_chars.size();
+        result = env->NewByteArray(n);
+        env->SetByteArrayRegion(result, 0, n, reinterpret_cast<const jbyte *>(cached_token_chars.data()));
         LOGv("id: %d,\tcached: `%s`,\tnew: `%s`", new_token_id, cached_token_chars.c_str(), new_token_chars.c_str());
 
         assistant_ss << cached_token_chars;
         cached_token_chars.clear();
     } else {
         LOGv("id: %d,\tappend to cache", new_token_id);
-        result = env->NewStringUTF("");
+        result = env->NewByteArray(0);
     }
     return result;
 }
@@ -560,12 +596,13 @@ Java_com_arm_aichat_internal_InferenceEngineImpl_unload(JNIEnv * /*unused*/, job
     reset_long_term_states();
     reset_short_term_states();
 
-    // Free up resources
-    common_sampler_free(g_sampler);
+    // Free up resources. Human Wonder change: null-safe and idempotent, so the Kotlin side can
+    // also call it after a failed load or prompt without leaking a whole model.
+    if (g_sampler) { common_sampler_free(g_sampler); g_sampler = nullptr; }
     g_chat_templates.reset();
     g_batch = common_batch();
-    llama_free(g_context);
-    llama_model_free(g_model);
+    if (g_context) { llama_free(g_context); g_context = nullptr; }
+    if (g_model) { llama_model_free(g_model); g_model = nullptr; }
 }
 
 extern "C"

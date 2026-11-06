@@ -143,6 +143,13 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    /** Re-checks network/storage, e.g. after the user turns Wi-Fi on. */
+    fun refreshConsentCheck() {
+        if (_ui.value.phase is Phase.NeedsConsent) {
+            _ui.update { it.copy(phase = Phase.NeedsConsent(deviceCheck())) }
+        }
+    }
+
     fun retry() {
         val local = store.localModel()
         if (local != null) loadModel(local) else _ui.update { it.copy(phase = Phase.NeedsConsent(deviceCheck())) }
@@ -150,6 +157,7 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
 
     fun deleteModelAndRestart() {
         generationJob?.cancel()
+        _ui.update { it.copy(phase = Phase.Starting, generating = false) }
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 unloadQuietly()
@@ -173,6 +181,7 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
                         }
                     }
                     unloadQuietly()
+                    if (engine.state.value is InferenceEngine.State.Error) throw EngineUnavailable()
                     engine.loadModel(model.file.path)
                     engine.setSystemPrompt(SYSTEM_PROMPT)
                 }
@@ -180,6 +189,13 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
                 _ui.update { it.copy(phase = Phase.Ready, modelLabel = model.label) }
             } catch (e: CancellationException) {
                 throw e
+            } catch (e: EngineUnavailable) {
+                Log.e(TAG, "Inference engine unavailable", e)
+                fail(
+                    "The on-device AI engine could not start on this phone. " +
+                        "It needs a 64-bit Arm phone running Android 9 or newer.",
+                    offerRedownload = false,
+                )
             } catch (e: Throwable) {
                 Log.e(TAG, "Model load failed", e)
                 fail(
@@ -291,6 +307,8 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
             online = online,
         )
     }
+
+    private class EngineUnavailable : Exception()
 
     companion object {
         private const val TAG = "HumanWonder"

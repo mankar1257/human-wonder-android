@@ -11,7 +11,9 @@ plugins {
 android {
     namespace = "com.arm.aichat"
     compileSdk = 36
-    ndkVersion = "29.0.13113456"
+    // Stable NDK r29 (the same version llama.cpp's own Android CI installs). Upstream's example
+    // used 29.0.13113456, a pre-release that CI machines may not be able to download.
+    ndkVersion = "29.0.14206865"
 
     defaultConfig {
         minSdk = 28
