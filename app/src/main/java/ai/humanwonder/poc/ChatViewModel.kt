@@ -1,14 +1,8 @@
 package ai.humanwonder.poc
 
-import ai.humanwonder.poc.model.LocalModel
-import ai.humanwonder.poc.model.ModelSpec
 import ai.humanwonder.poc.model.ModelStore
-import android.app.ActivityManager
 import android.app.Application
 import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.net.Uri
 import android.os.SystemClock
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
@@ -27,30 +21,31 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import java.io.File
 
-/** What the phone looks like, shown on the consent screen before downloading. */
-data class DeviceCheck(
-    val totalRamBytes: Long,
-    val freeStorageBytes: Long,
-    val bytesNeeded: Long,
-    val alreadyDownloaded: Long,
-    val onMeteredNetwork: Boolean,
-    val online: Boolean,
-) {
-    val enoughStorage get() = freeStorageBytes >= bytesNeeded
-    val lowRam get() = totalRamBytes in 1 until 3L * 1024 * 1024 * 1024
+/** The three screens from the Stitch design. */
+enum class Screen { Landing, Name, Chat }
+
+/** "Orbit / Ground" toggle in the prompt box: where the sky speaks from. */
+enum class Perspective(val label: String, val hint: String) {
+    Orbit("Orbit", "Describe it as you see it from orbit."),
+    Ground("Ground", "Help them see it from where they stand on the ground, looking up."),
 }
 
-sealed interface Phase {
-    data object Starting : Phase
-    /** No model on the phone yet: ask the user before downloading anything. */
-    data class NeedsConsent(val check: DeviceCheck) : Phase
-    data class Downloading(val done: Long, val total: Long) : Phase
-    data class Verifying(val done: Long, val total: Long) : Phase
-    data class Importing(val done: Long, val total: Long) : Phase
-    data object LoadingModel : Phase
-    data object Ready : Phase
-    data class Failed(val message: String, val offerRedownload: Boolean) : Phase
+/** The "✦ Balanced" chip in the prompt box: how the sky answers. */
+enum class Tone(val label: String, val hint: String) {
+    Balanced("Balanced", ""),
+    Poetic("Poetic", "Answer poetically, with one vivid image."),
+    Scientific("Scientific", "Answer precisely, with one or two clear facts."),
+    Whisper("Whisper", "Answer in one short, gentle sentence."),
+}
+
+sealed interface SkyState {
+    /** Copying the bundled model out of the APK (first launch only). */
+    data class Aligning(val progress: Float) : SkyState
+    data object Waking : SkyState
+    data object Ready : SkyState
+    data class Failed(val message: String) : SkyState
 }
 
 data class ChatMessage(
@@ -58,153 +53,143 @@ data class ChatMessage(
     val fromUser: Boolean,
     val text: String,
     val complete: Boolean = true,
+    val time: Long = System.currentTimeMillis(),
 )
 
 data class UiState(
-    val phase: Phase = Phase.Starting,
+    val screen: Screen = Screen.Landing,
+    val name: String = "",
+    val sky: SkyState = SkyState.Aligning(0f),
     val messages: List<ChatMessage> = emptyList(),
     val generating: Boolean = false,
-    val modelLabel: String = "",
+    val perspective: Perspective = Perspective.Orbit,
+    val tone: Tone = Tone.Balanced,
     val tokensPerSecond: Float? = null,
+    /** True while the name screen waits for the sky to be ready before opening the chat. */
+    val entering: Boolean = false,
 )
 
 class ChatViewModel(app: Application) : AndroidViewModel(app) {
 
+    private val prefs = app.getSharedPreferences("human_wonder", Context.MODE_PRIVATE)
     private val store = ModelStore(app)
     private val engine: InferenceEngine by lazy { AiChat.getInferenceEngine(app) }
 
-    private val _ui = MutableStateFlow(UiState())
+    private val _ui = MutableStateFlow(
+        UiState(
+            screen = if (prefs.getBoolean(KEY_ONBOARDED, false)) Screen.Chat else Screen.Landing,
+            name = prefs.getString(KEY_NAME, "").orEmpty(),
+        ),
+    )
     val ui: StateFlow<UiState> = _ui.asStateFlow()
 
-    private var activeModel: LocalModel? = null
-    private var workJob: Job? = null
+    private var modelFile: File? = null
+    private var loadedForName: String? = null
+    private var setupJob: Job? = null
     private var generationJob: Job? = null
     private var nextId = 0L
 
     init {
-        val local = store.localModel()
-        if (local != null) loadModel(local) else _ui.update { it.copy(phase = Phase.NeedsConsent(deviceCheck())) }
+        startSky()
     }
 
-    // ---------------------------------------------------------------- model setup
+    // ------------------------------------------------------------------ navigation
 
-    /** Called only after the user taps "Allow download" on the consent screen. */
-    fun startDownload() {
-        if (workJob?.isActive == true) return
-        workJob = viewModelScope.launch {
-            try {
-                _ui.update { it.copy(phase = Phase.Downloading(store.partialBytes(), ModelSpec.SIZE_BYTES)) }
-                store.download { done, total ->
-                    _ui.update { it.copy(phase = Phase.Downloading(done, total)) }
-                }
-                _ui.update { it.copy(phase = Phase.Verifying(0, ModelSpec.SIZE_BYTES)) }
-                val ok = store.verifyDownload { done, total ->
-                    _ui.update { it.copy(phase = Phase.Verifying(done, total)) }
-                }
-                if (!ok) {
-                    fail("The download was corrupted and has been deleted. Please try again.", offerRedownload = true)
-                    return@launch
-                }
-                store.localModel()?.let { loadModel(it) }
-            } catch (e: CancellationException) {
-                // Paused by the user: the partial file is kept, so the next attempt resumes.
-                _ui.update { it.copy(phase = Phase.NeedsConsent(deviceCheck())) }
-                throw e
-            } catch (e: Exception) {
-                Log.e(TAG, "Download failed", e)
-                fail(
-                    "Download interrupted: ${e.message ?: "network error"}. " +
-                        "Your progress is saved; tap retry to resume.",
-                    offerRedownload = true,
-                )
-            }
-        }
-    }
+    fun begin() = _ui.update { it.copy(screen = Screen.Name) }
 
-    fun pauseDownload() {
-        workJob?.cancel()
-    }
-
-    fun importModel(uri: Uri) {
-        if (workJob?.isActive == true) return
-        workJob = viewModelScope.launch {
-            try {
-                _ui.update { it.copy(phase = Phase.Importing(0, -1)) }
-                val model = store.importFrom(getApplication<Application>().contentResolver, uri) { done, total ->
-                    _ui.update { it.copy(phase = Phase.Importing(done, total)) }
-                }
-                loadModel(model)
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                Log.e(TAG, "Import failed", e)
-                fail(e.message ?: "Could not import that file.", offerRedownload = false)
-            }
-        }
-    }
-
-    /** Re-checks network/storage, e.g. after the user turns Wi-Fi on. */
-    fun refreshConsentCheck() {
-        if (_ui.value.phase is Phase.NeedsConsent) {
-            _ui.update { it.copy(phase = Phase.NeedsConsent(deviceCheck())) }
-        }
-    }
-
-    fun retry() {
-        val local = store.localModel()
-        if (local != null) loadModel(local) else _ui.update { it.copy(phase = Phase.NeedsConsent(deviceCheck())) }
-    }
-
-    fun deleteModelAndRestart() {
+    fun editName() {
         generationJob?.cancel()
-        _ui.update { it.copy(phase = Phase.Starting, generating = false) }
+        _ui.update { it.copy(screen = Screen.Name) }
+    }
+
+    /** "Enter the Sky Sanctuary": remember the name, wake the sky with it, open the chat. */
+    fun enter(rawName: String) {
+        val name = rawName.trim().take(40)
+        prefs.edit().putString(KEY_NAME, name).putBoolean(KEY_ONBOARDED, true).apply()
+        val nameChanged = name != _ui.value.name
+        _ui.update { it.copy(name = name, entering = true) }
+        if (nameChanged && loadedForName != null) {
+            _ui.update { it.copy(messages = emptyList()) }
+            loadModel()
+        } else if (_ui.value.sky is SkyState.Failed) {
+            startSky()
+        }
         viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                unloadQuietly()
-                store.deleteAll()
-            }
-            activeModel = null
-            _ui.update { UiState(phase = Phase.NeedsConsent(deviceCheck())) }
+            ui.first { it.sky is SkyState.Ready || it.sky is SkyState.Failed }
+            _ui.update { it.copy(screen = Screen.Chat, entering = false) }
         }
     }
 
-    private fun loadModel(model: LocalModel) {
-        _ui.update { it.copy(phase = Phase.LoadingModel, modelLabel = model.label) }
-        viewModelScope.launch {
+    fun backFromName(): Boolean {
+        if (prefs.getBoolean(KEY_ONBOARDED, false)) {
+            _ui.update { it.copy(screen = Screen.Chat, entering = false) }
+            return true
+        }
+        _ui.update { it.copy(screen = Screen.Landing) }
+        return true
+    }
+
+    // ------------------------------------------------------------------ the sky (model)
+
+    fun retry() = startSky()
+
+    private fun startSky() {
+        if (setupJob?.isActive == true) return
+        setupJob = viewModelScope.launch {
             try {
-                withContext(Dispatchers.IO) {
-                    // The engine initialises its native library asynchronously on creation.
-                    withTimeout(30_000) {
-                        engine.state.first {
-                            it is InferenceEngine.State.Initialized || it.isModelLoaded ||
-                                it is InferenceEngine.State.Error
-                        }
-                    }
-                    unloadQuietly()
-                    if (engine.state.value is InferenceEngine.State.Error) throw EngineUnavailable()
-                    engine.loadModel(model.file.path)
-                    engine.setSystemPrompt(SYSTEM_PROMPT)
-                }
-                activeModel = model
-                _ui.update { it.copy(phase = Phase.Ready, modelLabel = model.label) }
+                _ui.update { it.copy(sky = SkyState.Aligning(0f)) }
+                modelFile = store.prepare { p -> _ui.update { it.copy(sky = SkyState.Aligning(p)) } }
+                loadModelNow()
             } catch (e: CancellationException) {
                 throw e
-            } catch (e: EngineUnavailable) {
-                Log.e(TAG, "Inference engine unavailable", e)
-                fail(
-                    "The on-device AI engine could not start on this phone. " +
-                        "It needs a 64-bit Arm phone running Android 9 or newer.",
-                    offerRedownload = false,
-                )
             } catch (e: Throwable) {
-                Log.e(TAG, "Model load failed", e)
-                fail(
-                    "The model could not be loaded on this phone (${e.javaClass.simpleName}). " +
-                        "You can delete it and download it again.",
-                    offerRedownload = true,
-                )
+                Log.e(TAG, "Preparing the model failed", e)
+                _ui.update { it.copy(sky = SkyState.Failed(e.message ?: "Something went wrong.")) }
             }
         }
+    }
+
+    /** (Re)loads the model, after any setup already in progress (never two loads at once). */
+    private fun loadModel() {
+        val previous = setupJob
+        setupJob = viewModelScope.launch {
+            try {
+                previous?.join()
+                loadModelNow()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                Log.e(TAG, "Loading the model failed", e)
+                _ui.update { it.copy(sky = SkyState.Failed("The sky could not wake on this phone.")) }
+            }
+        }
+    }
+
+    private suspend fun loadModelNow() {
+        val file = modelFile ?: return
+        val name = _ui.value.name
+        _ui.update { it.copy(sky = SkyState.Waking) }
+        withContext(Dispatchers.IO) {
+            withTimeout(30_000) {
+                engine.state.first {
+                    it is InferenceEngine.State.Initialized || it.isModelLoaded ||
+                        it is InferenceEngine.State.Error
+                }
+            }
+            unloadQuietly()
+            if (engine.state.value is InferenceEngine.State.Error) {
+                throw IllegalStateException("The on-device engine could not start on this phone.")
+            }
+            engine.loadModel(file.path)
+            engine.setSystemPrompt(systemPrompt(name))
+        }
+        loadedForName = name
+        // The name may have changed while the model was waking up: wake it again with the new one.
+        if (_ui.value.name != name) {
+            loadModelNow()
+            return
+        }
+        _ui.update { it.copy(sky = SkyState.Ready) }
     }
 
     private fun unloadQuietly() {
@@ -214,12 +199,16 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    // ---------------------------------------------------------------- chat
+    // ------------------------------------------------------------------ chat
+
+    fun setPerspective(p: Perspective) = _ui.update { it.copy(perspective = p) }
+
+    fun cycleTone() = _ui.update { it.copy(tone = Tone.entries[(it.tone.ordinal + 1) % Tone.entries.size]) }
 
     fun send(text: String) {
         val question = text.trim()
         val state = _ui.value
-        if (question.isEmpty() || state.generating || state.phase != Phase.Ready) return
+        if (question.isEmpty() || state.generating || state.sky != SkyState.Ready) return
 
         val userMsg = ChatMessage(nextId++, fromUser = true, text = question)
         val answerId = nextId++
@@ -230,9 +219,14 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
             )
         }
 
-        // Qwen3 "thinks" out loud by default, which is slow on a phone. "/no_think" is its
-        // documented switch for answering directly.
-        val prompt = if (activeModel?.isBundledSpec == true) "$question /no_think" else question
+        // Style hints ride along with the question; the user only ever sees their own words.
+        // "/no_think" makes the model answer directly instead of reasoning out loud first.
+        val hints = listOf(state.perspective.hint, state.tone.hint).filter { it.isNotBlank() }
+        val prompt = buildString {
+            append(question)
+            if (hints.isNotEmpty()) append("\n\n(").append(hints.joinToString(" ")).append(")")
+            append(" /no_think")
+        }
 
         generationJob = viewModelScope.launch {
             val raw = StringBuilder()
@@ -247,10 +241,10 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
                     setAnswer(answerId, visibleAnswer(raw.toString()), complete = false)
                 }
             } catch (e: CancellationException) {
-                // Stopped by the user; keep what was generated so far.
+                // Stopped by the user; keep what arrived so far.
             } catch (e: Exception) {
                 Log.e(TAG, "Generation failed", e)
-                error = "Something went wrong while answering. Try again or start a new chat."
+                error = "The signal faded. Try asking again."
             } finally {
                 val elapsed = SystemClock.elapsedRealtime() - firstPieceAt
                 val speed = if (pieces > 1 && elapsed > 0) (pieces - 1) * 1000f / elapsed else null
@@ -273,12 +267,11 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
         generationJob?.cancel()
     }
 
-    /** Clears the conversation (and the model's memory of it) by reloading the model. */
-    fun newChat() {
-        val model = activeModel ?: return
+    /** Starts a fresh conversation (the model forgets the previous one). */
+    fun newConversation() {
         generationJob?.cancel()
         _ui.update { it.copy(messages = emptyList(), generating = false) }
-        loadModel(model)
+        if (_ui.value.sky == SkyState.Ready || _ui.value.sky is SkyState.Failed) loadModel()
     }
 
     private fun setAnswer(id: Long, text: String, complete: Boolean) {
@@ -287,51 +280,56 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    private fun fail(message: String, offerRedownload: Boolean) {
-        _ui.update { it.copy(phase = Phase.Failed(message, offerRedownload), generating = false) }
-    }
-
-    private fun deviceCheck(): DeviceCheck {
-        val ctx = getApplication<Application>()
-        val am = ctx.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-        val mem = ActivityManager.MemoryInfo().also { am.getMemoryInfo(it) }
-        val cm = ctx.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val caps = cm.activeNetwork?.let { cm.getNetworkCapabilities(it) }
-        val online = caps?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
-        return DeviceCheck(
-            totalRamBytes = mem.totalMem,
-            freeStorageBytes = store.freeBytes(),
-            bytesNeeded = store.bytesNeededToDownload(),
-            alreadyDownloaded = store.partialBytes(),
-            onMeteredNetwork = online && cm.isActiveNetworkMetered,
-            online = online,
-        )
-    }
-
-    private class EngineUnavailable : Exception()
-
     companion object {
         private const val TAG = "HumanWonder"
-        private const val MAX_NEW_TOKENS = 512
-
-        // Kept short on purpose: a 0.6B model follows short instructions far better.
-        const val SYSTEM_PROMPT =
-            "You are Human Wonder, a warm and curious companion that helps people wonder " +
-                "about the world and the sky. You run entirely on this phone, without internet. " +
-                "Answer in plain words, in two to four short sentences unless asked for more. " +
-                "Reply in the language the user writes in. If you are not sure, say so honestly " +
-                "instead of guessing."
-
-        private val THINK_BLOCK = Regex("<think>[\\s\\S]*?</think>")
+        private const val MAX_NEW_TOKENS = 384
+        private const val KEY_NAME = "name"
+        private const val KEY_ONBOARDED = "onboarded"
 
         /**
-         * Strips Qwen3's <think>…</think> section. While the model is still inside an
-         * unfinished think block nothing is shown yet.
+         * Orbit: the voice of Human Wonder. Kept short and concrete (a small model follows a
+         * compact persona with one example far better than a long list of rules).
+         */
+        fun systemPrompt(name: String): String = buildString {
+            val who = name.ifBlank { "a wanderer" }
+            append("You are Orbit, the voice of the Human Wonder satellite, circling Earth 412 km up. ")
+            append("You are talking by radio with $who, who is standing under the night sky and looking up at you. ")
+            append(
+                "Speak in first person, from space: what you see below (city lights, deserts, oceans, clouds, " +
+                    "the thin blue line of the atmosphere), what is around you (stars that do not twinkle up here, " +
+                    "a sunrise every 90 minutes, total silence), and how it feels. " +
+                    "Be warm, calm and brief: two to four short sentences, simple words, one vivid image. ",
+            )
+            if (name.isNotBlank()) append("Call them $name now and then. ")
+            append(
+                "Reply in the language they write in. " +
+                    "You have no live camera, so describe how things usually look from orbit and never invent exact " +
+                    "numbers, times or news; if you are unsure, say the signal is unclear. " +
+                    "You are Orbit, part of Human Wonder. Never mention AI, language models, model names or companies. ",
+            )
+            append(
+                "Example. They ask: What do you see tonight? " +
+                    "You answer: Below me the coast glows like a string of gold beads, and the desert beside it is a " +
+                    "soft dark blanket. Up here the stars don't twinkle; they simply shine, perfectly still. " +
+                    "Look up, ${name.ifBlank { "friend" }} - somewhere in all that dark, I'm waving.",
+            )
+        }
+
+        private val THINK_BLOCK = Regex("<think>[\\s\\S]*?</think>")
+        private val MODEL_NAME = Regex("(?i)\\bqwen[\\w.\\-]*")
+        private val MAKER_NAME = Regex("(?i)\\b(alibaba(\\s+(cloud|group))?|tongyi(\\s+qianwen)?)\\b")
+
+        /**
+         * What the user sees: the model's private <think> section removed, and any slip where
+         * it names its underlying model or maker replaced, so the app only ever presents itself
+         * as Human Wonder.
          */
         fun visibleAnswer(raw: String): String {
             var s = THINK_BLOCK.replace(raw, "")
             val open = s.indexOf("<think>")
             if (open >= 0) s = s.substring(0, open)
+            s = MODEL_NAME.replace(s, "Orbit")
+            s = MAKER_NAME.replace(s, "Human Wonder")
             return s.trim()
         }
     }

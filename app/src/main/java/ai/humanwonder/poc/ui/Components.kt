@@ -1,0 +1,220 @@
+package ai.humanwonder.poc.ui
+
+import androidx.annotation.DrawableRes
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import java.util.Locale
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
+
+@Composable
+fun HwIcon(@DrawableRes id: Int, tint: Color, size: Dp, modifier: Modifier = Modifier) {
+    Icon(painterResource(id), contentDescription = null, tint = tint, modifier = modifier.size(size))
+}
+
+@Composable
+fun MonoLabel(
+    text: String,
+    color: Color = HW.OnSurfaceVariant,
+    modifier: Modifier = Modifier,
+    style: TextStyle = HWType.LabelSm,
+) {
+    Text(text.uppercase(Locale.ROOT), modifier = modifier, color = color, style = style, maxLines = 1)
+}
+
+/** A small dot that breathes, like Tailwind's animate-pulse in the Stitch screens. */
+@Composable
+fun PulsingDot(color: Color, size: Dp = 6.dp, periodMs: Int = 1600) {
+    val t = rememberInfiniteTransition(label = "pulse")
+    val alpha by t.animateFloat(
+        initialValue = 1f, targetValue = 0.35f,
+        animationSpec = infiniteRepeatable(tween(periodMs / 2), RepeatMode.Reverse), label = "a",
+    )
+    Box(
+        Modifier
+            .size(size)
+            .graphicsLayer { this.alpha = alpha }
+            .clip(CircleShape)
+            .background(color),
+    )
+}
+
+/** Glass pill used across the Stitch screens (white/4% fill, white/8% hairline). */
+@Composable
+fun GlassPill(
+    modifier: Modifier = Modifier,
+    fill: Color = Color.White.copy(alpha = 0.04f),
+    border: Color = Color.White.copy(alpha = 0.08f),
+    content: @Composable RowScope.() -> Unit,
+) {
+    Row(
+        modifier
+            .clip(CircleShape)
+            .background(fill)
+            .border(1.dp, border, CircleShape)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        content = content,
+    )
+}
+
+/** The radiant teal call-to-action from the Stitch landing and name screens. */
+@Composable
+fun GlowButton(
+    text: String,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    trailing: @Composable (() -> Unit)? = null,
+    onClick: () -> Unit,
+) {
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    val glow = rememberInfiniteTransition(label = "glow").animateFloat(
+        initialValue = 0.30f, targetValue = 0.50f,
+        animationSpec = infiniteRepeatable(tween(2200), RepeatMode.Reverse), label = "g",
+    )
+    Row(
+        modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .scale(if (pressed) 0.98f else 1f)
+            .drawBehind {
+                // Soft outer glow: shadow-[0_0_32px_rgba(47,230,200,0.35)]
+                val r = size.height / 2
+                for (i in 1..6) {
+                    val spread = i * 5.dp.toPx()
+                    drawRoundRect(
+                        color = HW.PrimaryContainer.copy(alpha = glow.value * 0.10f / i),
+                        topLeft = Offset(-spread, -spread),
+                        size = androidx.compose.ui.geometry.Size(size.width + spread * 2, size.height + spread * 2),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(r + spread),
+                    )
+                }
+            }
+            .clip(CircleShape)
+            .background(if (enabled) HW.PrimaryContainer else HW.ContainerHigh)
+            .clickable(interactionSource = interaction, indication = null, enabled = enabled, onClick = onClick)
+            .padding(horizontal = 24.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text,
+            color = if (enabled) HW.OnPrimaryContainer else HW.Outline,
+            style = HWType.BodyMd.copy(fontWeight = FontWeight.Medium, fontSize = 16.sp),
+        )
+        if (trailing != null) {
+            Spacer(Modifier.width(8.dp))
+            trailing()
+        }
+    }
+}
+
+/**
+ * The Human Wonder mark, alive: a circle (the Earth) with one point of light travelling on its
+ * rim (a satellite crossing it). Faster and brighter while the sky is transmitting.
+ */
+@Composable
+fun OrbitMark(size: Dp, active: Boolean, modifier: Modifier = Modifier) {
+    val t = rememberInfiniteTransition(label = "mark")
+    val angle by t.animateFloat(
+        initialValue = 0f, targetValue = 360f,
+        animationSpec = infiniteRepeatable(tween(if (active) 2400 else 9000, easing = LinearEasing)),
+        label = "angle",
+    )
+    val glow by t.animateFloat(
+        initialValue = 0.55f, targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(900), RepeatMode.Reverse), label = "glow",
+    )
+    Canvas(modifier.size(size)) {
+        val r = this.size.minDimension / 2 * 0.72f
+        val c = center
+        drawCircle(HW.PrimaryContainer.copy(alpha = 0.10f), radius = r)
+        drawCircle(HW.PrimaryContainer.copy(alpha = 0.85f), radius = r, style = Stroke(1.2.dp.toPx()))
+        val a = Math.toRadians(angle.toDouble() - 45.0)
+        val p = Offset(c.x + r * cos(a).toFloat(), c.y + r * sin(a).toFloat())
+        val g = if (active) glow else 0.6f
+        drawCircle(
+            Brush.radialGradient(listOf(HW.Primary.copy(alpha = 0.55f * g), Color.Transparent), center = p, radius = r * 0.9f),
+            radius = r * 0.9f, center = p,
+        )
+        drawCircle(Color(0xFFE9FFFA), radius = 1.8.dp.toPx(), center = p)
+    }
+}
+
+/**
+ * A live radio waveform. While [active] it ripples (two interfering sines with a travelling
+ * envelope); when idle it settles into a flat line.
+ */
+@Composable
+fun SignalWave(active: Boolean, modifier: Modifier = Modifier, color: Color = HW.Primary) {
+    val t = rememberInfiniteTransition(label = "wave")
+    val phase by t.animateFloat(
+        initialValue = 0f, targetValue = (2 * PI).toFloat(),
+        animationSpec = infiniteRepeatable(tween(1100, easing = LinearEasing)), label = "phase",
+    )
+    val amp by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (active) 1f else 0.06f, animationSpec = tween(700), label = "amp",
+    )
+    Canvas(modifier) {
+        val w = size.width
+        val h = size.height
+        val mid = h / 2
+        val path = androidx.compose.ui.graphics.Path()
+        val steps = 48
+        for (i in 0..steps) {
+            val x = w * i / steps
+            val u = i.toFloat() / steps
+            val envelope = sin(PI * u).toFloat()
+            val y = mid + amp * envelope * h * 0.42f *
+                (0.65f * sin(u * 14f + phase) + 0.35f * sin(u * 31f - phase * 2f))
+            if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+        }
+        drawPath(path, color.copy(alpha = 0.85f), style = Stroke(1.3.dp.toPx(), cap = StrokeCap.Round))
+    }
+}

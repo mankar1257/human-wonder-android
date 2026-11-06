@@ -69,7 +69,7 @@ jobs:
           gh release create "$TAG" human-wonder-poc.apk "${{ steps.apk.outputs.file }}" \
             --target "${{ github.sha }}" \
             --title "Human Wonder POC #${{ github.run_number }}" \
-            --notes "On-device chatbot POC (Qwen3-0.6B via llama.cpp). Built from ${{ github.sha }}.
+            --notes "Human Wonder on-device chatbot POC. Built from ${{ github.sha }}.
 
-          Install: download human-wonder-poc.apk on an Android phone (Android 9+, 64-bit), open it, and allow installing from this source. On first launch the app asks before downloading the 429 MB model; after that it works offline." \
+          Install: download human-wonder-poc.apk on an Android phone (Android 9+, 64-bit), open it, and allow installing from this source. The model is bundled; the app works fully offline." \
             --latest
