@@ -29,7 +29,15 @@ Any other `.gguf` chat model can be imported the same way.
 Every push to `main` builds a signed release APK in GitHub Actions
 (`.github/workflows/android.yml`) and publishes it as a GitHub Release.
 
-Locally (a recent Android Studio, or the command line):
+On a Mac without Android Studio, one script downloads Java 17 and the Android SDK into
+`~/human-wonder-android-tools` (it asks you to accept the SDK licenses), builds the APK and
+installs it on a USB-connected phone:
+
+```bash
+bash tools/build-on-mac.sh
+```
+
+Or with a recent Android Studio, or the command line:
 
 ```bash
 git clone --recursive https://github.com/mankar1257/human-wonder-android.git
