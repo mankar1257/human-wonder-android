@@ -84,7 +84,14 @@ This will:
   6. Install it on your phone if one is connected by USB with USB debugging on.
 
 EOF
-read -r -p "Continue? [y/N] " answer
+# tools/.auto-continue (left by Claude when it starts a build for you) answers this once.
+if [ -f "$PROJECT/tools/.auto-continue" ]; then
+  rm -f "$PROJECT/tools/.auto-continue"
+  answer=y
+  echo "Continue? [y/N] y (started for you)"
+else
+  read -r -p "Continue? [y/N] " answer
+fi
 case "$answer" in y|Y|yes|YES) ;; *) echo "Cancelled."; exit 0 ;; esac
 
 # Keep a copy of everything below in tools/build.log, so progress and errors can be read later.
