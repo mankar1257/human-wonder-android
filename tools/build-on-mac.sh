@@ -24,6 +24,23 @@ say()  { printf '\n\033[1;36m==> %s\033[0m\n' "$*"; }
 warn() { printf '\033[1;33m%s\033[0m\n' "$*"; }
 die()  { printf '\n\033[1;31mERROR: %s\033[0m\n' "$*"; exit 1; }
 
+# fetch OUT URL [URL...]: download OUT from the first source that works. A download that stalls
+# (under 20 KB/s for 45 s) is dropped and retried, then the next source is tried.
+fetch() {
+  local out="$1"; shift
+  local url
+  for url in "$@"; do
+    rm -f "$out"
+    echo "    from ${url%%\?*}"
+    if curl -fL --retry 4 --retry-delay 3 --retry-all-errors --connect-timeout 20 \
+         --speed-limit 20000 --speed-time 45 -o "$out" "$url"; then
+      return 0
+    fi
+    warn "That source stalled or failed; trying the next one."
+  done
+  return 1
+}
+
 case "$(uname -m)" in
   arm64)  JDK_ARCH="aarch64" ;;
   x86_64) JDK_ARCH="x64" ;;
@@ -74,9 +91,14 @@ elif [ -x "$TOOLS/jdk21/Contents/Home/bin/java" ]; then
   export JAVA_HOME="$TOOLS/jdk21/Contents/Home"
   say "Using the Java 21 downloaded earlier"
 else
-  say "Downloading Java 21 (Eclipse Temurin, $JDK_ARCH)"
-  curl -fL --retry 3 -o "$TOOLS/jdk21.tar.gz" \
-    "https://api.adoptium.net/v3/binary/latest/21/ga/mac/$JDK_ARCH/jdk/hotspot/normal/eclipse"
+  say "Downloading Java 21 ($JDK_ARCH, about 200 MB)"
+  # Three builds of the same OpenJDK 21; each unpacks to <name>/Contents/Home.
+  case "$JDK_ARCH" in aarch64) CORRETTO_ARCH="aarch64" ;; *) CORRETTO_ARCH="x64" ;; esac
+  fetch "$TOOLS/jdk21.tar.gz" \
+    "https://api.adoptium.net/v3/binary/latest/21/ga/mac/$JDK_ARCH/jdk/hotspot/normal/eclipse" \
+    "https://corretto.aws/downloads/latest/amazon-corretto-21-$CORRETTO_ARCH-macos-jdk.tar.gz" \
+    "https://aka.ms/download-jdk/microsoft-jdk-21-macos-$CORRETTO_ARCH.tar.gz" \
+    || die "Couldn't download Java 21 from any source. Check the internet connection and double-click again."
   rm -rf "$TOOLS/jdk21-extract" "$TOOLS/jdk21" && mkdir -p "$TOOLS/jdk21-extract"
   tar -xzf "$TOOLS/jdk21.tar.gz" -C "$TOOLS/jdk21-extract"
   mv "$TOOLS"/jdk21-extract/* "$TOOLS/jdk21"
@@ -93,7 +115,8 @@ if [ ! -x "$SDKMANAGER" ]; then
         | grep -o 'commandlinetools-mac-[0-9]*_latest\.zip' | sort -t- -k3 -n | tail -1)
   [ -n "$ZIP" ] || die "Could not find the command-line tools download on dl.google.com"
   say "Downloading $ZIP"
-  curl -fL --retry 3 -o "$TOOLS/cmdline-tools.zip" "https://dl.google.com/android/repository/$ZIP"
+  fetch "$TOOLS/cmdline-tools.zip" "https://dl.google.com/android/repository/$ZIP" \
+    || die "Couldn't download the Android command-line tools. Check the internet connection and double-click again."
   rm -rf "$TOOLS/cmdline-extract" && mkdir -p "$TOOLS/cmdline-extract" "$ANDROID_HOME/cmdline-tools"
   unzip -q "$TOOLS/cmdline-tools.zip" -d "$TOOLS/cmdline-extract"
   rm -rf "$ANDROID_HOME/cmdline-tools/latest"
@@ -129,7 +152,10 @@ if llama_ok; then
   say "llama.cpp is at the pinned commit ${LLAMA_PIN:0:7}"
 else
   say "Fetching llama.cpp ${LLAMA_PIN:0:7} (one time)"
-  curl -fL --retry 3 -o "$TOOLS/llama.cpp.tar.gz" "https://github.com/ggml-org/llama.cpp/archive/$LLAMA_PIN.tar.gz"
+  fetch "$TOOLS/llama.cpp.tar.gz" \
+    "https://github.com/ggml-org/llama.cpp/archive/$LLAMA_PIN.tar.gz" \
+    "https://codeload.github.com/ggml-org/llama.cpp/tar.gz/$LLAMA_PIN" \
+    || die "Couldn't download the llama.cpp source. Check the internet connection and double-click again."
   rm -rf "$TOOLS/llama-extract" && mkdir -p "$TOOLS/llama-extract"
   tar -xzf "$TOOLS/llama.cpp.tar.gz" -C "$TOOLS/llama-extract"
   [ -f "$TOOLS/llama-extract/llama.cpp-$LLAMA_PIN/CMakeLists.txt" ] || die "The llama.cpp download looks incomplete; run this again."
