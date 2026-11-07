@@ -173,7 +173,7 @@ HOME_JS = """class Component extends DCLogic {
     super(...args);
     this._orbitRef = (el) => { this.orbitEl = el; };
   }
-""" + orbit_methods(CARD_PLACE, 60000, 0.30, False) + """
+""" + orbit_methods(CARD_PLACE, 90000, 0.30, False) + """
   renderVals() {
     var name = (this.props.name || '').trim() || 'Wanderer';
     var h = new Date().getHours();

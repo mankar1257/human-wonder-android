@@ -76,7 +76,8 @@ Orbit mark on every list row, sparkle icons on chips, rainbow-gradient avatars.
 - Name: black sky; the Earth at night from orbit (`bg_earth_orbit`, the Gulf and Liwa) starts 17%
   down the screen (static); scrim black 0-17%, clear 33-58%, black by 92%. Orbit 412 glides
   just above the horizon, label above it (`SatelliteArc(place = ::nameScreenArc, labelAbove)`):
-  the owner loves seeing the orbit move, so keep a pass on every photo of the sky.
+  the owner loves seeing the orbit move, so keep a pass on every photo of the sky, but slow:
+  one pass takes 90 s everywhere (`ORBIT_PASS_MS`; "not too fast please").
   "What should Orbit 412 call you?" (32/38 light, keep "Orbit 412" unbroken), plain field
   (56dp, radius 16, rgba(14,17,19,.82), white 16% border, no icon), teal "Meet Orbit 412",
   lock + "Your name stays on this phone." in #8D9997.

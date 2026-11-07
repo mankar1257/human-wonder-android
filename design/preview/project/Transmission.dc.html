@@ -651,7 +651,7 @@ void main() {
       return [a * p0x + b * p1x + q * p2x, a * p0y + b * p1y + q * p2y];
     };
     var circle = (x, y, r) => { ctx.beginPath(); ctx.arc(x, y, Math.max(0.1, r), 0, Math.PI * 2); };
-    var travel = ((now - this._t0) / 75000 + 0.3) % 1;
+    var travel = ((now - this._t0) / 90000 + 0.3) % 1;
     var u = 0.08 + 0.84 * travel;
     var sat = at(u);
     // Comet trail: Orbit 412's path shows only where it has just been.

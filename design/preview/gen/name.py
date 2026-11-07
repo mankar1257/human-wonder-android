@@ -70,7 +70,7 @@ JS = '''class Component extends DCLogic {
     this.state = { name: '' };
     this._orbitRef = (el) => { this.orbitEl = el; };
   }
-''' + orbit_methods(NAME_PLACE, 60000, 0.22, True) + '''
+''' + orbit_methods(NAME_PLACE, 90000, 0.22, True) + '''
 
   renderVals() {
     return {
