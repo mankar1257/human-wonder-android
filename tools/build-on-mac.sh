@@ -7,6 +7,9 @@
 # ~/human-wonder-android-tools (delete it to remove all of it). Re-running is safe: finished
 # steps are skipped.
 set -euo pipefail
+# The whole script is one { ... } block, so bash reads all of it before running: an update to
+# this file while a build is running cannot change what that build does.
+{
 
 PROJECT="$(cd "$(dirname "$0")/.." && pwd)"
 TOOLS="$HOME/human-wonder-android-tools"
@@ -203,3 +206,5 @@ else
   echo "  - connect the phone with USB debugging on and run: \"$ADB\" install -r \"$APK_OUT\""
   echo "  - or send $APK_OUT to the phone (AirDrop won't work; use Google Drive, WhatsApp, or a cable) and open it there."
 fi
+exit 0
+}
