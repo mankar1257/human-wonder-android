@@ -10,9 +10,10 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +25,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,290 +34,214 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-/** Full-bleed photograph that slowly breathes (a gentle Ken Burns zoom), as in the Stitch screens. */
+/**
+ * Full-bleed photograph from the Stitch design, at full colour, breathing with a slow zoom.
+ * [scrim] darkens only where text sits. (No dot grid over photos.)
+ */
 @Composable
-fun PhotoBackdrop(@DrawableRes image: Int, scrims: @Composable () -> Unit) {
+private fun PhotoSky(@DrawableRes image: Int, scrim: Brush) {
     val t = rememberInfiniteTransition(label = "kenburns")
     val scale by t.animateFloat(
         initialValue = 1.0f, targetValue = 1.08f,
         animationSpec = infiniteRepeatable(tween(24_000), RepeatMode.Reverse), label = "s",
     )
-    Box(Modifier.fillMaxSize().background(HW.Background)) {
+    Box(Modifier.fillMaxSize().background(HW.Space)) {
         Image(
             painter = painterResource(image),
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer { scaleX = scale; scaleY = scale },
+            modifier = Modifier.fillMaxSize().graphicsLayer { scaleX = scale; scaleY = scale },
         )
-        scrims()
+        Box(Modifier.fillMaxSize().background(scrim))
     }
 }
 
-/** Stitch screen 1, "Human Wonder — Simple Landing". */
+/** A headline and line of copy that rise into place once, when the screen opens. */
+@Composable
+private fun Rising(content: @Composable () -> Unit) {
+    var shown by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { shown = true }
+    AnimatedVisibility(
+        visible = shown,
+        enter = fadeIn(tween(1200)) + slideInVertically(tween(1200)) { it / 5 },
+    ) { content() }
+}
+
+/** Welcome: the wanderer on the Liwa dunes, with Orbit 412 crossing the Milky Way above. */
 @Composable
 fun LandingScreen(onBegin: () -> Unit) {
     Box(Modifier.fillMaxSize()) {
-        PhotoBackdrop(R.drawable.bg_liwa_dunes) {
-            // bg-gradient-to-b from-surface-container-lowest/80 via-transparent to-surface-container-lowest/90
-            Box(
-                Modifier.fillMaxSize().background(
-                    Brush.verticalGradient(
-                        0f to HW.Lowest.copy(alpha = 0.80f), 0.5f to Color.Transparent, 1f to HW.Lowest.copy(alpha = 0.90f),
-                    ),
-                ),
-            )
-            // bottom 3/4: from-surface-container-lowest via-lowest/70 to-transparent
-            Box(
-                Modifier.fillMaxSize().background(
-                    Brush.verticalGradient(
-                        0f to Color.Transparent, 0.25f to Color.Transparent,
-                        0.62f to HW.Lowest.copy(alpha = 0.70f), 1f to HW.Lowest,
-                    ),
-                ),
-            )
-        }
+        PhotoSky(
+            R.drawable.bg_liwa_dunes,
+            Brush.verticalGradient(
+                0f to Color.Black.copy(alpha = 0.66f), 0.32f to Color.Black.copy(alpha = 0.22f),
+                0.46f to Color.Transparent, 0.62f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.72f),
+            ),
+        )
+        SatelliteArc(Modifier.fillMaxSize(), arcFraction = 0.45f, dropFraction = 0.06f, periodMs = 60_000, startAt = 0.18f)
 
         Column(Modifier.fillMaxSize().safeDrawingPadding()) {
-            // Header: ✦ Human Wonder · ZENITH 98°
-            Row(
-                Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 24.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text("✦", color = HW.Primary, style = HWType.BodySm)
-                Spacer(Modifier.size(8.dp))
-                Text("Human Wonder", color = HW.OnSurface, style = HWType.HeadlineSm)
-                Spacer(Modifier.weight(1f))
-                GlassPill(fill = HW.SurfaceLow.copy(alpha = 0.6f), border = Color.Transparent) {
-                    PulsingDot(HW.Primary)
-                    MonoLabel("Zenith 98°", color = HW.OnSurfaceVariant)
-                }
+            Box(Modifier.fillMaxWidth().height(64.dp), contentAlignment = Alignment.Center) {
+                BrandLockup()
             }
-
-            // Open zenith horizon with a quiet reticle
-            Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Reticle()
-            }
-
-            // Bottom third: words, radiant CTA, coordinates
-            var shown by remember { mutableStateOf(false) }
-            LaunchedEffect(Unit) { shown = true }
-            AnimatedVisibility(
-                visible = shown,
-                enter = fadeIn(tween(1400)) + slideInVertically(tween(1400)) { it / 6 },
-            ) {
+            Rising {
                 Column(
-                    Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, bottom = 40.dp),
+                    Modifier.fillMaxWidth().padding(start = 28.dp, end = 28.dp, top = 44.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
                         "The sky has something to tell you.",
-                        color = HW.OnSurface, style = HWType.HeadlineMobile, textAlign = TextAlign.Center,
-                        modifier = Modifier.widthIn(max = 384.dp),
+                        color = Color.White, style = HWType.WelcomeHero, textAlign = TextAlign.Center,
                     )
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(14.dp))
                     Text(
-                        "For thousands of years, we looked up and wondered. Now, for the first time, the sky can answer.",
-                        color = HW.OnSurfaceVariant, style = HWType.BodyMd.copy(fontWeight = FontWeight.Light),
-                        textAlign = TextAlign.Center, modifier = Modifier.widthIn(max = 384.dp),
+                        "Human Wonder gives the sky a voice: Orbit 412, a satellite passing over you tonight.",
+                        color = HW.Ink.copy(alpha = 0.85f), style = HWType.ChatSub, textAlign = TextAlign.Center,
+                        modifier = Modifier.widthIn(max = 310.dp),
                     )
-                    Spacer(Modifier.height(32.dp))
-                    GlowButton(
-                        "Begin Your First Look Up",
-                        modifier = Modifier.widthIn(max = 384.dp),
-                        trailing = { Text("→", color = HW.OnPrimaryContainer, style = HWType.LabelMd) },
-                        onClick = onBegin,
-                    )
-                    Spacer(Modifier.height(28.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        MonoLabel("Liwa Oasis", color = HW.OnSurfaceVariant.copy(alpha = 0.7f))
-                        Text("  ·  ", color = HW.Primary.copy(alpha = 0.4f), style = HWType.LabelSm)
-                        MonoLabel("23.13° N, 53.79° E", color = HW.OnSurfaceVariant.copy(alpha = 0.7f))
-                    }
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun Reticle() {
-    val t = rememberInfiniteTransition(label = "reticle")
-    val breathe by t.animateFloat(
-        initialValue = 0.18f, targetValue = 0.42f,
-        animationSpec = infiniteRepeatable(tween(3200), RepeatMode.Reverse), label = "b",
-    )
-    Canvas(Modifier.size(112.dp)) {
-        val r = size.minDimension / 2
-        drawCircle(HW.Primary.copy(alpha = breathe * 0.5f), radius = r, style = Stroke(1.dp.toPx()))
-        drawCircle(HW.Primary.copy(alpha = breathe * 0.25f), radius = r * 0.55f, style = Stroke(1.dp.toPx()))
-        val tick = 7.dp.toPx()
-        listOf(Offset(0f, -1f), Offset(0f, 1f), Offset(-1f, 0f), Offset(1f, 0f)).forEach { d ->
-            drawLine(
-                HW.Primary.copy(alpha = breathe),
-                start = center + Offset(d.x * (r - tick), d.y * (r - tick)),
-                end = center + Offset(d.x * r, d.y * r),
-                strokeWidth = 1.dp.toPx(),
+            Spacer(Modifier.weight(1f))
+            PrimaryButton(
+                "Begin your first look up",
+                modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 40.dp),
+                onClick = onBegin,
             )
         }
-        drawCircle(HW.PrimaryFixed, radius = 2.dp.toPx())
     }
 }
 
-/** Stitch screen 2, "Human Wonder — Setup Your Name (Minimal)". */
+/** Name: Earth at night from orbit (Orbit 412's own view). Orbit 412 will greet you by this name. */
 @Composable
 fun NameScreen(
     initialName: String,
     entering: Boolean,
+    onBack: () -> Unit,
     onEnter: (String) -> Unit,
 ) {
     var name by rememberSaveable { mutableStateOf(initialName) }
+    var focused by remember { mutableStateOf(false) }
     val submit = { if (!entering) onEnter(name.ifBlank { "Wanderer" }) }
 
     Box(Modifier.fillMaxSize()) {
-        PhotoBackdrop(R.drawable.bg_earth_orbit) {
-            // bg-gradient-to-b from-[#061617]/75 via-[#061617]/35 to-[#061617]/85 + teal glow at top
-            Box(
-                Modifier.fillMaxSize().background(
-                    Brush.verticalGradient(
-                        0f to HW.Background.copy(alpha = 0.75f), 0.5f to HW.Background.copy(alpha = 0.35f),
-                        1f to HW.Background.copy(alpha = 0.85f),
-                    ),
-                ),
-            )
-            Box(
-                Modifier.fillMaxSize().drawBehind {
-                    drawRect(
-                        Brush.radialGradient(
-                            listOf(HW.PrimaryContainer.copy(alpha = 0.12f), Color.Transparent),
-                            center = Offset(size.width / 2, 0f), radius = size.height * 0.65f,
-                        ),
-                    )
-                },
-            )
-        }
+        PhotoSky(
+            R.drawable.bg_earth_orbit,
+            Brush.verticalGradient(
+                0f to Color.Black.copy(alpha = 0.68f), 0.30f to Color.Black.copy(alpha = 0.22f),
+                0.42f to Color.Transparent, 0.55f to Color.Transparent,
+                0.75f to Color.Black.copy(alpha = 0.6f), 1f to Color.Black.copy(alpha = 0.9f),
+            ),
+        )
+        SatelliteArc(Modifier.fillMaxSize(), arcFraction = 0.42f, dropFraction = 0.045f, periodMs = 60_000, startAt = 0.18f)
 
-        Column(
-            Modifier.fillMaxSize().safeDrawingPadding().padding(24.dp),
-            verticalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Row(Modifier.fillMaxWidth().padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                GlassPill(fill = HW.ContainerHigh.copy(alpha = 0.7f), border = Color.Transparent) {
-                    PulsingDot(HW.Primary)
-                    MonoLabel("Initiation", color = HW.Primary)
-                }
-                Spacer(Modifier.weight(1f))
-                HwIcon(R.drawable.ic_explore, HW.Gold, 15.dp)
-                Spacer(Modifier.size(4.dp))
-                MonoLabel("23.13° N", color = HW.OnSurfaceVariant)
+        Column(Modifier.fillMaxSize().safeDrawingPadding()) {
+            Row(
+                Modifier.fillMaxWidth().height(64.dp).padding(horizontal = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(
+                    Modifier.size(48.dp).clip(CircleShape).clickable(role = Role.Button, onClick = onBack),
+                    contentAlignment = Alignment.Center,
+                ) { HwIcon(R.drawable.ic_arrow_back, HW.IconMuted, 22.dp, contentDescription = "Back") }
+                Box(Modifier.weight(1f), contentAlignment = Alignment.Center) { BrandLockup() }
+                Spacer(Modifier.width(48.dp))
             }
-
-            Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("What should the sky call you?", color = HW.OnSurface, style = HWType.HeadlineMobile)
+            Rising {
+                Column(
+                    Modifier.fillMaxWidth().padding(start = 32.dp, end = 32.dp, top = 36.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
                     Text(
-                        "When the orbital swarm passes above your coordinates, it will speak to you by name.",
-                        color = HW.OnSurfaceVariant, style = HWType.BodyMd,
+                        "What should Orbit 412 call you?",
+                        color = Color.White, style = HWType.WelcomeTitle, textAlign = TextAlign.Center,
+                    )
+                    Spacer(Modifier.height(14.dp))
+                    Text(
+                        "It will greet you by name every time it passes over.",
+                        color = HW.Ink.copy(alpha = 0.85f), style = HWType.ChatSub, textAlign = TextAlign.Center,
+                        modifier = Modifier.widthIn(max = 300.dp),
                     )
                 }
-                Column {
-                    Row(Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
-                        MonoLabel("Wanderer identity", color = HW.OnSurfaceVariant)
-                        Spacer(Modifier.weight(1f))
-                        MonoLabel("Radio telemetry", color = HW.Gold)
-                    }
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(HW.ContainerHigh.copy(alpha = 0.6f))
-                            .padding(horizontal = 16.dp, vertical = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        HwIcon(R.drawable.ic_satellite, HW.Primary.copy(alpha = 0.8f), 20.dp)
-                        Spacer(Modifier.size(12.dp))
-                        Box(Modifier.weight(1f)) {
-                            if (name.isEmpty()) {
-                                Text("Your name or callsign", color = HW.OnSurfaceVariant.copy(alpha = 0.4f), style = HWType.BodyLg)
-                            }
-                            BasicTextField(
-                                value = name,
-                                onValueChange = { name = it.take(40) },
-                                singleLine = true,
-                                textStyle = HWType.BodyLg.copy(color = HW.OnSurface),
-                                cursorBrush = SolidColor(HW.Primary),
-                                keyboardOptions = KeyboardOptions(
-                                    capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Go,
-                                ),
-                                keyboardActions = KeyboardActions(onGo = { submit() }),
-                                modifier = Modifier.fillMaxWidth(),
-                            )
+            }
+            Spacer(Modifier.weight(1f))
+            Column(
+                Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, bottom = 28.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                // The same glass as the chat composer.
+                val shape = RoundedCornerShape(28.dp)
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(60.dp)
+                        .clip(shape)
+                        .background(Brush.linearGradient(0f to Color(0xE00E0F14), 0.55f to Color(0xD61E2030), 1f to Color(0x99464A80)))
+                        .border(1.dp, if (focused) HW.Primary.copy(alpha = 0.45f) else Color.White.copy(alpha = 0.14f), shape)
+                        .padding(horizontal = 20.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    HwIcon(R.drawable.ic_satellite, HW.Primary, 20.dp)
+                    Spacer(Modifier.width(12.dp))
+                    Box(Modifier.weight(1f)) {
+                        if (name.isEmpty()) {
+                            Text("Your name or callsign", color = HW.InkTertiary, style = HWType.ChatInput.copy(fontSize = 17.sp))
                         }
-                        Box(
-                            Modifier
-                                .size(8.dp)
-                                .drawBehind {
-                                    drawCircle(
-                                        Brush.radialGradient(listOf(HW.PrimaryContainer.copy(alpha = 0.8f), Color.Transparent)),
-                                        radius = size.minDimension * 1.6f,
-                                    )
-                                }
-                                .clip(CircleShape)
-                                .background(HW.Primary),
+                        BasicTextField(
+                            value = name,
+                            onValueChange = { name = it.take(40) },
+                            singleLine = true,
+                            textStyle = HWType.ChatInput.copy(color = Color.White, fontSize = 17.sp),
+                            cursorBrush = SolidColor(HW.Primary),
+                            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Go),
+                            keyboardActions = KeyboardActions(onGo = { submit() }),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .onFocusChanged { focused = it.isFocused }
+                                .semantics { contentDescription = "Your name" },
                         )
                     }
                 }
-            }
-
-            Column(
-                Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                GlowButton(
-                    text = if (entering) "Aligning Zenith with ${name.ifBlank { "Wanderer" }}…" else "Enter the Sky Sanctuary",
-                    trailing = {
-                        if (entering) {
-                            CircularProgressIndicator(
-                                color = HW.OnPrimaryContainer, strokeWidth = 2.dp, modifier = Modifier.size(18.dp),
-                            )
-                        } else {
-                            HwIcon(R.drawable.ic_arrow_forward, HW.OnPrimaryContainer, 20.dp)
-                        }
-                    },
+                val spinner: (@Composable () -> Unit)? = if (entering) {
+                    { CircularProgressIndicator(color = HW.OnAccent, strokeWidth = 2.dp, modifier = Modifier.size(18.dp)) }
+                } else {
+                    null
+                }
+                PrimaryButton(
+                    text = if (entering) "Finding Orbit 412…" else "Meet Orbit 412",
+                    trailing = spinner,
                     onClick = submit,
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     HwIcon(R.drawable.ic_lock, HW.Primary, 14.dp)
-                    Spacer(Modifier.size(6.dp))
-                    Text("Your name stays between you and the sky.", color = HW.OnSurfaceVariant, style = HWType.LabelSm.copy(fontWeight = FontWeight.Normal, letterSpacing = 0.02.sp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Your name stays between you and the sky.", color = HW.InkSecondary, style = HWType.ChatMeta)
                 }
             }
         }

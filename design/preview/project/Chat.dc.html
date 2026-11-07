@@ -65,7 +65,13 @@ input::placeholder { color: rgba(186, 202, 196, 0.45); }
 <header style="height: 64px; flex-shrink: 0; display: flex; align-items: center; padding: 0 4px">
 <a href="Name.dc.html" aria-label="Back" class="hw-iconbtn" style="width: 48px; height: 48px; color: #c5cdcb"><svg width="22" height="22" viewBox="0 -960 960 960" aria-hidden="true" style="display: block; flex-shrink: 0"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" fill="currentColor"></path></svg></a>
 <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center">
-<span style="font-size: 16px; line-height: 22px; font-weight: 500; color: #eceff0">Orbit 412</span>
+<span style="display: flex; align-items: center; gap: 8px">
+<span aria-hidden="true" style="position: relative; display: block; width: 20px; height: 20px; flex-shrink: 0">
+<span style="position: absolute; left: 2px; top: 2px; width: 16px; height: 16px; box-sizing: border-box; border-radius: 50%; border: 1.5px solid rgba(131, 255, 229, 0.9); background: rgba(47, 230, 200, 0.08)"></span>
+<span class="hw-spin" style="animation-duration: 12s"><span style="position: absolute; left: 14px; top: 0.5px; width: 4.5px; height: 4.5px; border-radius: 50%; background: #ffffff; box-shadow: 0 0 5px rgba(131, 255, 229, 0.9)"></span></span>
+</span>
+<span style="font-size: 16px; line-height: 22px; font-weight: 500; letter-spacing: -0.01em; color: #ffffff">Human Wonder</span>
+</span>
 <span style="display: flex; align-items: center; gap: 6px; font-size: 12px; line-height: 16px; color: #a7b2b0">
 <span class="{{statusDotClass}}" style="display: block; width: 6px; height: 6px; border-radius: 50%; background: {{statusColor}}"></span>{{statusText}}</span>
 </div>
@@ -143,7 +149,7 @@ input::placeholder { color: rgba(186, 202, 196, 0.45); }
 </div>
 <div style="display: {{emptyDisplay}}; flex: 0.5"></div>
 
-<p style="flex-shrink: 0; margin: 0; padding: 10px 24px 14px; text-align: center; font-size: 12px; line-height: 16px; color: #8d9997">Orbit 412 sees far, but it can still be wrong.</p>
+<p style="flex-shrink: 0; margin: 0; padding: 10px 24px 14px; text-align: center; font-size: 12px; line-height: 16px; color: #8d9997">Human Wonder’s Orbit 412 sees far, but it can still be wrong.</p>
 </div>
 </div>
 </x-dc>
@@ -306,7 +312,7 @@ class Component extends DCLogic {
         poem: 'They move like something breathing in its sleep.',
         fact: 'The green light comes from oxygen about 100 to 300 km up, right around my altitude.' },
       { keys: ['who are you', 'your name', 'what are you', 'are you', 'model', ' ai'],
-        orbit: 'This is Orbit 412, {name}, the voice of the Human Wonder satellite, circling Earth 412 km above you. I see the whole sky at once, and I am here to tell you what is up there.',
+        orbit: 'This is Orbit 412, {name}, your Human Wonder satellite, circling Earth 412 km above you. I see the whole sky at once, and I am here to tell you what is up there.',
         ground: 'This is Orbit 412, {name}. Look for me as a steady light gliding across your sky, and know that I am looking back.',
         poem: 'Think of me as the sky, finally answering.',
         fact: 'I travel at 7.66 km per second and complete an orbit about every 92 minutes.' },
@@ -391,7 +397,7 @@ class Component extends DCLogic {
   }
 
   copyText(m) {
-    try { if (navigator.clipboard) navigator.clipboard.writeText(m.text); } catch (e) { }
+    try { if (navigator.clipboard) navigator.clipboard.writeText(m.text + '\n\n— Orbit 412, Human Wonder'); } catch (e) { }
     clearTimeout(this._copyTimer);
     this.setState({ copiedId: m.id });
     this._copyTimer = setTimeout(() => this.setState({ copiedId: -1 }), 1600);
@@ -620,40 +626,28 @@ void main() {
       return [a * p0x + b * p1x + q * p2x, a * p0y + b * p1y + q * p2y];
     };
     var circle = (x, y, r) => { ctx.beginPath(); ctx.arc(x, y, Math.max(0.1, r), 0, Math.PI * 2); };
-    ctx.beginPath();
-    ctx.moveTo(p0x, p0y);
-    ctx.quadraticCurveTo(p1x, p1y, p2x, p2y);
-    var fade = ctx.createLinearGradient(0, 0, w, 0);
-    fade.addColorStop(0, 'rgba(255, 255, 255, 0)');
-    fade.addColorStop(0.3, 'rgba(255, 255, 255, 0.14)');
-    fade.addColorStop(0.7, 'rgba(255, 255, 255, 0.14)');
-    fade.addColorStop(1, 'rgba(255, 255, 255, 0)');
-    ctx.strokeStyle = fade;
-    ctx.lineWidth = 1;
-    ctx.setLineDash([2, 5]);
-    ctx.stroke();
-    ctx.setLineDash([]);
     var travel = ((now - this._t0) / 75000 + 0.3) % 1;
     var u = 0.08 + 0.84 * travel;
     var sat = at(u);
-    for (var k = 1; k <= 12; k++) {
+    // Comet trail: Orbit 412's path shows only where it has just been.
+    for (var k = 1; k <= 18; k++) {
       var pt = at(Math.max(0, u - k * 0.004));
-      ctx.fillStyle = 'rgba(131, 255, 229, ' + (0.28 * (1 - k / 13)).toFixed(3) + ')';
-      circle(pt[0], pt[1], 1.8 - k * 0.1);
+      ctx.fillStyle = 'rgba(131, 255, 229, ' + (0.32 * (1 - k / 19)).toFixed(3) + ')';
+      circle(pt[0], pt[1], 2.0 - k * 0.09);
       ctx.fill();
     }
-    var glow = ctx.createRadialGradient(sat[0], sat[1], 0, sat[0], sat[1], 12);
-    glow.addColorStop(0, 'rgba(131, 255, 229, 0.45)');
+    var glow = ctx.createRadialGradient(sat[0], sat[1], 0, sat[0], sat[1], 13);
+    glow.addColorStop(0, 'rgba(131, 255, 229, 0.5)');
     glow.addColorStop(1, 'rgba(131, 255, 229, 0)');
     ctx.fillStyle = glow;
-    circle(sat[0], sat[1], 12);
+    circle(sat[0], sat[1], 13);
     ctx.fill();
     ctx.fillStyle = '#ffffff';
-    circle(sat[0], sat[1], 2.2);
+    circle(sat[0], sat[1], 2.3);
     ctx.fill();
     ctx.font = '500 11px Geist, system-ui, sans-serif';
     ctx.textBaseline = 'top';
-    ctx.fillStyle = 'rgba(236, 239, 240, 0.7)';
+    ctx.fillStyle = 'rgba(236, 239, 240, 0.78)';
     ctx.fillText('Orbit 412', sat[0] + 9, sat[1] + 7);
     ctx.globalAlpha = 1;
   }
@@ -668,11 +662,11 @@ void main() {
     var ready = s.sky === 'ready';
 
     var statusText, statusColor, busy = false;
-    if (s.sky === 'aligning') { statusText = 'Rising over the horizon, ' + Math.floor(s.progress * 100) + '%'; statusColor = '#edbf70'; busy = true; }
-    else if (s.sky === 'waking') { statusText = 'Finding your signal…'; statusColor = '#edbf70'; busy = true; }
-    else if (s.generating && (!last || !last.text)) { statusText = 'Receiving you…'; statusColor = '#83ffe5'; busy = true; }
-    else if (s.generating) { statusText = 'Transmitting…'; statusColor = '#83ffe5'; busy = true; }
-    else { statusText = 'Overhead now, 412 km up'; statusColor = '#83ffe5'; }
+    if (s.sky === 'aligning') { statusText = 'Orbit 412 is rising over the horizon, ' + Math.floor(s.progress * 100) + '%'; statusColor = '#edbf70'; busy = true; }
+    else if (s.sky === 'waking') { statusText = 'Orbit 412 is finding your signal…'; statusColor = '#edbf70'; busy = true; }
+    else if (s.generating && (!last || !last.text)) { statusText = 'Orbit 412 is receiving you…'; statusColor = '#83ffe5'; busy = true; }
+    else if (s.generating) { statusText = 'Orbit 412 is transmitting…'; statusColor = '#83ffe5'; busy = true; }
+    else { statusText = 'Orbit 412 is overhead now'; statusColor = '#83ffe5'; }
 
     var messages = s.messages.map((m) => {
       var streaming = !m.fromUser && !m.complete;
@@ -717,7 +711,7 @@ void main() {
       emptyDisplay: empty ? 'flex' : 'none',
       listDisplay: empty ? 'none' : 'flex',
       scrimOpacity: empty ? '0' : '1',
-      heroSub: 'Orbit 412 here, ' + name + '. I\u2019m passing over you right now. What should I look at?',
+      heroSub: 'Orbit 412 here, ' + name + ', your Human Wonder satellite. I\u2019m passing over you right now. What should I look at?',
       messages: messages,
       chips: chips,
       input: s.input,

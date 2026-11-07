@@ -27,7 +27,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -38,15 +37,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -63,34 +59,26 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Text
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.PointMode
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.Role
@@ -99,16 +87,14 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
-import kotlin.math.max
 import kotlin.math.min
 
 /** The three suggestions from the Stitch "Talk to Space" screen. */
@@ -177,7 +163,7 @@ fun ChatScreen(
     Box(Modifier.fillMaxSize().background(HW.Space)) {
         GalaxyBackground(Modifier.fillMaxSize(), energy = if (state.generating) 1f else 0f, calm = calm, pulseKey = uplinks)
         DotGrid(Modifier.fillMaxSize())
-        if (calm < 0.98f) SatelliteArc(Modifier.fillMaxSize(), visibility = 1f - calm)
+        if (calm < 0.98f) SatelliteArc(Modifier.fillMaxSize(), visibility = 1f - calm, arcBelowTop = 96.dp)
         // Keeps the newest lines crisp where the low aurora meets the conversation.
         Box(
             Modifier
@@ -211,7 +197,7 @@ fun ChatScreen(
                 }
             }
             Text(
-                "Orbit 412 sees far, but it can still be wrong.",
+                "Human Wonder's Orbit 412 sees far, but it can still be wrong.",
                 color = HW.InkTertiary,
                 style = HWType.ChatMeta,
                 textAlign = TextAlign.Center,
@@ -227,13 +213,13 @@ fun ChatScreen(
 private fun ChatHeader(state: UiState, onBack: () -> Unit, onNew: () -> Unit) {
     val last = state.messages.lastOrNull()
     val (status, busy, color) = when (val sky = state.sky) {
-        is SkyState.Aligning -> Triple("Rising over the horizon, ${(sky.progress * 100).toInt()}%", true, HW.Gold)
-        SkyState.Waking -> Triple("Finding your signal…", true, HW.Gold)
-        is SkyState.Failed -> Triple("Signal lost", false, HW.Error)
+        is SkyState.Aligning -> Triple("Orbit 412 is rising over the horizon, ${(sky.progress * 100).toInt()}%", true, HW.Gold)
+        SkyState.Waking -> Triple("Orbit 412 is finding your signal…", true, HW.Gold)
+        is SkyState.Failed -> Triple("Orbit 412's signal is lost", false, HW.Error)
         SkyState.Ready -> when {
-            state.generating && (last == null || last.text.isEmpty()) -> Triple("Receiving you…", true, HW.Primary)
-            state.generating -> Triple("Transmitting…", true, HW.Primary)
-            else -> Triple("Overhead now, 412 km up", false, HW.Primary)
+            state.generating && (last == null || last.text.isEmpty()) -> Triple("Orbit 412 is receiving you…", true, HW.Primary)
+            state.generating -> Triple("Orbit 412 is transmitting…", true, HW.Primary)
+            else -> Triple("Orbit 412 is overhead now", false, HW.Primary)
         }
     }
     Row(
@@ -242,7 +228,7 @@ private fun ChatHeader(state: UiState, onBack: () -> Unit, onNew: () -> Unit) {
     ) {
         IconCircle(R.drawable.ic_arrow_back, "Back", HW.IconMuted, size = 48, iconSize = 22, onClick = onBack)
         Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(SATELLITE, color = HW.Ink, style = HWType.ChatTitle)
+            BrandLockup(markSize = 20.dp, textSize = 16.sp)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (busy) PulsingDot(color, size = 6.dp, periodMs = 900)
                 else Box(Modifier.size(6.dp).clip(CircleShape).background(color))
@@ -266,7 +252,7 @@ private fun Hero(name: String) {
         Text("Talk to the\ninfinite sky", color = Color.White, style = HWType.ChatHero, textAlign = TextAlign.Center)
         Spacer(Modifier.height(12.dp))
         Text(
-            "Orbit 412 here, ${name.ifBlank { "Wanderer" }}. I'm passing over you right now. What should I look at?",
+            "Orbit 412 here, ${name.ifBlank { "Wanderer" }}, your Human Wonder satellite. I'm passing over you right now. What should I look at?",
             color = HW.InkSecondary,
             style = HWType.ChatSub,
             textAlign = TextAlign.Center,
@@ -441,7 +427,7 @@ private fun CopyAction(text: String) {
             size = 40, iconSize = 18,
         ) {
             context.getSystemService(ClipboardManager::class.java)
-                ?.setPrimaryClip(ClipData.newPlainText(SATELLITE, text))
+                ?.setPrimaryClip(ClipData.newPlainText("Orbit 412, Human Wonder", "$text\n\n— Orbit 412, Human Wonder"))
             copied = true
         }
         if (copied) Text("Copied", color = HW.InkSecondary, style = HWType.ChatMeta)
@@ -461,7 +447,7 @@ private fun LostSignal(message: String, onRetry: () -> Unit, modifier: Modifier)
         Spacer(Modifier.height(8.dp))
         Text(message, color = HW.InkSecondary, style = HWType.ChatSub, textAlign = TextAlign.Center)
         Spacer(Modifier.height(28.dp))
-        GlowButton("Try again", onClick = onRetry)
+        PrimaryButton("Try again", modifier = Modifier.widthIn(max = 280.dp), onClick = onRetry)
     }
 }
 
@@ -644,87 +630,4 @@ private fun IconCircle(
         Modifier.size(size.dp).clip(CircleShape).clickable(role = Role.Button, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) { HwIcon(icon, tint, iconSize.dp, contentDescription = description) }
-}
-
-// --------------------------------------------------------------------------------- the sky
-
-/** The faint dot grid from the Stitch home screen. */
-@Composable
-private fun DotGrid(modifier: Modifier) {
-    Box(
-        modifier.drawWithCache {
-            val step = 22.dp.toPx()
-            val w = size.width
-            val h = size.height
-            val points = buildList {
-                var y = step / 2
-                while (y < h) {
-                    var x = step / 2
-                    while (x < w) {
-                        add(Offset(x, y))
-                        x += step
-                    }
-                    y += step
-                }
-            }
-            onDrawBehind {
-                drawPoints(points, PointMode.Points, Color.White.copy(alpha = 0.09f), strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
-            }
-        },
-    )
-}
-
-/**
- * On the empty screen, Orbit crosses the top of the sky along a faint dotted arc. Once the
- * conversation starts it fades away and lives on as the mark beside each answer.
- */
-@Composable
-private fun SatelliteArc(modifier: Modifier, visibility: Float) {
-    val density = LocalDensity.current
-    val top = WindowInsets.safeDrawing.asPaddingValues().calculateTopPadding()
-    val measurer = rememberTextMeasurer()
-    val t = rememberInfiniteTransition(label = "orbit")
-    val travel by t.animateFloat(0f, 1f, infiniteRepeatable(tween(75_000, easing = LinearEasing)), label = "travel")
-
-    Canvas(modifier.graphicsLayer { alpha = visibility }) {
-        val w = size.width
-        val arcY = with(density) { (top + 96.dp).toPx() }
-        val drop = 70.dp.toPx()
-        val p0 = Offset(-0.12f * w, arcY + drop)
-        val p1 = Offset(0.5f * w, arcY - drop)
-        val p2 = Offset(1.12f * w, arcY + drop)
-        fun at(u: Float): Offset {
-            val a = (1 - u) * (1 - u)
-            val b = 2 * (1 - u) * u
-            val c = u * u
-            return Offset(a * p0.x + b * p1.x + c * p2.x, a * p0.y + b * p1.y + c * p2.y)
-        }
-        val arc = Path().apply {
-            moveTo(p0.x, p0.y)
-            quadraticTo(p1.x, p1.y, p2.x, p2.y)
-        }
-        drawPath(
-            arc,
-            Brush.horizontalGradient(
-                0f to Color.Transparent, 0.3f to Color.White.copy(alpha = 0.14f),
-                0.7f to Color.White.copy(alpha = 0.14f), 1f to Color.Transparent,
-            ),
-            style = Stroke(1.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(2.dp.toPx(), 5.dp.toPx()))),
-        )
-        val u = 0.08f + 0.84f * ((travel + 0.3f) % 1f)
-        val sat = at(u)
-        for (k in 1..12) {
-            drawCircle(HW.Primary.copy(alpha = 0.28f * (1f - k / 13f)), radius = (1.8f - k * 0.1f).dp.toPx(), center = at(max(0f, u - k * 0.004f)))
-        }
-        drawCircle(
-            Brush.radialGradient(listOf(HW.Primary.copy(alpha = 0.45f), Color.Transparent), center = sat, radius = 12.dp.toPx()),
-            radius = 12.dp.toPx(), center = sat,
-        )
-        drawCircle(Color.White, radius = 2.2.dp.toPx(), center = sat)
-        drawText(
-            measurer, SATELLITE,
-            topLeft = Offset(sat.x + 9.dp.toPx(), sat.y + 7.dp.toPx()),
-            style = HWType.ChatMeta.copy(color = HW.Ink.copy(alpha = 0.7f)),
-        )
-    }
 }

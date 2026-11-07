@@ -26,13 +26,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -40,9 +39,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.util.Locale
@@ -107,9 +109,9 @@ fun GlassPill(
     )
 }
 
-/** The radiant teal call-to-action from the Stitch landing and name screens. */
+/** The primary action: a solid teal pill, the same accent as the chat's send button. */
 @Composable
-fun GlowButton(
+fun PrimaryButton(
     text: String,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
@@ -118,44 +120,40 @@ fun GlowButton(
 ) {
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
-    val glow = rememberInfiniteTransition(label = "glow").animateFloat(
-        initialValue = 0.30f, targetValue = 0.50f,
-        animationSpec = infiniteRepeatable(tween(2200), RepeatMode.Reverse), label = "g",
-    )
     Row(
         modifier
             .fillMaxWidth()
             .height(56.dp)
             .scale(if (pressed) 0.98f else 1f)
-            .drawBehind {
-                // Soft outer glow: shadow-[0_0_32px_rgba(47,230,200,0.35)]
-                val r = size.height / 2
-                for (i in 1..6) {
-                    val spread = i * 5.dp.toPx()
-                    drawRoundRect(
-                        color = HW.PrimaryContainer.copy(alpha = glow.value * 0.10f / i),
-                        topLeft = Offset(-spread, -spread),
-                        size = androidx.compose.ui.geometry.Size(size.width + spread * 2, size.height + spread * 2),
-                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(r + spread),
-                    )
-                }
-            }
             .clip(CircleShape)
-            .background(if (enabled) HW.PrimaryContainer else HW.ContainerHigh)
-            .clickable(interactionSource = interaction, indication = null, enabled = enabled, onClick = onClick)
+            .background(if (enabled) HW.Primary else HW.ContainerHigh)
+            .clickable(interactionSource = interaction, indication = null, enabled = enabled, role = Role.Button, onClick = onClick)
             .padding(horizontal = 24.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text,
-            color = if (enabled) HW.OnPrimaryContainer else HW.Outline,
-            style = HWType.BodyMd.copy(fontWeight = FontWeight.Medium, fontSize = 16.sp),
-        )
+        Text(text, color = if (enabled) HW.OnAccent else HW.InkTertiary, style = HWType.ButtonLabel)
         if (trailing != null) {
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(10.dp))
             trailing()
         }
+    }
+}
+
+/** The Human Wonder logo: the orbit mark (a ring with Orbit 412 circling it) and the wordmark. */
+@Composable
+fun BrandLockup(modifier: Modifier = Modifier, markSize: Dp = 22.dp, textSize: TextUnit = 17.sp) {
+    Row(
+        modifier.semantics(mergeDescendants = true) {},
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        OrbitMark(markSize, active = false)
+        Spacer(Modifier.width(if (markSize >= 22.dp) 9.dp else 8.dp))
+        Text(
+            "Human Wonder",
+            color = Color.White,
+            style = HWType.ChatTitle.copy(fontSize = textSize, letterSpacing = (-0.01).em),
+        )
     }
 }
 

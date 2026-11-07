@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Human Wonder — Landing</title>
+<title>Human Wonder — Welcome</title>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -45,51 +45,120 @@ button { font: inherit; cursor: pointer; }
 .hw-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .hw-noscroll { scrollbar-width: none; }
 .hw-noscroll::-webkit-scrollbar { display: none; }
-textarea::placeholder { color: rgba(132, 148, 143, 0.7); }
+textarea::placeholder { color: #8d9997; }
+.hw-shimmer { background: linear-gradient(90deg, #7f8b89 0%, #7f8b89 35%, #f1f4f4 50%, #7f8b89 65%, #7f8b89 100%); background-size: 260% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: hw-shimmer 1.8s linear infinite; }
+@keyframes hw-shimmer { from { background-position: 100% 0; } to { background-position: -60% 0; } }
+.hw-dots { background-image: radial-gradient(circle, rgba(255, 255, 255, 0.10) 1px, rgba(255, 255, 255, 0) 1.6px); background-size: 22px 22px; background-position: 11px 11px; }
+.hw-ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hw-iconbtn { border: 0; padding: 0; background: transparent; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+.hw-iconbtn:focus-visible, .hw-chip:focus-visible, textarea:focus-visible { outline: 2px solid #83ffe5; outline-offset: 2px; }
 input::placeholder { color: rgba(186, 202, 196, 0.45); }
+
+.hw-cta { transition: transform 0.15s ease, background 0.2s ease; }
+.hw-cta:active { transform: scale(0.98); }
+.hw-cta:focus-visible, .hw-field:focus-within { outline: 2px solid #83ffe5; outline-offset: 2px; }
+.hw-balance { text-wrap: balance; }
 </style>
 </helmet>
-<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #061617; font-family: 'Geist', system-ui, sans-serif; color: #d4e6e7">
-<img class="hw-kb" src="/_blob/cfc316bc9f5dd90bd5cd3874418cb0b0" alt="" aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; display: block">
-<div aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(2, 17, 18, 0.8) 0%, rgba(2, 17, 18, 0) 50%, rgba(2, 17, 18, 0.9) 100%)"></div>
-<div aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(2, 17, 18, 0) 0%, rgba(2, 17, 18, 0) 25%, rgba(2, 17, 18, 0.7) 62%, #021112 100%)"></div>
-<div style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: flex; flex-direction: column">
-<div style="display: flex; align-items: center; padding: 24px 20px 0">
-<span style="color: #83ffe5; font-size: 13px; line-height: 20px">✦</span>
-<span style="margin-left: 8px; font-family: 'Newsreader', Georgia, serif; font-size: 20px; line-height: 28px; letter-spacing: -0.01em; color: #d4e6e7">Human Wonder</span>
-<span style="flex: 1"></span>
-<span style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: rgba(14, 30, 31, 0.6)">
-<span class="hw-pulse" style="display: block; width: 6px; height: 6px; border-radius: 50%; background: #83ffe5"></span>
-<span class="hw-mono" style="color: #bacac4">Zenith 98°</span>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #000000; font-family: 'Geist', system-ui, sans-serif; color: #eceff0">
+<img class="hw-kb" src="/_blob/cfc316bc9f5dd90bd5cd3874418cb0b0" alt="" aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 390px; height: 844px; object-fit: cover; display: block">
+<div aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 390px; height: 844px; background: linear-gradient(to bottom, rgba(0, 0, 0, 0.66) 0%, rgba(0, 0, 0, 0.22) 32%, rgba(0, 0, 0, 0) 46%, rgba(0, 0, 0, 0) 62%, rgba(0, 0, 0, 0.72) 100%)"></div>
+<canvas ref="{{orbitRef}}" aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 390px; height: 844px; display: block; pointer-events: none"></canvas>
+<div style="position: absolute; left: 0; top: 0; width: 390px; height: 844px; display: flex; flex-direction: column">
+<header style="height: 64px; flex-shrink: 0; display: flex; align-items: center; justify-content: center">
+<div style="display: flex; align-items: center; gap: 9px">
+<span aria-hidden="true" style="position: relative; display: block; width: 22px; height: 22px; flex-shrink: 0">
+<span style="position: absolute; left: 2px; top: 2px; width: 18px; height: 18px; box-sizing: border-box; border-radius: 50%; border: 1.5px solid rgba(131, 255, 229, 0.9); background: rgba(47, 230, 200, 0.08)"></span>
+<span class="hw-spin" style="animation-duration: 12s"><span style="position: absolute; left: 15.5px; top: 0.5px; width: 5px; height: 5px; border-radius: 50%; background: #ffffff; box-shadow: 0 0 5px rgba(131, 255, 229, 0.9)"></span></span>
 </span>
+<span style="font-size: 17px; line-height: 22px; font-weight: 500; letter-spacing: -0.01em; color: #ffffff">Human Wonder</span>
 </div>
-<div style="flex: 1; display: flex; align-items: center; justify-content: center">
-<svg width="112" height="112" viewBox="0 0 112 112" aria-hidden="true">
-<g class="hw-breathe">
-<circle cx="56" cy="56" r="55.5" fill="none" stroke="#83ffe5" stroke-opacity="0.21" stroke-width="1"></circle>
-<circle cx="56" cy="56" r="30.5" fill="none" stroke="#83ffe5" stroke-opacity="0.105" stroke-width="1"></circle>
-<path d="M56 0.5V7.5M56 104.5V111.5M0.5 56H7.5M104.5 56H111.5" stroke="#83ffe5" stroke-opacity="0.42" stroke-width="1"></path>
-</g>
-<circle cx="56" cy="56" r="2" fill="#51fcdd"></circle>
-</svg>
+</header>
+<div class="hw-rise" style="display: flex; flex-direction: column; align-items: center; padding: 44px 28px 0; text-align: center">
+<h1 class="hw-balance" style="margin: 0; font-size: 40px; line-height: 44px; font-weight: 300; letter-spacing: -0.02em; color: #ffffff">The sky has something to tell you.</h1>
+<p style="margin: 14px 0 0; max-width: 310px; font-size: 15px; line-height: 22px; color: rgba(236, 239, 240, 0.85)">Human Wonder gives the sky a voice: Orbit 412, a satellite passing over you tonight.</p>
 </div>
-<div class="hw-rise" style="display: flex; flex-direction: column; align-items: center; padding: 0 20px 40px; text-align: center">
-<h1 style="margin: 0; max-width: 384px; font-family: 'Newsreader', Georgia, serif; font-weight: 400; font-size: 28px; line-height: 36px; letter-spacing: -0.01em; color: #d4e6e7">The sky has something to tell you.</h1>
-<p style="margin: 12px 0 0; max-width: 384px; font-size: 15px; line-height: 24px; font-weight: 300; color: #bacac4">For thousands of years, we looked up and wondered. Now, for the first time, the sky can answer.</p>
-<a href="Name.dc.html" class="hw-glow" style="margin-top: 32px; width: 100%; max-width: 384px; height: 56px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 999px; background: #2fe6c8; color: #006354; text-decoration: none; font-size: 16px; line-height: 24px; font-weight: 500">Begin Your First Look Up <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px">→</span></a>
-<div style="margin-top: 28px; display: flex; align-items: center">
-<span class="hw-mono" style="color: rgba(186, 202, 196, 0.7)">Liwa Oasis</span>
-<span style="margin: 0 10px; color: rgba(131, 255, 229, 0.4); font-size: 10px">·</span>
-<span class="hw-mono" style="color: rgba(186, 202, 196, 0.7)">23.13° N, 53.79° E</span>
-</div>
+<div style="flex: 1"></div>
+<div style="padding: 0 20px 40px">
+<a href="Name.dc.html" class="hw-cta" style="height: 56px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border-radius: 999px; background: #83ffe5; color: #00201a; text-decoration: none; font-size: 16px; line-height: 24px; font-weight: 500">Begin your first look up</a>
 </div>
 </div>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
 class Component extends DCLogic {
+  constructor(...args) {
+    super(...args);
+    this.state = {  };
+    this._orbitRef = (el) => { this.orbitEl = el; };
+  }
+
+  componentDidMount() {
+    this._t0 = performance.now();
+    this._last = 0;
+    var loop = (now) => {
+      this._raf = requestAnimationFrame(loop);
+      if (now - this._last < 32) return;
+      this._last = now;
+      this.drawOrbit(now);
+    };
+    this._raf = requestAnimationFrame(loop);
+  }
+
+  componentWillUnmount() {
+    cancelAnimationFrame(this._raf);
+  }
+
+  // Orbit 412 gliding across this sky along a faint dotted arc.
+  drawOrbit(now) {
+    var c = this.orbitEl;
+    if (!c) return;
+    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    var w = c.clientWidth || 390;
+    var h = c.clientHeight || 844;
+    if (c.width !== Math.round(w * dpr) || c.height !== Math.round(h * dpr)) {
+      c.width = Math.round(w * dpr);
+      c.height = Math.round(h * dpr);
+    }
+    var ctx = c.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    var arcY = 0.45 * h, drop = 0.06 * h;
+    var p0x = -0.12 * w, p0y = arcY + drop, p1x = 0.5 * w, p1y = arcY - drop, p2x = 1.12 * w, p2y = arcY + drop;
+    var at = (u) => {
+      var a = (1 - u) * (1 - u), b = 2 * (1 - u) * u, q = u * u;
+      return [a * p0x + b * p1x + q * p2x, a * p0y + b * p1y + q * p2y];
+    };
+    var circle = (x, y, r) => { ctx.beginPath(); ctx.arc(x, y, Math.max(0.1, r), 0, Math.PI * 2); };
+    var travel = ((now - this._t0) / 60000 + 0.18) % 1;
+    var u = 0.08 + 0.84 * travel;
+    var sat = at(u);
+    // Comet trail: Orbit 412's path shows only where it has just been.
+    for (var k = 1; k <= 18; k++) {
+      var pt = at(Math.max(0, u - k * 0.004));
+      ctx.fillStyle = 'rgba(131, 255, 229, ' + (0.32 * (1 - k / 19)).toFixed(3) + ')';
+      circle(pt[0], pt[1], 2.0 - k * 0.09);
+      ctx.fill();
+    }
+    var glow = ctx.createRadialGradient(sat[0], sat[1], 0, sat[0], sat[1], 13);
+    glow.addColorStop(0, 'rgba(131, 255, 229, 0.5)');
+    glow.addColorStop(1, 'rgba(131, 255, 229, 0)');
+    ctx.fillStyle = glow;
+    circle(sat[0], sat[1], 13);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    circle(sat[0], sat[1], 2.3);
+    ctx.fill();
+    ctx.font = '500 11px Geist, system-ui, sans-serif';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = 'rgba(236, 239, 240, 0.78)';
+    ctx.fillText('Orbit 412', sat[0] + 9, sat[1] + 7);
+  }
+
   renderVals() {
-    return {};
+    return {
+      orbitRef: this._orbitRef,
+    };
   }
 }
 </script>

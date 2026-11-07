@@ -75,13 +75,14 @@ class MainActivity : ComponentActivity() {
 
                 BackHandler(enabled = state.screen == Screen.Name) { vm.backFromName() }
 
-                Box(Modifier.fillMaxSize().background(HW.Background)) {
+                Box(Modifier.fillMaxSize().background(HW.Space)) {
                     Crossfade(targetState = state.screen, animationSpec = tween(700), label = "screen") { screen ->
                         when (screen) {
                             Screen.Landing -> LandingScreen(onBegin = vm::begin)
                             Screen.Name -> NameScreen(
                                 initialName = state.name,
                                 entering = state.entering,
+                                onBack = { vm.backFromName() },
                                 onEnter = vm::enter,
                             )
                             Screen.Chat -> ChatScreen(

@@ -9,6 +9,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 
@@ -108,6 +109,17 @@ object HWType {
     val ChatInput = TextStyle(fontFamily = HWFont.Geist, fontSize = 16.sp, lineHeight = 24.sp)
     val ChatLabel = TextStyle(fontFamily = HWFont.Geist, fontWeight = FontWeight.Medium, fontSize = 13.sp, lineHeight = 18.sp)
     val ChatMeta = TextStyle(fontFamily = HWFont.Geist, fontSize = 12.sp, lineHeight = 16.sp)
+
+    // Onboarding display type: light, tight, and balanced across lines (no lone last word).
+    val WelcomeHero = TextStyle(
+        fontFamily = HWFont.Geist, fontWeight = FontWeight.Light,
+        fontSize = 40.sp, lineHeight = 44.sp, letterSpacing = (-0.02).em, lineBreak = LineBreak.Heading,
+    )
+    val WelcomeTitle = TextStyle(
+        fontFamily = HWFont.Geist, fontWeight = FontWeight.Light,
+        fontSize = 34.sp, lineHeight = 40.sp, letterSpacing = (-0.02).em, lineBreak = LineBreak.Heading,
+    )
+    val ButtonLabel = TextStyle(fontFamily = HWFont.Geist, fontWeight = FontWeight.Medium, fontSize = 16.sp, lineHeight = 24.sp)
 }
 
 private val colors = darkColorScheme(
