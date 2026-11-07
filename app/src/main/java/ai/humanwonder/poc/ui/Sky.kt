@@ -1,5 +1,34 @@
 package ai.humanwonder.poc.ui
 
+import android.graphics.Bitmap
+import android.graphics.Paint
+import android.graphics.RectF
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlin.math.PI
+import kotlin.math.ceil
+import kotlin.math.hypot
+import kotlin.math.min
+import kotlin.math.pow
+import kotlin.math.roundToInt
+import kotlin.math.sqrt
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -113,5 +142,188 @@ fun SatelliteArc(
             topLeft = Offset(sat.x + 9.dp.toPx(), sat.y + 7.dp.toPx()),
             style = HWType.ChatMeta.copy(fontSize = 11.sp, fontWeight = FontWeight.Medium, color = HW.Ink.copy(alpha = 0.78f)),
         )
+    }
+}
+
+// --------------------------------------------------------------------------------- star trails
+
+/** The pre-drawn trails: one bitmap, rotated around the pole star every frame. */
+private class StarTrails(val image: ImageBitmap, val sizeDp: Float)
+
+private class TrailColor(val r: Int, val g: Int, val b: Int, val weight: Int)
+
+private val TRAIL_PALETTE = listOf(
+    TrailColor(255, 255, 255, 34), TrailColor(196, 216, 255, 26), TrailColor(255, 222, 176, 15),
+    TrailColor(255, 186, 128, 10), TrailColor(176, 255, 238, 8), TrailColor(214, 196, 255, 7),
+)
+
+/**
+ * Draws the long-exposure trails once (off the main thread). Same seed, palette, count and sweep
+ * as the preview canvas, so both skies are identical. Geometry is in dp; the bitmap holds at most
+ * 2 px per dp to keep memory small (the trails are soft, so upscaling is invisible).
+ */
+private fun buildStarTrails(widthDp: Float, heightDp: Float, density: Float): StarTrails {
+    val px = 0.5f * widthDp
+    val py = 0.42f * heightDp
+    val maxR = maxOf(
+        hypot(px, py), hypot(widthDp - px, py),
+        hypot(px, 0.8f * heightDp - py), hypot(widthDp - px, 0.8f * heightDp - py),
+    )
+    val sizeDp = ceil(2 * maxR + 8)
+    val scale = min(density, 2f)
+    val bitmapPx = (sizeDp * scale).roundToInt().coerceAtLeast(1)
+    val bitmap = Bitmap.createBitmap(bitmapPx, bitmapPx, Bitmap.Config.ARGB_8888)
+    val canvas = android.graphics.Canvas(bitmap)
+    canvas.scale(scale, scale)
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE
+        strokeCap = Paint.Cap.ROUND
+    }
+    var seed = 412L
+    fun rand(): Double {
+        seed = (seed * 16807L) % 2147483647L
+        return (seed - 1) / 2147483646.0
+    }
+    fun pick(): TrailColor {
+        val r = rand() * 100
+        var acc = 0
+        for (c in TRAIL_PALETTE) {
+            acc += c.weight
+            if (r <= acc) return c
+        }
+        return TRAIL_PALETTE[0]
+    }
+    val c = sizeDp / 2
+    val sweep = 0.85
+    val rect = RectF()
+    repeat(950) {
+        val r = sqrt(rand()) * maxR
+        if (r < 6) return@repeat
+        val a0 = rand() * PI * 2
+        val col = pick()
+        val bright = 0.16 + rand().pow(3) * 0.8
+        val width = 0.5 + rand() * rand() * 1.4
+        paint.strokeWidth = width.toFloat()
+        rect.set((c - r).toFloat(), (c - r).toFloat(), (c + r).toFloat(), (c + r).toFloat())
+        for (j in 0 until 10) {
+            val alpha = bright * (1 - j / 10.0).pow(1.5)
+            paint.color = android.graphics.Color.argb((alpha * 255).roundToInt().coerceIn(0, 255), col.r, col.g, col.b)
+            val start = Math.toDegrees(a0 + sweep * j / 10).toFloat()
+            canvas.drawArc(rect, start, Math.toDegrees(sweep / 10).toFloat(), false, paint)
+        }
+    }
+    return StarTrails(bitmap.asImageBitmap(), sizeDp)
+}
+
+/**
+ * A night sky photographed with a long exposure: every star draws an arc around the pole star and
+ * the whole sky turns slowly (one degree a second). The pole star is "your star": [glow] (0..1)
+ * brightens it, and each change of [pulseKey] sends a soft ring out from it.
+ */
+@Composable
+fun StarTrailSky(modifier: Modifier = Modifier, glow: Float = 0f, pulseKey: Int = 0) {
+    BoxWithConstraints(modifier) {
+        val density = LocalDensity.current
+        val wDp = maxWidth.value
+        val hDp = maxHeight.value
+        val trails by produceState<StarTrails?>(null, wDp, hDp) {
+            value = withContext(Dispatchers.Default) { buildStarTrails(wDp, hDp, density.density) }
+        }
+        val t = rememberInfiniteTransition(label = "trails")
+        val turn by t.animateFloat(0f, -360f, infiniteRepeatable(tween(360_000, easing = LinearEasing)), label = "turn")
+        val twinkle by t.animateFloat(0.7f, 1f, infiniteRepeatable(tween(1320), RepeatMode.Reverse), label = "twinkle")
+        val appear by animateFloatAsState(if (trails != null) 1f else 0f, tween(1600), label = "appear")
+        val lit by animateFloatAsState(glow.coerceIn(0f, 1f), tween(500), label = "lit")
+        val pulse = remember { Animatable(1f) }
+        LaunchedEffect(pulseKey) {
+            if (pulseKey > 0) {
+                pulse.snapTo(0f)
+                pulse.animateTo(1f, tween(1400, easing = LinearEasing))
+            }
+        }
+
+        Box(
+            Modifier.fillMaxSize().background(
+                Brush.verticalGradient(
+                    0f to Color(0xFF010208), 0.42f to Color(0xFF02051A), 0.70f to Color(0xFF07103A),
+                    0.80f to Color(0xFF1A1650), 1f to Color(0xFF04040C),
+                ),
+            ),
+        )
+        Canvas(Modifier.fillMaxSize()) {
+            // Horizon glow: an ellipse 90% wide and 22% tall, centred 80% down.
+            val glowCenter = Offset(size.width * 0.5f, size.height * 0.8f)
+            val rx = size.width * 0.9f
+            val ry = size.height * 0.22f
+            withTransform({ scale(1f, ry / rx, pivot = glowCenter) }) {
+                drawCircle(
+                    Brush.radialGradient(
+                        0f to Color(0x597C5CFF), 0.55f to Color(0x1A2FE6C8), 1f to Color.Transparent,
+                        center = glowCenter, radius = rx,
+                    ),
+                    radius = rx, center = glowCenter,
+                )
+            }
+            val tr = trails ?: return@Canvas
+            val pole = Offset(size.width * 0.5f, size.height * 0.42f)
+            val side = tr.sizeDp.dp.toPx()
+            rotate(turn, pivot = pole) {
+                drawImage(
+                    tr.image,
+                    srcOffset = IntOffset.Zero,
+                    srcSize = IntSize(tr.image.width, tr.image.height),
+                    dstOffset = IntOffset((pole.x - side / 2).roundToInt(), (pole.y - side / 2).roundToInt()),
+                    dstSize = IntSize(side.roundToInt(), side.roundToInt()),
+                    alpha = appear,
+                )
+            }
+            val glowR = (14f + 16f * lit).dp.toPx()
+            drawCircle(
+                Brush.radialGradient(
+                    listOf(Color(200, 255, 245).copy(alpha = ((0.35f + 0.45f * lit) * twinkle * appear).coerceIn(0f, 1f)), Color.Transparent),
+                    center = pole, radius = glowR,
+                ),
+                radius = glowR, center = pole,
+            )
+            drawCircle(Color.White.copy(alpha = appear), radius = (1.8f + 1.2f * lit).dp.toPx(), center = pole)
+            val q = pulse.value
+            if (q < 1f) {
+                drawCircle(
+                    HW.Primary.copy(alpha = 0.5f * (1f - q)),
+                    radius = (6f + 64f * q).dp.toPx(), center = pole, style = Stroke(1.2.dp.toPx()),
+                )
+            }
+        }
+    }
+}
+
+/** Liwa dunes in silhouette along the bottom of the night sky, with a faint moonlit rim. */
+@Composable
+fun DuneHorizon(modifier: Modifier = Modifier) {
+    Canvas(modifier) {
+        val sx = size.width / 390f
+        val sy = size.height / 844f
+        fun ridge(close: Boolean) = Path().apply {
+            moveTo(0f, 652 * sy)
+            cubicTo(52 * sx, 634 * sy, 110 * sx, 622 * sy, 172 * sx, 640 * sy)
+            cubicTo(228 * sx, 656 * sy, 262 * sx, 684 * sy, 318 * sx, 676 * sy)
+            cubicTo(350 * sx, 671 * sy, 372 * sx, 660 * sy, 390 * sx, 654 * sy)
+            if (close) {
+                lineTo(size.width, size.height)
+                lineTo(0f, size.height)
+                close()
+            }
+        }
+        drawPath(ridge(close = true), Color.Black)
+        drawPath(ridge(close = false), HW.Primary.copy(alpha = 0.22f), style = Stroke(1.dp.toPx()))
+        val front = Path().apply {
+            moveTo(0f, 700 * sy)
+            cubicTo(70 * sx, 690 * sy, 150 * sx, 712 * sy, 230 * sx, 706 * sy)
+            cubicTo(300 * sx, 700 * sy, 350 * sx, 712 * sy, 390 * sx, 708 * sy)
+            lineTo(size.width, size.height)
+            lineTo(0f, size.height)
+            close()
+        }
+        drawPath(front, Color(0xFF020304))
     }
 }

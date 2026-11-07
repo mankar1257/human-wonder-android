@@ -38,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -59,6 +60,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.min
 
 /**
  * Full-bleed photograph from the Stitch design, at full colour, breathing with a slow zoom.
@@ -137,7 +139,10 @@ fun LandingScreen(onBegin: () -> Unit) {
     }
 }
 
-/** Name: Earth at night from orbit (Orbit 412's own view). Orbit 412 will greet you by this name. */
+/**
+ * Name: later the same night over the Liwa dunes, a long-exposure sky turning around the pole
+ * star. That star is yours: it brightens as you type your name, and each letter sends a ring out.
+ */
 @Composable
 fun NameScreen(
     initialName: String,
@@ -147,18 +152,18 @@ fun NameScreen(
 ) {
     var name by rememberSaveable { mutableStateOf(initialName) }
     var focused by remember { mutableStateOf(false) }
+    var keystrokes by remember { mutableIntStateOf(0) }
     val submit = { if (!entering) onEnter(name.ifBlank { "Wanderer" }) }
 
     Box(Modifier.fillMaxSize()) {
-        PhotoSky(
-            R.drawable.bg_earth_orbit,
-            Brush.verticalGradient(
-                0f to Color.Black.copy(alpha = 0.68f), 0.30f to Color.Black.copy(alpha = 0.22f),
-                0.42f to Color.Transparent, 0.55f to Color.Transparent,
-                0.75f to Color.Black.copy(alpha = 0.6f), 1f to Color.Black.copy(alpha = 0.9f),
+        StarTrailSky(Modifier.fillMaxSize(), glow = min(1f, name.length / 8f), pulseKey = keystrokes)
+        SatelliteArc(Modifier.fillMaxSize(), arcFraction = 0.62f, dropFraction = 0.03f, periodMs = 60_000, startAt = 0.18f)
+        DuneHorizon(Modifier.fillMaxSize())
+        Box(
+            Modifier.fillMaxSize().background(
+                Brush.verticalGradient(0f to Color.Black.copy(alpha = 0.55f), 0.30f to Color.Transparent),
             ),
         )
-        SatelliteArc(Modifier.fillMaxSize(), arcFraction = 0.42f, dropFraction = 0.045f, periodMs = 60_000, startAt = 0.18f)
 
         Column(Modifier.fillMaxSize().safeDrawingPadding()) {
             Row(
@@ -178,7 +183,7 @@ fun NameScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
-                        "What should Orbit 412 call you?",
+                        "What should Orbit\u00A0412 call you?",
                         color = Color.White, style = HWType.WelcomeTitle, textAlign = TextAlign.Center,
                     )
                     Spacer(Modifier.height(14.dp))
@@ -215,7 +220,11 @@ fun NameScreen(
                         }
                         BasicTextField(
                             value = name,
-                            onValueChange = { name = it.take(40) },
+                            onValueChange = { value ->
+                                val next = value.take(40)
+                                if (next.length > name.length) keystrokes++
+                                name = next
+                            },
                             singleLine = true,
                             textStyle = HWType.ChatInput.copy(color = Color.White, fontSize = 17.sp),
                             cursorBrush = SolidColor(HW.Primary),
