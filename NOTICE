@@ -1,0 +1,16 @@
+Human Wonder (Android)
+Copyright 2026 Human Wonder
+
+This product is derived from OfflineLLM by jegly
+(https://github.com/jegly/OfflineLLM, commit b001c2c), licensed under the Apache License,
+Version 2.0 (third_party_licenses/LICENSE-OfflineLLM.txt), and has been modified by Human Wonder.
+
+Modifications include: package renamed to ai.humanwonder.poc (smollm: ai.humanwonder.poc.smollm);
+CPU-only native build (Vulkan removed); a native resetChat() call; a single bundled model
+(no import or download); Human Wonder's persona, sanitizer and first-launch flow; the profile
+and settings storage reduced to Human Wonder's profile; tamper checks, biometric lock, themes,
+fonts, translator, help, GPU and sampling settings removed; the user interface replaced with
+Human Wonder's own.
+
+OfflineLLM's native wrapper is adapted from SmolChat-Android by shubham0204 (Apache-2.0).
+Native inference uses llama.cpp / ggml (MIT, third_party/llama.cpp).

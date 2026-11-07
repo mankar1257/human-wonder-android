@@ -1,0 +1,10 @@
+Human Wonder
+Copyright 2026 Human Wonder
+
+Human Wonder is derived from OfflineLLM by jegly (https://github.com/jegly/OfflineLLM),
+licensed under the Apache License, Version 2.0 (see Apache License 2.0 below), and has been
+modified by Human Wonder. Parts of it are adapted from SmolChat-Android by shubham0204
+(Apache License, Version 2.0).
+
+It includes ggml (MIT License), the Geist, Newsreader and JetBrains Mono typefaces
+(SIL Open Font License 1.1) and Material Symbols icons (Apache License, Version 2.0).

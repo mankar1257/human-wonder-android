@@ -3,20 +3,27 @@ import java.net.HttpURLConnection
 import java.net.URI
 import java.security.MessageDigest
 
+// Human Wonder v2: the app's architecture comes from OfflineLLM (jegly/OfflineLLM, Apache-2.0):
+// Hilt, Room, Navigation Compose, the smollm native module. Plugins match OfflineLLM exactly
+// (AGP 9 has Kotlin built in, so there is no kotlin-android plugin).
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
 }
 
-// CI passes GITHUB_RUN_NUMBER so every build can be installed over the previous one.
-val buildNumber = (System.getenv("GITHUB_RUN_NUMBER") ?: "2").toInt()
+// v1 builds used versionCode 2 (local) or the CI run number; v2 starts at 200 so it always
+// installs over them. CI passes GITHUB_RUN_NUMBER so every CI build is newer than the last.
+val buildNumber = 200 + (System.getenv("GITHUB_RUN_NUMBER") ?: "0").toInt()
 
 // ---------------------------------------------------------------------------------------------
 // On-device language model, bundled inside the APK as assets/hw-core.gguf.
 // It is fetched once at build time (pinned to an exact commit, SHA-256 verified) and never
 // committed to git. Set HW_MODEL_FILE=/path/to/file.gguf to use a local copy instead.
-// The app itself never names the model to users.
+// The app itself never names the model to users. ModelManager copies it out of the APK on the
+// first launch (status "Orbit 412 is rising over the horizon, n%").
 // ---------------------------------------------------------------------------------------------
 val modelUrl = "https://huggingface.co/ggml-org/Qwen3-0.6B-GGUF/resolve/" +
     "13ac06624948e4d8589cb4b6f90100837342fcb8/Qwen3-0.6B-Q4_0.gguf"
@@ -73,14 +80,16 @@ tasks.named("preBuild") { dependsOn(fetchModel) }
 
 android {
     namespace = "ai.humanwonder.poc"
-    compileSdk = 36
+    // compileSdk 37 because the OfflineLLM library set (core-ktx 1.19, activity 1.13,
+    // lifecycle 2.11, navigation 2.10, Compose BOM 2026.09) is built against it.
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "ai.humanwonder.poc"
-        minSdk = 28
+        minSdk = 33
         targetSdk = 36
         versionCode = buildNumber
-        versionName = "0.1.$buildNumber"
+        versionName = "2.0"
 
         ndk {
             abiFilters += listOf("arm64-v8a")
@@ -88,8 +97,8 @@ android {
     }
 
     signingConfigs {
-        // POC signing key, committed on purpose so that every CI build is signed with the
-        // same key and installs over the previous version. NOT for the Play Store:
+        // POC signing key, committed on purpose so that every build is signed with the same key
+        // and installs over the previous version (v1 used this key too). NOT for the Play Store:
         // set HW_KEYSTORE / HW_KEYSTORE_PASSWORD / HW_KEY_ALIAS / HW_KEY_PASSWORD
         // (e.g. from GitHub secrets) to sign with a private key instead.
         create("poc") {
@@ -109,10 +118,23 @@ android {
         }
     }
 
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
+
     packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
         jniLibs {
-            // llama.cpp loads its CPU backend variants with dlopen() from the app's
-            // native library directory, so the .so files must be extracted on install.
+            // ggml discovers its CPU backend variants (libggml-cpu-android_*.so) by scanning
+            // nativeLibraryDir at runtime, so the .so files must be extracted on install.
             useLegacyPackaging = true
         }
     }
@@ -127,31 +149,54 @@ android {
         // Stored uncompressed so the app can stream it straight out of the APK.
         noCompress += listOf("gguf")
     }
-
-    buildFeatures {
-        compose = true
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
 }
 
 kotlin {
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_17)
+        jvmTarget = JvmTarget.JVM_17
     }
 }
 
 dependencies {
-    implementation(project(":lib"))
+    // Native inference module
+    implementation(project(":smollm"))
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.foundation)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.kotlinx.coroutines.android)
+    // Compose BOM
+    implementation(platform(libs.compose.bom))
+    implementation(libs.compose.ui)
+    implementation(libs.compose.ui.graphics)
+    implementation(libs.compose.material3)
+    implementation(libs.compose.animation)
+    implementation(libs.compose.foundation)
+
+    // Activity & Navigation
+    implementation(libs.activity.compose)
+    implementation(libs.navigation.compose)
+
+    // Lifecycle
+    implementation(libs.lifecycle.runtime.compose)
+    implementation(libs.lifecycle.viewmodel.compose)
+
+    // Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.hilt.lifecycle.viewmodel.compose)
+
+    // Room
+    implementation(libs.room.runtime)
+    ksp(libs.room.compiler)
+    implementation(libs.room.ktx)
+
+    // Coroutines
+    implementation(libs.coroutines.core)
+    implementation(libs.coroutines.android)
+
+    // Security (encrypted settings)
+    implementation(libs.security.crypto)
+
+    // Core
+    implementation(libs.core.ktx)
+
+    // Serialization (conversation export)
+    implementation(libs.serialization.json)
 }

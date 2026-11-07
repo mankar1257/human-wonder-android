@@ -13,3 +13,6 @@ captures/
 *.apk
 *.gguf
 .transfer/
+
+# Old llama.cpp checkout kept aside by tools/build-on-mac.sh when it fetches the pinned one
+third_party/llama.cpp.previous/

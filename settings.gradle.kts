@@ -1,6 +1,12 @@
 pluginManagement {
     repositories {
-        google()
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
         mavenCentral()
         gradlePluginPortal()
     }
@@ -17,4 +23,5 @@ dependencyResolutionManagement {
 rootProject.name = "HumanWonder"
 
 include(":app")
-include(":lib")
+// Native inference (llama.cpp + JNI glue), from OfflineLLM. Replaces the old :lib module.
+include(":smollm")
