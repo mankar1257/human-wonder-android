@@ -346,7 +346,7 @@ profile = f'''<div style="{ROOT}">
 PROFILE_JS = """class Component extends DCLogic {
   constructor(...args) {
     super(...args);
-    this.state = { name: '', email: '', city: '', view: 'orbit', tone: 0, voice: false, haptics: true };
+    this.state = { name: ((this.props && this.props.name) || '').trim(), email: '', city: '', view: 'orbit', tone: 0, voice: false, haptics: true };
   }
 
   sw(on) {
