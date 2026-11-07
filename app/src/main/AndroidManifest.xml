@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Lets the app find the phone's text-to-speech engine for "Read answers aloud" (Android 11+
+         package visibility). Not a permission. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+    </queries>
+
     <!-- No permissions at all: the model ships inside the APK and the app never goes online.
          NEVER add INTERNET, ACCESS_NETWORK_STATE or ACCESS_WIFI_STATE (as in OfflineLLM). -->
 

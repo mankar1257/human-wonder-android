@@ -141,7 +141,9 @@ android {
 
     sourceSets {
         getByName("main") {
-            assets.srcDir(modelAssetsDir)
+            // A File, not a Provider: AGP 9 refuses Providers in the sourceSets DSL
+            // (android.sourceset.disallowProvider). Ordering comes from preBuild -> fetchModel.
+            assets.srcDir(modelAssetsDir.get().asFile)
         }
     }
 
