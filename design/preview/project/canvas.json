@@ -45,13 +45,43 @@
    "title": "4 · Orbit 412 answering",
    "is_interactive": true,
    "radius": 36
+  },
+  "Home.dc.html": {
+   "x": 0,
+   "y": 1224,
+   "w": 390,
+   "h": 844,
+   "title": "5 · Home",
+   "is_interactive": true,
+   "radius": 36
+  },
+  "Drawer.dc.html": {
+   "x": 470,
+   "y": 1224,
+   "w": 390,
+   "h": 844,
+   "title": "6 · Side menu with your transmissions",
+   "is_interactive": true,
+   "radius": 36
+  },
+  "Profile.dc.html": {
+   "x": 940,
+   "y": 1224,
+   "w": 390,
+   "h": 844,
+   "title": "7 · Profile & settings",
+   "is_interactive": true,
+   "radius": 36
   }
  },
  "order": [
   "Main.dc.html",
   "Name.dc.html",
   "Chat.dc.html",
-  "Transmission.dc.html"
+  "Transmission.dc.html",
+  "Home.dc.html",
+  "Drawer.dc.html",
+  "Profile.dc.html"
  ],
  "notes": {
   "title": {
@@ -67,7 +97,14 @@
    "w": 360,
    "fill": "teal",
    "size": "m",
-   "text": "Press Play on any screen to use it.\n\nScreen 3 starts the way the app does: Orbit 412 rises over the horizon, finds your signal, then greets you. Tap a suggestion or type a question and watch the answer come down from orbit.\n\nTry the Orbit / Ground switch and the tone chip (Balanced, Poetic, Scientific, Whisper).\n\nOn this canvas Orbit 412 carries a few prepared answers; in the app it answers anything you ask."
+   "text": "Press Play on any screen to use it.\n\nOnboarding: 1 → 2. Then Home (5) is where you land: talk to Orbit 412, pick up a recent transmission, or open the side menu (6) for all your conversations and your profile (7).\n\nScreens 3 and 4 are the chat. The menu button opens the side menu. The send button never shrinks; on narrow phones or large text the tone label folds away first.\n\nOn this canvas Orbit 412 carries a few prepared answers; in the app it answers anything you ask."
+  },
+  "row2": {
+   "x": 0,
+   "y": 924,
+   "text": "After onboarding: home, history and you",
+   "kind": "title1",
+   "maxW": 1330
   }
  },
  "designSystems": []

@@ -53,6 +53,9 @@ textarea::placeholder { color: #8d9997; }
 .hw-iconbtn { border: 0; padding: 0; background: transparent; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
 .hw-iconbtn:focus-visible, .hw-chip:focus-visible, textarea:focus-visible { outline: 2px solid #83ffe5; outline-offset: 2px; }
 input::placeholder { color: rgba(186, 202, 196, 0.45); }
+.hw-composer-row.c1 .hw-tone-label { display: none; }
+.hw-composer-row.c2 .hw-seg-label { display: none; }
+.hw-composer-row.c2 .hw-seg { padding: 0 10px !important; }
 </style>
 </helmet>
 <div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #000000; font-family: 'Geist', system-ui, sans-serif; color: #eceff0">
@@ -63,7 +66,7 @@ input::placeholder { color: rgba(186, 202, 196, 0.45); }
 <div style="position: absolute; left: 0; top: 0; width: 390px; height: 844px; display: flex; flex-direction: column">
 
 <header style="height: 64px; flex-shrink: 0; display: flex; align-items: center; padding: 0 4px">
-<a href="Name.dc.html" aria-label="Back" class="hw-iconbtn" style="width: 48px; height: 48px; color: #c5cdcb"><svg width="22" height="22" viewBox="0 -960 960 960" aria-hidden="true" style="display: block; flex-shrink: 0"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" fill="currentColor"></path></svg></a>
+<a href="Drawer.dc.html" aria-label="Open menu" class="hw-iconbtn" style="width: 48px; height: 48px; color: #c5cdcb"><svg width="24" height="24" viewBox="0 -960 960 960" aria-hidden="true" style="display: block; flex-shrink: 0"><path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z" fill="currentColor"></path></svg></a>
 <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center">
 <span style="display: flex; align-items: center; gap: 8px">
 <span aria-hidden="true" style="position: relative; display: block; width: 20px; height: 20px; flex-shrink: 0">
@@ -123,21 +126,21 @@ input::placeholder { color: rgba(186, 202, 196, 0.45); }
 </div>
 
 <div style="flex-shrink: 0; padding: 0 12px">
-<div style="border-radius: 28px; padding: 14px 10px 10px 14px; background: linear-gradient(140deg, rgba(14, 15, 20, 0.92) 0%, rgba(30, 32, 48, 0.88) 55%, rgba(70, 74, 128, 0.62) 100%); border: 1px solid {{boxBorder}}; box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.9); transition: border-color 0.3s; -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px)">
+<div style="border-radius: 28px; padding: 14px 8px 8px 12px; background: linear-gradient(140deg, rgba(14, 15, 20, 0.92) 0%, rgba(30, 32, 48, 0.88) 55%, rgba(70, 74, 128, 0.62) 100%); border: 1px solid {{boxBorder}}; box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.9); transition: border-color 0.3s; -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px)">
 <label for="hw-q" class="hw-sr">Message to Orbit</label>
 <textarea id="hw-q" value="{{input}}" onChange="{{onInput}}" onKeyDown="{{onKey}}" onFocus="{{onFocus}}" onBlur="{{onBlur}}" placeholder="{{placeholder}}" rows="1" style="display: block; width: 100%; height: {{taHeight}}; box-sizing: border-box; resize: none; background: transparent; border: 0; outline: none; padding: 2px 4px 0; color: #ffffff; font-family: 'Geist', system-ui, sans-serif; font-size: 16px; line-height: 24px; transition: height 0.4s"></textarea>
-<div style="display: flex; align-items: center; gap: 6px; margin-top: 10px">
+<div ref="{{rowRef}}" class="hw-composer-row {{compactClass}}" style="display: flex; align-items: center; gap: 4px; margin-top: 10px">
 <span role="group" aria-label="Point of view" style="display: flex; padding: 2px; border-radius: 999px; background: rgba(255, 255, 255, 0.07)">
-<button type="button" aria-pressed="{{orbitOn}}" aria-label="Orbit view" onClick="{{pickOrbit}}" class="hw-chip" style="height: 36px; display: flex; align-items: center; gap: 6px; border: 0; border-radius: 999px; font-size: 13px; line-height: 18px; font-weight: 500; padding: {{orbitPad}}; background: {{orbitBg}}; color: {{orbitText}}"><span style="color: {{orbitIcon}}"><svg width="16" height="16" viewBox="0 -960 960 960" aria-hidden="true" style="display: block; flex-shrink: 0"><path d="M560-32v-80q117 0 198.5-81.5T840-392h80q0 75-28.5 140.5t-77 114q-48.5 48.5-114 77T560-32Zm0-160v-80q50 0 85-35t35-85h80q0 83-58.5 141.5T560-192ZM222-57q-15 0-30-6t-27-17L23-222q-11-12-17-27t-6-30q0-16 6-30.5T23-335l127-127q23-23 57-23.5t57 22.5l50 50 28-28-50-50q-23-23-23-56t23-56l57-57q23-23 56.5-23t56.5 23l50 50 28-28-50-50q-23-23-23-56.5t23-56.5l127-127q12-12 27-18t30-6q15 0 29.5 6t26.5 18l142 142q12 11 17.5 25.5T895-730q0 15-5.5 30T872-673L745-546q-23 23-56.5 23T632-546l-50-50-28 28 50 50q23 23 22.5 56.5T603-405l-56 56q-23 23-56.5 23T434-349l-50-50-28 28 50 50q23 23 22.5 57T405-207L278-80q-11 11-25.5 17T222-57Zm0-79 42-42-142-142-42 42 142 142Zm85-85 42-42-142-142-42 42 142 142Zm184-184 56-56-142-142-56 56 142 142Zm198-198 42-42-142-142-42 42 142 142Zm85-85 42-42-142-142-42 42 142 142ZM448-504Z" fill="currentColor"></path></svg></span><sc-if value="{{orbitOn}}" hint-placeholder-val="{{true}}">Orbit</sc-if></button>
-<button type="button" aria-pressed="{{groundOn}}" aria-label="Ground view" onClick="{{pickGround}}" class="hw-chip" style="height: 36px; display: flex; align-items: center; gap: 6px; border: 0; border-radius: 999px; font-size: 13px; line-height: 18px; font-weight: 500; padding: {{groundPad}}; background: {{groundBg}}; color: {{groundText}}"><svg width="16" height="16" viewBox="0 -960 960 960" aria-hidden="true" style="display: block; flex-shrink: 0"><path d="M480-480q33 0 56.5-23.5T560-560q0-33-23.5-56.5T480-640q-33 0-56.5 23.5T400-560q0 33 23.5 56.5T480-480Zm0 294q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Zm0-480Z" fill="currentColor"></path></svg><sc-if value="{{groundOn}}" hint-placeholder-val="{{false}}">Ground</sc-if></button>
+<button type="button" aria-pressed="{{orbitOn}}" aria-label="Orbit view" onClick="{{pickOrbit}}" class="hw-chip hw-seg" style="height: 36px; display: flex; align-items: center; gap: 6px; border: 0; border-radius: 999px; font-size: 13px; line-height: 18px; font-weight: 500; padding: {{orbitPad}}; background: {{orbitBg}}; color: {{orbitText}}"><span style="color: {{orbitIcon}}"><svg width="16" height="16" viewBox="0 -960 960 960" aria-hidden="true" style="display: block; flex-shrink: 0"><path d="M560-32v-80q117 0 198.5-81.5T840-392h80q0 75-28.5 140.5t-77 114q-48.5 48.5-114 77T560-32Zm0-160v-80q50 0 85-35t35-85h80q0 83-58.5 141.5T560-192ZM222-57q-15 0-30-6t-27-17L23-222q-11-12-17-27t-6-30q0-16 6-30.5T23-335l127-127q23-23 57-23.5t57 22.5l50 50 28-28-50-50q-23-23-23-56t23-56l57-57q23-23 56.5-23t56.5 23l50 50 28-28-50-50q-23-23-23-56.5t23-56.5l127-127q12-12 27-18t30-6q15 0 29.5 6t26.5 18l142 142q12 11 17.5 25.5T895-730q0 15-5.5 30T872-673L745-546q-23 23-56.5 23T632-546l-50-50-28 28 50 50q23 23 22.5 56.5T603-405l-56 56q-23 23-56.5 23T434-349l-50-50-28 28 50 50q23 23 22.5 57T405-207L278-80q-11 11-25.5 17T222-57Zm0-79 42-42-142-142-42 42 142 142Zm85-85 42-42-142-142-42 42 142 142Zm184-184 56-56-142-142-56 56 142 142Zm198-198 42-42-142-142-42 42 142 142Zm85-85 42-42-142-142-42 42 142 142ZM448-504Z" fill="currentColor"></path></svg></span><sc-if value="{{orbitOn}}" hint-placeholder-val="{{true}}"><span class="hw-seg-label">Orbit</span></sc-if></button>
+<button type="button" aria-pressed="{{groundOn}}" aria-label="Ground view" onClick="{{pickGround}}" class="hw-chip hw-seg" style="height: 36px; display: flex; align-items: center; gap: 6px; border: 0; border-radius: 999px; font-size: 13px; line-height: 18px; font-weight: 500; padding: {{groundPad}}; background: {{groundBg}}; color: {{groundText}}"><svg width="16" height="16" viewBox="0 -960 960 960" aria-hidden="true" style="display: block; flex-shrink: 0"><path d="M480-480q33 0 56.5-23.5T560-560q0-33-23.5-56.5T480-640q-33 0-56.5 23.5T400-560q0 33 23.5 56.5T480-480Zm0 294q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Zm0-480Z" fill="currentColor"></path></svg><sc-if value="{{groundOn}}" hint-placeholder-val="{{false}}"><span class="hw-seg-label">Ground</span></sc-if></button>
 </span>
-<button type="button" aria-label="Tone: {{toneLabel}}" onClick="{{cycleTone}}" class="hw-chip" style="height: 36px; display: flex; align-items: center; gap: 6px; padding: 0 8px 0 12px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.08); color: #eceff0; font-size: 13px; line-height: 18px; font-weight: 500"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="display: block; flex-shrink: 0"><path d="M11 4.5c.5 4 3.5 7 7.5 7.5-4 .5-7 3.5-7.5 7.5-.5-4-3.5-7-7.5-7.5 4-.5 7-3.5 7.5-7.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path><path d="M19 2.5v4M17 4.5h4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>{{toneLabel}}<span style="color: #a7b2b0"><svg width="16" height="16" viewBox="0 -960 960 960" aria-hidden="true" style="display: block; flex-shrink: 0"><path d="M480-345 240-585l56-56 184 184 184-184 56 56-240 240Z" fill="currentColor"></path></svg></span></button>
+<button type="button" aria-label="Tone: {{toneLabel}}" onClick="{{cycleTone}}" class="hw-chip" style="height: 36px; display: flex; align-items: center; gap: 6px; padding: 0 8px 0 12px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.08); color: #eceff0; font-size: 13px; line-height: 18px; font-weight: 500"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style="display: block; flex-shrink: 0"><path d="M11 4.5c.5 4 3.5 7 7.5 7.5-4 .5-7 3.5-7.5 7.5-.5-4-3.5-7-7.5-7.5 4-.5 7-3.5 7.5-7.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path><path d="M19 2.5v4M17 4.5h4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg><span class="hw-tone-label">{{toneLabel}}</span><span style="color: #a7b2b0"><svg width="16" height="16" viewBox="0 -960 960 960" aria-hidden="true" style="display: block; flex-shrink: 0"><path d="M480-345 240-585l56-56 184 184 184-184 56 56-240 240Z" fill="currentColor"></path></svg></span></button>
 <span style="flex: 1"></span>
-<button type="button" aria-label="Voice input" onClick="{{onMic}}" class="hw-iconbtn" style="width: 40px; height: 40px; color: #c5cdcb"><svg width="20" height="20" viewBox="0 -960 960 960" aria-hidden="true" style="display: block; flex-shrink: 0"><path d="M480-400q-50 0-85-35t-35-85v-240q0-50 35-85t85-35q50 0 85 35t35 85v240q0 50-35 85t-85 35Zm0-240Zm-40 520v-123q-104-14-172-93t-68-184h80q0 83 58.5 141.5T480-320q83 0 141.5-58.5T680-520h80q0 105-68 184t-172 93v123h-80Zm40-360q17 0 28.5-11.5T520-520v-240q0-17-11.5-28.5T480-800q-17 0-28.5 11.5T440-760v240q0 17 11.5 28.5T480-480Z" fill="currentColor"></path></svg></button>
-<button type="button" aria-label="{{sendLabel}}" onClick="{{onSendOrStop}}" class="hw-iconbtn" style="width: 40px; height: 40px; background: {{sendBg}}; color: {{sendColor}}; transition: background 0.25s, color 0.25s">
+<button type="button" aria-label="Voice input" onClick="{{onMic}}" class="hw-iconbtn" style="flex-shrink: 0; width: 48px; height: 48px; color: #c5cdcb"><svg width="20" height="20" viewBox="0 -960 960 960" aria-hidden="true" style="display: block; flex-shrink: 0"><path d="M480-400q-50 0-85-35t-35-85v-240q0-50 35-85t85-35q50 0 85 35t35 85v240q0 50-35 85t-85 35Zm0-240Zm-40 520v-123q-104-14-172-93t-68-184h80q0 83 58.5 141.5T480-320q83 0 141.5-58.5T680-520h80q0 105-68 184t-172 93v123h-80Zm40-360q17 0 28.5-11.5T520-520v-240q0-17-11.5-28.5T480-800q-17 0-28.5 11.5T440-760v240q0 17 11.5 28.5T480-480Z" fill="currentColor"></path></svg></button>
+<button type="button" aria-label="{{sendLabel}}" onClick="{{onSendOrStop}}" class="hw-iconbtn" style="flex-shrink: 0; width: 48px; height: 48px"><span style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: {{sendBg}}; color: {{sendColor}}; transition: background 0.25s, color 0.25s">
 <sc-if value="{{generating}}" hint-placeholder-val="{{false}}"><svg width="18" height="18" viewBox="0 -960 960 960" aria-hidden="true" style="display: block; flex-shrink: 0"><path d="M260-260v-440h440v440H260Z" fill="currentColor"></path></svg></sc-if>
 <sc-if value="{{idle}}" hint-placeholder-val="{{true}}"><svg width="20" height="20" viewBox="0 -960 960 960" aria-hidden="true" style="display: block; flex-shrink: 0"><path d="M440-160v-487L216-423l-56-57 320-320 320 320-56 57-224-224v487h-80Z" fill="currentColor"></path></svg></sc-if>
-</button>
+</span></button>
 </div>
 </div>
 </div>
@@ -169,6 +172,7 @@ class Component extends DCLogic {
       focused: false,
       tick: 0,
       copiedId: -1,
+      compact: 0,
     };
     this._demo = demo;
     this._demoLoop = demo;
@@ -184,6 +188,7 @@ class Component extends DCLogic {
       galaxy: (el) => { this.galaxyEl = el; },
       orbit: (el) => { this.orbitEl = el; },
       list: (el) => { this.listEl = el; },
+      row: (el) => { this.rowEl = el; },
     };
   }
 
@@ -202,10 +207,14 @@ class Component extends DCLogic {
     this._raf = requestAnimationFrame(loop);
     this._clock = setInterval(() => this.setState((s) => ({ tick: s.tick + 1 })), 20000);
     if (this._demo) this.seedDemo(); else this.wakeSky();
+    this._onResize = () => this.fitComposer();
+    window.addEventListener('resize', this._onResize);
+    this.fitComposer();
   }
 
   componentWillUnmount() {
     cancelAnimationFrame(this._raf);
+    window.removeEventListener('resize', this._onResize);
     clearInterval(this._clock);
     clearInterval(this._skyTimer);
     clearTimeout(this._skyTimer2);
@@ -219,7 +228,23 @@ class Component extends DCLogic {
     }
   }
 
+  // Never squeeze send/mic: if the composer row overflows, hide the tone label first,
+  // then the Orbit/Ground labels (the app does the same measurement in Compose).
+  fitComposer() {
+    var row = this.rowEl;
+    if (!row) return;
+    var level = 0;
+    row.classList.remove('c1', 'c2');
+    if (row.scrollWidth > row.clientWidth + 1) {
+      level = 1;
+      row.classList.add('c1');
+      if (row.scrollWidth > row.clientWidth + 1) { level = 2; row.classList.add('c2'); }
+    }
+    if (level !== this.state.compact) this.setState({ compact: level });
+  }
+
   componentDidUpdate() {
+    this.fitComposer();
     var el = this.listEl;
     if (!el) return;
     var n = this.state.messages.length;
@@ -705,6 +730,8 @@ void main() {
       galaxyRef: this._refs.galaxy,
       orbitRef: this._refs.orbit,
       listRef: this._refs.list,
+      rowRef: this._refs.row,
+      compactClass: s.compact === 2 ? 'c1 c2' : s.compact === 1 ? 'c1' : '',
       statusText: statusText,
       statusColor: statusColor,
       statusDotClass: busy ? 'hw-pulse' : '',

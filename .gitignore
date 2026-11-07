@@ -13,3 +13,4 @@ captures/
 *.apk
 *.gguf
 .transfer/
+design/preview/test-renders/
