@@ -26,3 +26,7 @@ Keep the preview and the app in step:
 ## Screenshot of every screen
 
 `python3 design/preview/tour.py` renders all seven screens side by side at 393 x 852 dp (text 100%), with the live sky, star trails and the chat demo running, into `design/preview/test-renders/tour.png`. Use `render_test.py` for the size and font-scale stress test.
+
+## Real-speed demo video
+
+`python3 design/preview/demo.py` records Welcome, Your name (typing), Home, Side menu, Chat, Answer and Profile at a 393 x 852 phone size with every animation at real speed, into `design/preview/test-renders/human-wonder-demo.mp4` (uses Playwright with the system Chrome and ffmpeg). Useful when the canvas cannot be opened.
