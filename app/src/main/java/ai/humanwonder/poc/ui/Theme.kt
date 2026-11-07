@@ -71,6 +71,14 @@ object HW {
     val Sheet = Color(0xFF0B0D12)
     /** Avatar gradient end (the start is [PrimaryContainer]). */
     val Iris = Color(0xFF7C5CFF)
+    /** Quiet solid avatar behind the initial (Home header, side menu). */
+    val AvatarFill = Color(0xFF1F2629)
+    /** Chevrons on Home rows. */
+    val Chevron = Color(0xFF6B7775)
+    /** Name field on the Earth photo: rgba(14, 17, 19, 0.82). */
+    val NameField = Color(0xD10E1113)
+    /** Behind the Earth photo on the Home card, before it loads. */
+    val HeroCard = Color(0xFF05080A)
     /** Placeholder text in fields (rgba(186, 202, 196, 0.45)). */
     val Placeholder = Color(0x73BACAC4)
 }
@@ -150,6 +158,21 @@ object HWType {
     val WelcomeTitle = TextStyle(
         fontFamily = HWFont.Geist, fontWeight = FontWeight.Light,
         fontSize = 34.sp, lineHeight = 40.sp, letterSpacing = (-0.02).em, lineBreak = LineBreak.Heading,
+    )
+    /** Name screen question (32/38 light). */
+    val NameTitle = TextStyle(
+        fontFamily = HWFont.Geist, fontWeight = FontWeight.Light,
+        fontSize = 32.sp, lineHeight = 38.sp, letterSpacing = (-0.02).em, lineBreak = LineBreak.Heading,
+    )
+    /** Home greeting (30/36 light). */
+    val HomeGreeting = TextStyle(
+        fontFamily = HWFont.Geist, fontWeight = FontWeight.Light,
+        fontSize = 30.sp, lineHeight = 36.sp, letterSpacing = (-0.02).em, lineBreak = LineBreak.Heading,
+    )
+    /** "Orbit 412" on the Home photo card (24/30 regular). */
+    val HeroTitle = TextStyle(
+        fontFamily = HWFont.Geist, fontWeight = FontWeight.Normal,
+        fontSize = 24.sp, lineHeight = 30.sp, letterSpacing = (-0.01).em,
     )
     val ButtonLabel = TextStyle(fontFamily = HWFont.Geist, fontWeight = FontWeight.Medium, fontSize = 16.sp, lineHeight = 24.sp)
 

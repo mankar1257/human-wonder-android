@@ -3,13 +3,15 @@ package ai.humanwonder.poc.ui
 import ai.humanwonder.poc.R
 import ai.humanwonder.poc.SkyState
 import ai.humanwonder.poc.data.local.entities.Conversation
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,21 +22,25 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import java.time.Instant
 import java.time.LocalDate
@@ -43,12 +49,13 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
+import kotlin.math.roundToInt
 
-/** The three questions under "Ask tonight". */
-private val ASK_TONIGHT = listOf(
+/** The three questions under "Try asking". */
+private val TRY_ASKING = listOf(
     "What does Earth look like tonight?",
     "Where is the Moon right now?",
-    "Tell me about the Milky Way",
+    "How fast are you moving?",
 )
 
 /** "Good morning|afternoon|evening|night", from the phone's clock (as in the preview). */
@@ -77,9 +84,12 @@ fun transmissionTime(epochMillis: Long, today: LocalDate = LocalDate.now()): Str
 }
 
 /**
- * Home: the aurora a little lower than the empty chat (calm 0.35) under a faint dot grid, a
- * greeting, the Orbit 412 card, the last three transmissions and a few questions for tonight.
+ * Home (matches the preview's Home artboard): plain black, a greeting, one photo card for
+ * Orbit 412 (the Earth at night from orbit), the last three transmissions in a quiet grouped
+ * list, and a few questions to try. No aurora, dot grid or glowing icons here; the chat keeps
+ * the sky.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun HomeScreen(
     name: String,
@@ -95,14 +105,6 @@ fun HomeScreen(
 ) {
     val displayName = name.trim().ifBlank { "Wanderer" }
     Box(Modifier.fillMaxSize().background(HW.Space)) {
-        GalaxyBackground(Modifier.fillMaxSize(), energy = 0f, calm = 0.35f)
-        DotGrid(Modifier.fillMaxSize())
-        Box(
-            Modifier.fillMaxSize().background(
-                Brush.verticalGradient(0f to Color.Black.copy(alpha = 0.35f), 0.4f to Color.Transparent),
-            ),
-        )
-
         Column(Modifier.fillMaxSize().safeDrawingPadding()) {
             // Header: menu, lockup, avatar (64dp).
             Row(
@@ -122,45 +124,42 @@ fun HomeScreen(
             }
 
             Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())) {
-                // Greeting.
-                Column(Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = 20.dp)) {
-                    Text(
-                        "${greetingFor()}, $displayName",
-                        color = Color.White,
-                        style = HWType.WelcomeTitle.capScale(),
-                    )
-                    Spacer(Modifier.height(8.dp))
-                    Text(homeSubline(sky), color = HW.InkSecondary, style = HWType.ChatSub)
-                }
+                Text(
+                    "${greetingFor()}, $displayName",
+                    color = Color.White,
+                    style = HWType.HomeGreeting.capScale(),
+                    modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 16.dp),
+                )
 
                 OrbitCard(sky, onTalk, onRetry)
 
                 if (recent.isNotEmpty()) {
                     Row(
-                        Modifier.fillMaxWidth().padding(start = 24.dp, end = 20.dp, top = 28.dp, bottom = 10.dp),
+                        Modifier.fillMaxWidth().padding(start = 24.dp, end = 12.dp, top = 28.dp, bottom = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        Text(
-                            "Recent transmissions",
-                            color = Color.White,
-                            style = HWType.HubTitle,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.weight(1f),
-                        )
+                        Text("Recent transmissions", color = Color.White, style = HWType.HubTitle, modifier = Modifier.weight(1f))
                         Box(
                             Modifier
                                 .heightIn(min = 48.dp)
                                 .clip(CircleShape)
                                 .clickable(role = Role.Button, onClick = onSeeAll)
-                                .padding(horizontal = 4.dp),
+                                .padding(horizontal = 12.dp),
                             contentAlignment = Alignment.Center,
                         ) {
                             Text("See all", color = HW.Primary, style = HWType.ChipStrong, maxLines = 1, softWrap = false)
                         }
                     }
-                    Column(Modifier.padding(horizontal = 16.dp).fillMaxWidth().glass()) {
+                    val group = RoundedCornerShape(20.dp)
+                    Column(
+                        Modifier
+                            .padding(horizontal = 16.dp)
+                            .fillMaxWidth()
+                            .clip(group)
+                            .background(Color.White.copy(alpha = 0.04f))
+                            .border(1.dp, Color.White.copy(alpha = 0.08f), group),
+                    ) {
                         recent.take(3).forEachIndexed { i, c ->
                             if (i > 0) Box(Modifier.fillMaxWidth().height(1.dp).background(HW.Divider))
                             RecentRow(c, onClick = { onOpen(c.id) })
@@ -169,33 +168,36 @@ fun HomeScreen(
                 }
 
                 Text(
-                    "Ask tonight",
+                    "Try asking",
                     color = Color.White,
                     style = HWType.HubTitle,
                     modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 28.dp, bottom = 12.dp),
                 )
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState())
-                        .padding(start = 16.dp, end = 16.dp, bottom = 32.dp),
+                FlowRow(
+                    Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 32.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    ASK_TONIGHT.forEach { q -> AskChip(q, onClick = { onAsk(q) }) }
+                    TRY_ASKING.forEach { q -> AskChip(q, onClick = { onAsk(q) }) }
                 }
             }
         }
     }
 }
 
-private fun homeSubline(sky: SkyState): String = when (sky) {
-    is SkyState.Aligning -> "Orbit 412 is rising over the horizon, ${(sky.progress * 100).toInt()}%"
-    SkyState.Waking -> "Orbit 412 is finding your signal…"
-    SkyState.Ready -> "Orbit 412 is overhead and listening."
-    is SkyState.Failed -> "Orbit 412’s signal is lost."
+/**
+ * Places the Earth photo at full card width, 30% of the width above the card's top edge, so the
+ * glowing horizon always sits in the clear band above the text (the preview's margin-top: -30%).
+ */
+private val EarthOnCard = Alignment { size, space, _ ->
+    IntOffset((space.width - size.width) / 2, -(space.width * 0.30f).roundToInt())
 }
 
-/** The glass Orbit 412 card: mark, live status, one line about it and the teal call to action. */
+/**
+ * The Orbit 412 card: the Earth at night from orbit, then live status, name, one line and the
+ * teal call to action on a dark band that grows with the text (so text never sits on the bright
+ * horizon, even at 150% font size).
+ */
 @Composable
 private fun OrbitCard(sky: SkyState, onTalk: () -> Unit, onRetry: () -> Unit) {
     val (status, dot) = when (sky) {
@@ -205,36 +207,63 @@ private fun OrbitCard(sky: SkyState, onTalk: () -> Unit, onRetry: () -> Unit) {
         is SkyState.Failed -> "Signal lost" to HW.Error
     }
     val failed = sky as? SkyState.Failed
-    Column(
+    val shape = RoundedCornerShape(24.dp)
+    Box(
         Modifier
-            .padding(start = 16.dp, end = 16.dp, top = 24.dp)
+            .padding(start = 16.dp, end = 16.dp, top = 20.dp)
             .fillMaxWidth()
-            .glass()
-            .padding(20.dp),
+            .clip(shape)
+            .background(HW.HeroCard)
+            .border(1.dp, Color.White.copy(alpha = 0.08f), shape),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            OrbitMark(32.dp, active = sky !is SkyState.Ready && failed == null)
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
-                Text("Orbit 412", color = Color.White, style = HWType.HubTitle)
+        Image(
+            painter = painterResource(R.drawable.bg_earth_orbit),
+            contentDescription = null,
+            contentScale = ContentScale.FillWidth,
+            alignment = EarthOnCard,
+            modifier = Modifier.matchParentSize(),
+        )
+        Column(Modifier.fillMaxWidth()) {
+            Spacer(Modifier.height(120.dp))
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .drawBehind {
+                        val fade = (56.dp.toPx() / size.height).coerceIn(0f, 1f)
+                        drawRect(
+                            Brush.verticalGradient(
+                                0f to Color.Transparent,
+                                fade to Color.Black.copy(alpha = 0.8f),
+                                1f to Color.Black.copy(alpha = 0.92f),
+                            ),
+                        )
+                    }
+                    .padding(start = 20.dp, end = 20.dp, top = 56.dp, bottom = 20.dp),
+            ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (failed == null) PulsingDot(dot, size = 6.dp, periodMs = 1600)
                     else Box(Modifier.size(6.dp).clip(CircleShape).background(dot))
-                    Spacer(Modifier.width(6.dp))
-                    Text(status, color = HW.InkSecondary, style = HWType.Subline)
+                    Spacer(Modifier.width(8.dp))
+                    Text(status, color = HW.IconMuted, style = HWType.Subline)
+                }
+                Text(
+                    "Orbit 412",
+                    color = Color.White,
+                    style = HWType.HeroTitle,
+                    modifier = Modifier.padding(top = 6.dp),
+                )
+                Text(
+                    failed?.message ?: "Your Human Wonder satellite. Ask it what it sees tonight.",
+                    color = HW.IconMuted,
+                    style = HWType.ChatSub,
+                    modifier = Modifier.padding(top = 4.dp, bottom = 16.dp),
+                )
+                if (failed != null) {
+                    PrimaryButton("Try again", onClick = onRetry)
+                } else {
+                    PrimaryButton("Talk to Orbit 412", onClick = onTalk)
                 }
             }
-        }
-        Text(
-            failed?.message ?: "Your Human Wonder satellite. Ask it what it sees: city lights, deserts, the Moon, the stars.",
-            color = HW.IconMuted,
-            style = HWType.ChatSub,
-            modifier = Modifier.padding(top = 14.dp, bottom = 18.dp),
-        )
-        if (failed != null) {
-            PrimaryButton("Try again", onClick = onRetry)
-        } else {
-            PrimaryButton("Talk to Orbit 412", onClick = onTalk)
         }
     }
 }
@@ -246,35 +275,32 @@ private fun RecentRow(c: Conversation, onClick: () -> Unit) {
             .fillMaxWidth()
             .heightIn(min = 64.dp)
             .clickable(role = Role.Button, onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(start = 16.dp, end = 8.dp, top = 10.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        OrbitMark(24.dp, active = false)
-        Column(Modifier.weight(1f)) {
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(c.title, color = HW.Ink, style = HWType.RowTitle, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(transmissionTime(c.updatedAt), color = HW.InkTertiary, style = HWType.ChatMeta, maxLines = 1)
+            Text(transmissionTime(c.updatedAt), color = HW.InkTertiary, style = HWType.Subline, maxLines = 1)
         }
-        HwIcon(R.drawable.ic_chevron_right, HW.InkTertiary, 20.dp)
+        Box(Modifier.width(40.dp), contentAlignment = Alignment.Center) {
+            HwIcon(R.drawable.ic_chevron_right, HW.Chevron, 20.dp)
+        }
     }
 }
 
-/** A 40dp question chip: sparkle + 14/20 text on black 35% with a white 16% hairline. */
+/** A question chip: 14/20 text in a white 14% outline, wrapping onto a new line when needed. */
 @Composable
 private fun AskChip(text: String, onClick: () -> Unit) {
-    Row(
+    Box(
         Modifier
-            .widthIn(max = 250.dp)
             .heightIn(min = 40.dp)
             .clip(CircleShape)
-            .background(Color.Black.copy(alpha = 0.35f))
-            .border(1.dp, Color.White.copy(alpha = 0.16f), CircleShape)
+            .border(1.dp, Color.White.copy(alpha = 0.14f), CircleShape)
             .clickable(role = Role.Button, onClick = onClick)
-            .padding(start = 12.dp, end = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
+            .padding(horizontal = 16.dp, vertical = 9.dp),
+        contentAlignment = Alignment.CenterStart,
     ) {
-        HwIcon(R.drawable.ic_sparkle, HW.Primary, 16.dp)
-        Spacer(Modifier.width(6.dp))
-        Text(text, color = HW.Chip, style = HWType.Chip, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(text, color = HW.Chip, style = HWType.Chip)
     }
 }

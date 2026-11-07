@@ -16,12 +16,14 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
@@ -38,13 +40,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -60,7 +62,6 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlin.math.min
 
 /**
  * Full-bleed photograph from the Stitch design, at full colour, breathing with a slow zoom.
@@ -140,8 +141,9 @@ fun LandingScreen(onBegin: () -> Unit) {
 }
 
 /**
- * Name: later the same night over the Liwa dunes, a long-exposure sky turning around the pole
- * star. That star is yours: it brightens as you type your name, and each letter sends a ring out.
+ * Name: black sky over the Earth at night seen from orbit (the Gulf and Liwa, the view Orbit 412
+ * has of you), a plain field and the teal button. Matches the preview's Name artboard: the photo
+ * starts 17% down the screen, breathing with the same slow zoom as the welcome photo.
  */
 @Composable
 fun NameScreen(
@@ -152,16 +154,38 @@ fun NameScreen(
 ) {
     var name by rememberSaveable { mutableStateOf(initialName) }
     var focused by remember { mutableStateOf(false) }
-    var keystrokes by remember { mutableIntStateOf(0) }
     val submit = { if (!entering) onEnter(name.ifBlank { "Wanderer" }) }
 
-    Box(Modifier.fillMaxSize()) {
-        StarTrailSky(Modifier.fillMaxSize(), glow = min(1f, name.length / 8f), pulseKey = keystrokes)
-        SatelliteArc(Modifier.fillMaxSize(), arcFraction = 0.62f, dropFraction = 0.03f, periodMs = 60_000, startAt = 0.18f)
-        DuneHorizon(Modifier.fillMaxSize())
+    val t = rememberInfiniteTransition(label = "kenburns")
+    val zoom by t.animateFloat(
+        initialValue = 1.0f, targetValue = 1.08f,
+        animationSpec = infiniteRepeatable(tween(24_000), RepeatMode.Reverse), label = "z",
+    )
+
+    BoxWithConstraints(Modifier.fillMaxSize().background(HW.Space)) {
+        val h = maxHeight
+        Box(
+            Modifier
+                .offset(y = h * 0.17f)
+                .fillMaxWidth()
+                .height(h * 0.83f)
+                .clipToBounds(),
+        ) {
+            Image(
+                painter = painterResource(R.drawable.bg_earth_orbit),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                alignment = Alignment.TopCenter,
+                modifier = Modifier.fillMaxSize().graphicsLayer { scaleX = zoom; scaleY = zoom },
+            )
+        }
         Box(
             Modifier.fillMaxSize().background(
-                Brush.verticalGradient(0f to Color.Black.copy(alpha = 0.55f), 0.30f to Color.Transparent),
+                Brush.verticalGradient(
+                    0f to Color.Black, 0.17f to Color.Black, 0.33f to Color.Transparent,
+                    0.58f to Color.Transparent, 0.76f to Color.Black.copy(alpha = 0.78f), 0.92f to Color.Black,
+                    1f to Color.Black,
+                ),
             ),
         )
 
@@ -179,63 +203,54 @@ fun NameScreen(
             }
             Rising {
                 Column(
-                    Modifier.fillMaxWidth().padding(start = 32.dp, end = 32.dp, top = 36.dp),
+                    Modifier.fillMaxWidth().padding(start = 32.dp, end = 32.dp, top = 28.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
                         "What should Orbit\u00A0412 call you?",
-                        color = Color.White, style = HWType.WelcomeTitle.capScale(), textAlign = TextAlign.Center,
+                        color = Color.White, style = HWType.NameTitle.capScale(), textAlign = TextAlign.Center,
                     )
-                    Spacer(Modifier.height(14.dp))
+                    Spacer(Modifier.height(12.dp))
                     Text(
                         "It will greet you by name every time it passes over.",
-                        color = HW.Ink.copy(alpha = 0.85f), style = HWType.ChatSub, textAlign = TextAlign.Center,
+                        color = HW.InkSecondary, style = HWType.ChatSub, textAlign = TextAlign.Center,
                         modifier = Modifier.widthIn(max = 300.dp),
                     )
                 }
             }
             Spacer(Modifier.weight(1f))
             Column(
-                Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, bottom = 28.dp),
+                Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, bottom = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                // The same glass as the chat composer.
-                val shape = RoundedCornerShape(28.dp)
-                Row(
+                val shape = RoundedCornerShape(16.dp)
+                Box(
                     Modifier
                         .fillMaxWidth()
-                        .height(60.dp)
+                        .height(56.dp)
                         .clip(shape)
-                        .background(Brush.linearGradient(0f to Color(0xE00E0F14), 0.55f to Color(0xD61E2030), 1f to Color(0x99464A80)))
-                        .border(1.dp, if (focused) HW.Primary.copy(alpha = 0.45f) else Color.White.copy(alpha = 0.14f), shape)
-                        .padding(horizontal = 20.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                        .background(HW.NameField)
+                        .border(1.dp, if (focused) HW.Primary.copy(alpha = 0.6f) else Color.White.copy(alpha = 0.16f), shape)
+                        .padding(horizontal = 18.dp),
+                    contentAlignment = Alignment.CenterStart,
                 ) {
-                    HwIcon(R.drawable.ic_satellite, HW.Primary, 20.dp)
-                    Spacer(Modifier.width(12.dp))
-                    Box(Modifier.weight(1f)) {
-                        if (name.isEmpty()) {
-                            Text("Your name or callsign", color = HW.InkTertiary, style = HWType.ChatInput.copy(fontSize = 17.sp))
-                        }
-                        BasicTextField(
-                            value = name,
-                            onValueChange = { value ->
-                                val next = value.take(40)
-                                if (next.length > name.length) keystrokes++
-                                name = next
-                            },
-                            singleLine = true,
-                            textStyle = HWType.ChatInput.copy(color = Color.White, fontSize = 17.sp),
-                            cursorBrush = SolidColor(HW.Primary),
-                            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Go),
-                            keyboardActions = KeyboardActions(onGo = { submit() }),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .onFocusChanged { focused = it.isFocused }
-                                .semantics { contentDescription = "Your name" },
-                        )
+                    if (name.isEmpty()) {
+                        Text("Your name or callsign", color = HW.InkTertiary, style = HWType.ChatInput.copy(fontSize = 17.sp))
                     }
+                    BasicTextField(
+                        value = name,
+                        onValueChange = { value -> name = value.take(40) },
+                        singleLine = true,
+                        textStyle = HWType.ChatInput.copy(color = Color.White, fontSize = 17.sp),
+                        cursorBrush = SolidColor(HW.Primary),
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Go),
+                        keyboardActions = KeyboardActions(onGo = { submit() }),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .onFocusChanged { focused = it.isFocused }
+                            .semantics { contentDescription = "Your name" },
+                    )
                 }
                 val spinner: (@Composable () -> Unit)? = if (entering) {
                     { CircularProgressIndicator(color = HW.OnAccent, strokeWidth = 2.dp, modifier = Modifier.size(18.dp)) }
@@ -248,9 +263,9 @@ fun NameScreen(
                     onClick = submit,
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    HwIcon(R.drawable.ic_lock, HW.Primary, 14.dp)
+                    HwIcon(R.drawable.ic_lock, HW.InkTertiary, 14.dp)
                     Spacer(Modifier.width(6.dp))
-                    Text("Your name stays between you and the sky.", color = HW.InkSecondary, style = HWType.ChatMeta)
+                    Text("Your name stays on this phone.", color = HW.InkTertiary, style = HWType.Subline)
                 }
             }
         }

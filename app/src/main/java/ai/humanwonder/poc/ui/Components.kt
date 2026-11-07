@@ -162,20 +162,21 @@ fun BrandLockup(modifier: Modifier = Modifier, markSize: Dp = 22.dp, textSize: D
     }
 }
 
-/** The person's initial on the Human Wonder gradient (teal to iris), as on Home and in the side menu. */
+/** The person's initial on a quiet solid circle (white 12% border), as on Home and in the side menu. */
 @Composable
 fun InitialAvatar(name: String, size: Dp = 36.dp, fontSize: TextUnit = 15.sp, modifier: Modifier = Modifier) {
     Box(
         modifier
             .size(size)
             .clip(CircleShape)
-            .background(Brush.linearGradient(listOf(HW.PrimaryContainer, HW.Iris))),
+            .background(HW.AvatarFill)
+            .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             initialOf(name),
-            color = HW.OnAccent,
-            style = HWType.ChatTitle.copy(fontSize = fontSize, lineHeight = fontSize, fontWeight = FontWeight.SemiBold),
+            color = HW.Ink,
+            style = HWType.ChatTitle.copy(fontSize = fontSize, lineHeight = fontSize, fontWeight = FontWeight.Medium),
             maxLines = 1,
         )
     }
