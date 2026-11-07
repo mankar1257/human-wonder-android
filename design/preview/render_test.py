@@ -13,6 +13,9 @@ OUT.mkdir(exist_ok=True)
 FONTS = (HERE.parents[1] / "app/src/main/res/font").resolve()
 WIDTHS = [(360, 780), (393, 852), (412, 915)]
 SCALES = [1.0, 1.3, 1.5]
+_RES = HERE.parents[1] / "app/src/main/res/drawable-nodpi"
+PHOTOS = {"cfc316bc9f5dd90bd5cd3874418cb0b0": (_RES / "bg_liwa_dunes.jpg").resolve(),
+          "8ee8bb7af970b49cfab3b586c5e1f849": (_RES / "bg_earth_orbit.jpg").resolve()}
 
 def scale_css(text, f):
     # The Human Wonder wordmark is a logo (fixed dp); everything else scales like sp.
@@ -33,6 +36,8 @@ def scale_css(text, f):
 
 def build(name, props):
     src = (HERE / "project" / f"{name}.dc.html").read_text()
+    for blob, photo in PHOTOS.items():
+        src = src.replace(f"/_blob/{blob}", f"file://{photo}")
     css = src.split("<helmet>\n<style>")[1].split("</style>")[0]
     css = re.sub(r"url\(/_blob/[0-9a-f]+\)", "", css)
     css = css.replace("font-family: 'Geist'; src: ;", "")

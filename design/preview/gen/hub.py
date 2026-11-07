@@ -10,7 +10,8 @@ PROJECT = HERE.parent / "project"
 CHAT = (PROJECT / "Chat.dc.html").read_text()
 CSS = CHAT.split("<helmet>\n<style>")[1].split("</style>")[0]
 CHAT_JS = CHAT.split("data-dc-script")[1].split(">", 1)[1].split("</script>")[0]
-GALAXY_INIT = CHAT_JS[CHAT_JS.index("  initGalaxy() {"):CHAT_JS.index("  drawGalaxy(now) {")]
+# (Home no longer draws the aurora; the chat keeps it.)
+_UNUSED = CHAT_JS[CHAT_JS.index("  initGalaxy() {"):CHAT_JS.index("  drawGalaxy(now) {")]
 
 EXTRA_CSS = """
 .hw-row:active, .hw-chip:active { background: rgba(255, 255, 255, 0.08); }
@@ -58,8 +59,10 @@ def lockup(size=22, text=17):
             f'<span style="font-size: {text}px; line-height: 22px; font-weight: 500; letter-spacing: -0.01em; color: #ffffff; white-space: nowrap">Human Wonder</span></span>')
 
 def avatar(size, font):
-    return (f'<span aria-hidden="true" style="width: {size}px; height: {size}px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; '
-            f'background: linear-gradient(135deg, #2fe6c8, #7c5cff); color: #00201a; font-size: {font}px; line-height: 1; font-weight: 600">{{{{initial}}}}</span>')
+    return (f'<span aria-hidden="true" style="width: {size}px; height: {size}px; border-radius: 50%; flex-shrink: 0; box-sizing: border-box; display: flex; align-items: center; justify-content: center; '
+            f'background: #1f2629; border: 1px solid rgba(255, 255, 255, 0.12); color: #eceff0; font-size: {font}px; line-height: 1; font-weight: 500">{{{{initial}}}}</span>')
+
+EARTH = "/_blob/8ee8bb7af970b49cfab3b586c5e1f849"
 
 ROOT = "position: relative; width: 390px; height: 844px; overflow: hidden; background: #000000; font-family: 'Geist', system-ui, sans-serif; color: #eceff0"
 FILL = "position: absolute; left: 0; top: 0; width: 390px; height: 844px"
@@ -67,7 +70,8 @@ ICONBTN = "width: 48px; height: 48px; display: flex; align-items: center; justif
 SECTION = "margin: 0; font-size: 13px; line-height: 18px; font-weight: 500; color: #8d9997"
 GLASS = "border-radius: 24px; background: rgba(20, 24, 30, 0.72); border: 1px solid rgba(255, 255, 255, 0.10)"
 CTA = "height: 56px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border-radius: 999px; background: #83ffe5; color: #00201a; text-decoration: none; font-size: 16px; line-height: 24px; font-weight: 500"
-CHIP = "flex-shrink: 0; max-width: 250px; height: 40px; box-sizing: border-box; display: flex; align-items: center; gap: 6px; padding: 0 14px 0 12px; border-radius: 999px; background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.16); color: #d5dcdb; font-size: 14px; line-height: 20px; text-decoration: none"
+GROUP = "border-radius: 20px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08)"
+CHIP = "max-width: 100%; min-height: 40px; box-sizing: border-box; display: flex; align-items: center; padding: 9px 16px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.14); color: #d5dcdb; font-size: 14px; line-height: 20px; text-decoration: none"
 
 RECENT = [
     ("City lights from 400 km up", "9:42 PM"),
@@ -77,56 +81,49 @@ RECENT = [
 
 def home_content():
     rows = "\n".join(
-        f'''<a href="Transmission.dc.html" class="hw-row" style="display: flex; align-items: center; gap: 14px; min-height: 64px; padding: 0 16px; text-decoration: none; color: #eceff0{'; border-top: 1px solid rgba(255, 255, 255, 0.07)' if i else ''}">
-<span style="color: #83ffe5">{mark(24, '20s')}</span>
-<span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+        f'''<a href="Transmission.dc.html" class="hw-row" style="display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 8px 10px 16px; box-sizing: border-box; text-decoration: none; color: #eceff0{'; border-top: 1px solid rgba(255, 255, 255, 0.07)' if i else ''}">
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
 <span class="hw-ellipsis" style="font-size: 16px; line-height: 22px">{t}</span>
-<span style="font-size: 12px; line-height: 16px; color: #8d9997">{w}</span>
+<span style="font-size: 13px; line-height: 18px; color: #8d9997">{w}</span>
 </span>
-<span style="color: #8d9997">{icon('chevron', 20)}</span>
+<span style="width: 40px; display: flex; justify-content: center; color: #6b7775">{icon('chevron', 20)}</span>
 </a>''' for i, (t, w) in enumerate(RECENT))
     chips = "\n".join(
-        f'<a href="Chat.dc.html" class="hw-chip" style="{CHIP}"><span style="color: #83ffe5">{sparkle(16)}</span><span class="hw-ellipsis">{c}</span></a>'
-        for c in ["What does Earth look like tonight?", "Where is the Moon right now?", "Tell me about the Milky Way"])
+        f'<a href="Chat.dc.html" class="hw-chip" style="{CHIP}">{c}</a>'
+        for c in ["What does Earth look like tonight?", "Where is the Moon right now?", "How fast are you moving?"])
     return f'''<div style="{FILL}; display: flex; flex-direction: column">
 <header style="height: 64px; flex-shrink: 0; display: flex; align-items: center; padding: 0 4px">
 <a href="Drawer.dc.html" aria-label="Open menu" style="{ICONBTN}">{icon('menu', 24)}</a>
 <div style="flex: 1; display: flex; justify-content: center">{lockup()}</div>
 <a href="Profile.dc.html" aria-label="Profile and settings" style="{ICONBTN}">{avatar(36, 15)}</a>
 </header>
-<div class="hw-noscroll" style="flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column">
-<div class="hw-rise" style="padding: 20px 24px 0">
-<h1 style="margin: 0; font-size: 34px; line-height: 40px; font-weight: 300; letter-spacing: -0.02em; color: #ffffff">{{{{greeting}}}}, {{{{name}}}}</h1>
-<p style="margin: 8px 0 0; font-size: 15px; line-height: 22px; color: #a7b2b0">Orbit 412 is overhead and listening.</p>
+<div class="hw-noscroll" style="flex: 1; min-height: 0; overflow-y: auto">
+<h1 style="margin: 0; padding: 16px 24px 0; font-size: 30px; line-height: 36px; font-weight: 300; letter-spacing: -0.02em; color: #ffffff">{{{{greeting}}}}, {{{{name}}}}</h1>
+<section aria-label="Orbit 412" style="position: relative; margin: 20px 16px 0; display: flex; flex-direction: column; border-radius: 24px; overflow: hidden; background: #05080a; border: 1px solid rgba(255, 255, 255, 0.08)">
+<img src="{EARTH}" alt="" aria-hidden="true" style="position: absolute; left: 0; top: 0; margin-top: -30%; width: 100%; height: auto; display: block">
+<div aria-hidden="true" style="flex: 1 0 120px"></div>
+<div style="position: relative; padding: 56px 20px 20px; background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0.8) 56px, rgba(0, 0, 0, 0.92) 100%)">
+<span style="display: flex; align-items: center; gap: 8px; font-size: 13px; line-height: 18px; color: #c5cdcb"><span class="hw-pulse" style="display: block; flex-shrink: 0; width: 6px; height: 6px; border-radius: 50%; background: #83ffe5"></span>Overhead now, 412 km up</span>
+<h2 style="margin: 6px 0 0; font-size: 24px; line-height: 30px; font-weight: 400; letter-spacing: -0.01em; color: #ffffff">Orbit 412</h2>
+<p style="margin: 4px 0 16px; font-size: 15px; line-height: 22px; color: #c5cdcb">Your Human Wonder satellite. Ask it what it sees tonight.</p>
+<a href="Chat.dc.html" class="hw-cta" style="{CTA}; height: 52px">Talk to Orbit 412</a>
 </div>
-<div style="margin: 24px 16px 0; padding: 20px; {GLASS}; -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px)">
-<div style="display: flex; align-items: center; gap: 12px">
-{mark(32, '9s')}
-<span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
-<span style="font-size: 17px; line-height: 22px; font-weight: 500; color: #ffffff">Orbit 412</span>
-<span style="display: flex; align-items: center; gap: 6px; font-size: 13px; line-height: 18px; color: #a7b2b0"><span class="hw-pulse" style="display: block; width: 6px; height: 6px; border-radius: 50%; background: #83ffe5"></span>Overhead now, 412 km up</span>
-</span>
+</section>
+<div style="display: flex; align-items: center; gap: 12px; padding: 28px 12px 8px 24px">
+<h2 style="flex: 1; min-width: 0; margin: 0; font-size: 17px; line-height: 22px; font-weight: 500; color: #ffffff">Recent transmissions</h2>
+<a href="Drawer.dc.html" style="flex-shrink: 0; min-height: 48px; display: flex; align-items: center; padding: 0 12px; font-size: 14px; line-height: 20px; font-weight: 500; color: #83ffe5; text-decoration: none; white-space: nowrap">See all</a>
 </div>
-<p style="margin: 14px 0 18px; font-size: 15px; line-height: 22px; color: #c5cdcb">Your Human Wonder satellite. Ask it what it sees: city lights, deserts, the Moon, the stars.</p>
-<a href="Chat.dc.html" class="hw-cta" style="{CTA}">Talk to Orbit 412</a>
-</div>
-<div style="display: flex; align-items: center; gap: 12px; padding: 28px 20px 10px 24px">
-<h2 class="hw-ellipsis" style="flex: 1; min-width: 0; margin: 0; font-size: 17px; line-height: 22px; font-weight: 500; color: #ffffff">Recent transmissions</h2>
-<a href="Drawer.dc.html" style="flex-shrink: 0; min-height: 48px; display: flex; align-items: center; padding: 0 4px; font-size: 14px; line-height: 20px; font-weight: 500; color: #83ffe5; text-decoration: none; white-space: nowrap">See all</a>
-</div>
-<div style="margin: 0 16px; {GLASS}; overflow: hidden">
+<div style="margin: 0 16px; {GROUP}; overflow: hidden">
 {rows}
 </div>
-<h2 style="margin: 0; padding: 28px 24px 12px; font-size: 17px; line-height: 22px; font-weight: 500; color: #ffffff">Ask tonight</h2>
-<div class="hw-noscroll" style="display: flex; gap: 8px; overflow-x: auto; padding: 0 16px 32px">
+<h2 style="margin: 0; padding: 28px 24px 12px; font-size: 17px; line-height: 22px; font-weight: 500; color: #ffffff">Try asking</h2>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; padding: 0 16px 32px">
 {chips}
 </div>
 </div>
 </div>'''
 
-SKY_LAYERS = f'''<canvas ref="{{{{galaxyRef}}}}" aria-hidden="true" style="{FILL}; display: block"></canvas>
-<div class="hw-dots" aria-hidden="true" style="{FILL}"></div>
-<div aria-hidden="true" style="{FILL}; background: linear-gradient(to bottom, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0) 40%)"></div>'''
+SKY_LAYERS = ''
 
 def drawer_sheet():
     groups = [
@@ -167,60 +164,13 @@ def drawer_sheet():
 </nav>'''
 
 HOME_JS = """class Component extends DCLogic {
-  constructor(...args) {
-    super(...args);
-    this._galaxyRef = (el) => { this.galaxyEl = el; };
-  }
-
-  componentDidMount() {
-    this._t0 = performance.now();
-    this._last = 0;
-    this.initGalaxy();
-    var loop = (now) => {
-      this._raf = requestAnimationFrame(loop);
-      if (now - this._last < 32) return;
-      this._last = now;
-      this.drawGalaxy(now);
-    };
-    this._raf = requestAnimationFrame(loop);
-  }
-
-  componentWillUnmount() {
-    cancelAnimationFrame(this._raf);
-    var g = this._gl;
-    if (g) { var ext = g.gl.getExtension('WEBGL_lose_context'); if (ext) ext.loseContext(); }
-  }
-
-__GALAXY_INIT__
-  // Home keeps the aurora a little lower than the empty chat (calm 0.35) so cards stay readable.
-  drawGalaxy(now) {
-    var g = this._gl;
-    var c = this.galaxyEl;
-    if (!g || !c) return;
-    var w = c.clientWidth || 390;
-    var h = c.clientHeight || 844;
-    if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
-    var gl = g.gl;
-    gl.viewport(0, 0, w, h);
-    gl.useProgram(g.prog);
-    gl.uniform1f(g.uTime, ((now - this._t0) % 3600000) / 1000);
-    gl.uniform2f(g.uRes, w, h);
-    gl.uniform1f(g.uEnergy, 0);
-    gl.uniform1f(g.uCalm, 0.35);
-    gl.uniform1f(g.uPulse, 99);
-    gl.bindBuffer(gl.ARRAY_BUFFER, g.buf);
-    gl.enableVertexAttribArray(g.aPos);
-    gl.vertexAttribPointer(g.aPos, 2, gl.FLOAT, false, 0, 0);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-  }
-
   renderVals() {
     var name = (this.props.name || '').trim() || 'Wanderer';
     var h = new Date().getHours();
     var greeting = h < 5 ? 'Good night' : h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : h < 22 ? 'Good evening' : 'Good night';
-    return { galaxyRef: this._galaxyRef, name: name, initial: name.charAt(0).toUpperCase(), greeting: greeting };
+    return { name: name, initial: name.charAt(0).toUpperCase(), greeting: greeting };
   }
-}""".replace("__GALAXY_INIT__", GALAXY_INIT)
+}"""
 
 def page(title, body, js, props='{"name":{"editor":"text","default":"Wanderer"},"$preview":{"width":390,"height":844}}'):
     return f"""<!doctype html>

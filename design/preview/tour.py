@@ -11,7 +11,8 @@ OUT = HERE / "test-renders"
 OUT.mkdir(exist_ok=True)
 ROOT = HERE.parents[1]
 FONTS = (ROOT / "app/src/main/res/font").resolve()
-PHOTOS = {"cfc316bc9f5dd90bd5cd3874418cb0b0": (ROOT / "app/src/main/res/drawable-nodpi/bg_liwa_dunes.jpg").resolve()}
+PHOTOS = {"cfc316bc9f5dd90bd5cd3874418cb0b0": (ROOT / "app/src/main/res/drawable-nodpi/bg_liwa_dunes.jpg").resolve(),
+          "8ee8bb7af970b49cfab3b586c5e1f849": (ROOT / "app/src/main/res/drawable-nodpi/bg_earth_orbit.jpg").resolve()}
 SCREENS = [("Main", "1  Welcome"), ("Name", "2  Your name"), ("Home", "3  Home"), ("Drawer", "4  Side menu"),
            ("Chat", "5  Chat"), ("Transmission", "6  Answer"), ("Profile", "7  Profile & settings")]
 W, H = 393, 852
