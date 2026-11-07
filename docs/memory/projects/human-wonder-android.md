@@ -14,10 +14,13 @@ Kotlin 2.3, Jetpack Compose (BOM 2026.04.01), AGP 8.13.2, compileSdk 36, minSdk 
 llama.cpp v0.9.0 submodule via Arm `com.arm.aichat` JNI wrapper (`lib/`). Model Qwen3-0.6B Q4_0
 bundled in the APK as `assets/hw-core.gguf` (fetched + SHA-256 checked at build time). No INTERNET permission.
 
-## Screens (current)
+## Screens (current, v2 on branch v2-offlinellm; Mac folder human-wonder-v2)
 1. Landing: Liwa dunes photo, Human Wonder lockup, "The sky has something to tell you.", teal CTA.
-2. Name: star-trail sky over dune silhouette; "What should Orbit 412 call you?"; your star brightens as you type.
-3. Chat: aurora-valley shader, Gemini-style readable answers, composer (Orbit/Ground, tone, mic, send), copy action.
+2. Name: black sky over the Earth at night from orbit (Gulf/Liwa photo), plain field, "Meet Orbit 412".
+3. Home: greeting, Orbit 412 photo card with "Talk to Orbit 412", recent transmissions, "Try asking" chips.
+4. Side menu (Gemini-style): Home, New conversation, search, history by Today/Yesterday/Earlier, profile.
+5-6. Chat: aurora-valley shader, Gemini-style readable answers, composer (Orbit/Ground, tone, mic, send).
+7. Profile & settings: name, email, place, point of view, tone, read aloud, haptics.
 
 ## Decision log
 - 2026-11-06: llama.cpp + Qwen3-0.6B chosen; model first downloaded at runtime, then bundled in APK.
@@ -29,3 +32,6 @@ bundled in the APK as `assets/hw-core.gguf` (fetched + SHA-256 checked at build 
 - 2026-11-07: Device feedback: spacing/wording off, headlines too big, send button squeezed.
   Wants home page, Gemini-style side menu with chat history, profile (name, email...), and asked
   to evaluate open-source bases (found OfflineLLM by jegly, SmolChat-Android; both Apache-2.0).
+- 2026-11-07: Owner chose to fork OfflineLLM (jegly, Apache-2.0) as v2; phone is Android 13+.
+- 2026-11-07: Star-trail Name screen and aurora Home called "too fancy and childish" -> Earth-from-
+  orbit photo on Name, plain black Home with one photo card, quiet list, plain chips, solid avatar.

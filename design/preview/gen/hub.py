@@ -106,7 +106,7 @@ def home_content():
 <span style="display: flex; align-items: center; gap: 8px; font-size: 13px; line-height: 18px; color: #c5cdcb"><span class="hw-pulse" style="display: block; flex-shrink: 0; width: 6px; height: 6px; border-radius: 50%; background: #83ffe5"></span>Overhead now, 412 km up</span>
 <h2 style="margin: 6px 0 0; font-size: 24px; line-height: 30px; font-weight: 400; letter-spacing: -0.01em; color: #ffffff">Orbit 412</h2>
 <p style="margin: 4px 0 16px; font-size: 15px; line-height: 22px; color: #c5cdcb">Your Human Wonder satellite. Ask it what it sees tonight.</p>
-<a href="Chat.dc.html" class="hw-cta" style="{CTA}; height: 52px">Talk to Orbit 412</a>
+<a href="Chat.dc.html" class="hw-cta" style="{CTA}">Talk to Orbit 412</a>
 </div>
 </section>
 <div style="display: flex; align-items: center; gap: 12px; padding: 28px 12px 8px 24px">

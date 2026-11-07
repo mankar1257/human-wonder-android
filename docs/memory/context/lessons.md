@@ -16,6 +16,18 @@ Rules from now on:
 5. Ask for the phone model and screenshots; use Oh My Android to see the real device.
 6. The app must match the preview exactly; the preview must be tested at the same sizes.
 
+## 2026-11-07: "too fancy and childish"
+What happened: the Name screen (star trails swirling round the pole star over a dune silhouette,
+a glowing satellite with a label) and Home (aurora streaks, a glowing Orbit mark on every row,
+sparkle icons, gradient avatar) read as childish. The owner wants professional and clean, yet
+rich and premium.
+
+Rules from now on:
+1. Spend boldness in one place per screen: one real photograph (or the chat's aurora), never
+   stacked effects. Everything else plain black, Geist, one teal action.
+2. No decorative motion or glow on reading screens; brand mark only in the header lockup.
+3. Check "would a top-tier first-party app ship this?" before showing a screen.
+
 ## Earlier lessons
 - Show the design in the preview before building (builds cost the owner 5-15 minutes).
 - Never reveal the model or how it works in any user-facing text, error, or status.

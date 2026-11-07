@@ -63,17 +63,27 @@ java extension, not the package).
 ## Design system
 
 One visual language: Geist (light display, regular body), true black, one teal accent #83FFE5 for
-actions, ink #ECEFF0 / #A7B2B0 / #8D9997, glass panels (radius 28, gradient rgba(14,15,20,.9) to
-rgba(70,74,128,.6), white 12-14% border). Rejected and never to return: Newsreader serif headings,
-mono all-caps labels, heavy dark scrims, glowing "transmission" text, dot grid over photos,
-dotted arc lines.
+actions, ink #ECEFF0 / #A7B2B0 / #8D9997. The bar (owner, 2026-11-07): professional, clean, yet
+rich and premium. Richness comes from one real photograph and precise type, never from effects.
+Rejected and never to return: Newsreader serif headings, mono all-caps labels, heavy dark scrims,
+glowing "transmission" text, dot grid over photos, dotted arc lines, and (called "fancy and
+childish") the swirling star-trail sky, the dune silhouette, the aurora behind Home, a glowing
+Orbit mark on every list row, sparkle icons on chips, rainbow-gradient avatars.
 
 - Landing: Liwa dunes photo at full colour, light scrims, slow zoom; lockup; "The sky has
   something to tell you."; "Human Wonder gives the sky a voice: Orbit 412, a satellite passing
   over you tonight."; teal "Begin your first look up".
-- Name: live star-trail sky (long exposure around the pole star, 1°/s, seed 412) over a dune
-  silhouette; the pole star brightens as you type and each letter sends a ring; "What should
-  Orbit 412 call you?" (keep "Orbit 412" unbroken); glass name field; teal "Meet Orbit 412".
+- Name: black sky; the Earth at night from orbit (`bg_earth_orbit`, the Gulf and Liwa) starts 17%
+  down the screen with the same slow zoom; scrim black 0-17%, clear 33-58%, black by 92%.
+  "What should Orbit 412 call you?" (32/38 light, keep "Orbit 412" unbroken), plain field
+  (56dp, radius 16, rgba(14,17,19,.82), white 16% border, no icon), teal "Meet Orbit 412",
+  lock + "Your name stays on this phone." in #8D9997.
+- Home (v2): plain black, no shader. Header menu / lockup / solid avatar (#1F2629, white 12%
+  border). Greeting 30/36 light. Orbit 412 photo card (radius 24): Earth photo at card width,
+  shifted up 30% of the width, a 120dp clear band, then status / "Orbit 412" 24/30 / one line /
+  teal 56dp button on a dark band that grows with the text. "Recent transmissions" + See all,
+  grouped list (radius 20, white 4% fill, 8% border), rows title + time + grey chevron.
+  "Try asking": outlined chips that wrap, no icons.
 - Chat (Gemini + Stitch home): aurora-valley shader + faint dot grid; `u_calm` sinks the aurora
   when talking. Answers Geist 16/25 #E8ECEC, no glow; newest ~18 chars fade in. User bubble
   #1D2225. Orbit mark + "Orbit 412" per answer, copy action. Composer: Orbit/Ground, tone chip,
