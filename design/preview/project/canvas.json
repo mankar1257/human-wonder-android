@@ -1,0 +1,74 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-06T17:40:19Z"
+ },
+ "title": "Human Wonder — App Preview",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "1 · Landing",
+   "is_interactive": true,
+   "radius": 36
+  },
+  "Name.dc.html": {
+   "x": 470,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "2 · What should the sky call you?",
+   "is_interactive": true,
+   "radius": 36
+  },
+  "Chat.dc.html": {
+   "x": 940,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "3 · Talk to Orbit 412 (live)",
+   "is_interactive": true,
+   "radius": 36
+  },
+  "Transmission.dc.html": {
+   "x": 1410,
+   "y": 0,
+   "w": 390,
+   "h": 844,
+   "title": "4 · Orbit 412 answering",
+   "is_interactive": true,
+   "radius": 36
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "Name.dc.html",
+  "Chat.dc.html",
+  "Transmission.dc.html"
+ ],
+ "notes": {
+  "title": {
+   "x": 0,
+   "y": -300,
+   "text": "Human Wonder · the app, before we build it",
+   "kind": "title1",
+   "maxW": 1800
+  },
+  "howto": {
+   "x": 1880,
+   "y": 0,
+   "w": 360,
+   "fill": "teal",
+   "size": "m",
+   "text": "Press Play on any screen to use it.\n\nScreen 3 starts the way the app does: Orbit 412 rises over the horizon, finds your signal, then greets you. Tap a suggestion or type a question and watch the answer come down from orbit.\n\nTry the Orbit / Ground switch and the tone chip (Balanced, Poetic, Scientific, Whisper).\n\nOn this canvas Orbit 412 carries a few prepared answers; in the app it answers anything you ask."
+  }
+ },
+ "designSystems": []
+}

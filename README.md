@@ -9,18 +9,19 @@ underlying model is never named to users.
 
 1. **Landing** – the lone wanderer on the Liwa dunes, "The sky has something to tell you."
 2. **Name** – Earth at night over the Gulf, "What should the sky call you?" (Orbit uses the name).
-3. **Talk to the infinite sky** – Stitch's live galaxy shader, made to react:
-   - a visible **orbit**: a satellite glides along an arc at the top of the sky;
-   - each question flies up from the prompt to the satellite as a **spark**, and the sky sends an
-     **uplink pulse**;
-   - while Orbit answers, the galaxy **brightens**, signal rings and a downlink beam appear, and
-     the reply arrives as a **transmission** (live waveform, glowing words that cool to starlight
-     cream, "END OF TRANSMISSION");
+3. **Talk to the infinite sky** – a calm, readable chat in the spirit of the Gemini app and the
+   Stitch home screen:
+   - true black with a faint dot grid and a live **aurora** (OpenGL shader) that rises around the
+     message box on the empty screen and sinks low once you talk, so it never sits behind text;
+   - Orbit's satellite crosses the empty sky, then lives on as the small mark beside each answer
+     (it circles faster while Orbit thinks; "Listening across the dark…" shimmers);
+   - answers are plain off-white text that fades in as it streams, with a copy button when done;
    - **Orbit / Ground** and **Balanced / Poetic / Scientific / Whisper** change how it answers,
-     **+** starts a new conversation, the **mic** uses the phone's voice typing.
+     **+** (top right) starts a new conversation, the **mic** uses the phone's voice typing.
 
 Fonts (Geist, Newsreader, JetBrains Mono), colours, icons and photos come from the Stitch project
-(`design/stitch` in the working folder) and are bundled, so the app works offline.
+(`design/stitch` in the working folder) and are bundled, so the app works offline. A clickable
+preview of every screen lives on a Claude Design canvas; its source is in `design/preview/`.
 
 ## Build (Mac, no Android Studio needed)
 

@@ -44,6 +44,18 @@ object HW {
     val Emerald400 = Color(0xFF34D399)
     val Emerald500 = Color(0xFF10B981)
     val Error = Color(0xFFFFB4AB)
+
+    // Chat (Gemini-inspired, readable): true black space, calm ink, one teal accent.
+    val Space = Color(0xFF000000)
+    val Ink = Color(0xFFECEFF0)
+    val InkAnswer = Color(0xFFE8ECEC)
+    val InkSecondary = Color(0xFFA7B2B0)
+    val InkTertiary = Color(0xFF8D9997)
+    val InkDisabled = Color(0xFF6F7B79)
+    val IconMuted = Color(0xFFC5CDCB)
+    val Bubble = Color(0xFF1D2225)
+    val Chip = Color(0xFFD5DCDB)
+    val OnAccent = Color(0xFF00201A)
 }
 
 /** Typefaces from the Stitch design, bundled so the app needs no network. */
@@ -85,11 +97,17 @@ object HWType {
     val LabelMd = TextStyle(
         fontFamily = HWFont.Mono, fontSize = 12.sp, lineHeight = 16.sp, letterSpacing = 0.06.em,
     )
-    /** The sky's replies: Newsreader, a calm serif voice in starlight cream. */
-    val Transmission = TextStyle(
-        fontFamily = HWFont.Newsreader, fontWeight = FontWeight.Normal,
-        fontSize = 19.sp, lineHeight = 28.sp, letterSpacing = 0.em,
+    // Chat type scale (Material 3 roles: body 16sp, labels never below 12sp).
+    val ChatHero = TextStyle(
+        fontFamily = HWFont.Geist, fontWeight = FontWeight.Light,
+        fontSize = 42.sp, lineHeight = 46.sp, letterSpacing = (-0.02).em,
     )
+    val ChatSub = TextStyle(fontFamily = HWFont.Geist, fontSize = 15.sp, lineHeight = 22.sp)
+    val ChatTitle = TextStyle(fontFamily = HWFont.Geist, fontWeight = FontWeight.Medium, fontSize = 16.sp, lineHeight = 22.sp)
+    val ChatBody = TextStyle(fontFamily = HWFont.Geist, fontSize = 16.sp, lineHeight = 25.sp)
+    val ChatInput = TextStyle(fontFamily = HWFont.Geist, fontSize = 16.sp, lineHeight = 24.sp)
+    val ChatLabel = TextStyle(fontFamily = HWFont.Geist, fontWeight = FontWeight.Medium, fontSize = 13.sp, lineHeight = 18.sp)
+    val ChatMeta = TextStyle(fontFamily = HWFont.Geist, fontSize = 12.sp, lineHeight = 16.sp)
 }
 
 private val colors = darkColorScheme(

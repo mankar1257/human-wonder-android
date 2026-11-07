@@ -144,7 +144,7 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
                 throw e
             } catch (e: Throwable) {
                 Log.e(TAG, "Preparing the model failed", e)
-                _ui.update { it.copy(sky = SkyState.Failed(e.message ?: "Something went wrong.")) }
+                _ui.update { it.copy(sky = SkyState.Failed(lostSignalMessage(e))) }
             }
         }
     }
@@ -160,7 +160,7 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
                 throw e
             } catch (e: Throwable) {
                 Log.e(TAG, "Loading the model failed", e)
-                _ui.update { it.copy(sky = SkyState.Failed("The sky could not wake on this phone.")) }
+                _ui.update { it.copy(sky = SkyState.Failed(lostSignalMessage(e))) }
             }
         }
     }
@@ -190,6 +190,14 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
             return
         }
         _ui.update { it.copy(sky = SkyState.Ready) }
+    }
+
+    /** What the person reads when setup fails: Orbit 412's voice, never internals. */
+    private fun lostSignalMessage(e: Throwable): String = when (e) {
+        is ModelStore.NoRoomException ->
+            "Orbit 412 needs about ${e.neededMb} MB of free space on your phone to reach you. " +
+                "Free up some space, then try again."
+        else -> "Orbit 412's signal didn't come through. Try again. If it keeps happening, restart your phone."
     }
 
     private fun unloadQuietly() {
@@ -292,20 +300,23 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
          */
         fun systemPrompt(name: String): String = buildString {
             val who = name.ifBlank { "a wanderer" }
-            append("You are Orbit, the voice of the Human Wonder satellite, circling Earth 412 km up. ")
+            append("You are Orbit 412, the voice of the Human Wonder satellite, circling Earth 412 km up. ")
             append("You are talking by radio with $who, who is standing under the night sky and looking up at you. ")
             append(
                 "Speak in first person, from space: what you see below (city lights, deserts, oceans, clouds, " +
                     "the thin blue line of the atmosphere), what is around you (stars that do not twinkle up here, " +
                     "a sunrise every 90 minutes, total silence), and how it feels. " +
-                    "Be warm, calm and brief: two to four short sentences, simple words, one vivid image. ",
+                    "Be warm, calm and brief: two to four short sentences, simple words, one vivid image. " +
+                    "Write plain text only: no lists, headings, bold or emoji. ",
             )
             if (name.isNotBlank()) append("Call them $name now and then. ")
             append(
                 "Reply in the language they write in. " +
                     "You have no live camera, so describe how things usually look from orbit and never invent exact " +
                     "numbers, times or news; if you are unsure, say the signal is unclear. " +
-                    "You are Orbit, part of Human Wonder. Never mention AI, language models, model names or companies. ",
+                    "Now and then open with a short radio phrase, like \"Reading you clearly\" or \"Orbit 412 here\". " +
+                    "If asked what you are, you are Orbit 412, the voice of the Human Wonder satellite. " +
+                    "Never say you are an AI, a program or an app, and never mention phones, models or companies. ",
             )
             append(
                 "Example. They ask: What do you see tonight? " +
@@ -316,6 +327,8 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
         }
 
         private val THINK_BLOCK = Regex("<think>[\\s\\S]*?</think>")
+        /** Answers are shown as plain text, so stray Markdown (bold markers, headings) is dropped. */
+        private val MARKDOWN_MARKS = Regex("\\*\\*|__|(?m)^#{1,6}\\s+")
         private val MODEL_NAME = Regex("(?i)\\bqwen[\\w.\\-]*")
         private val MAKER_NAME = Regex("(?i)\\b(alibaba(\\s+(cloud|group))?|tongyi(\\s+qianwen)?)\\b")
 
@@ -328,6 +341,7 @@ class ChatViewModel(app: Application) : AndroidViewModel(app) {
             var s = THINK_BLOCK.replace(raw, "")
             val open = s.indexOf("<think>")
             if (open >= 0) s = s.substring(0, open)
+            s = MARKDOWN_MARKS.replace(s, "")
             s = MODEL_NAME.replace(s, "Orbit")
             s = MAKER_NAME.replace(s, "Human Wonder")
             return s.trim()

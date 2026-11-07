@@ -315,7 +315,7 @@ fun NameScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     HwIcon(R.drawable.ic_lock, HW.Primary, 14.dp)
                     Spacer(Modifier.size(6.dp))
-                    Text("Pure on-device private wonder", color = HW.OnSurfaceVariant, style = HWType.LabelSm.copy(fontWeight = FontWeight.Normal, letterSpacing = 0.02.sp))
+                    Text("Your name stays between you and the sky.", color = HW.OnSurfaceVariant, style = HWType.LabelSm.copy(fontWeight = FontWeight.Normal, letterSpacing = 0.02.sp))
                 }
             }
         }

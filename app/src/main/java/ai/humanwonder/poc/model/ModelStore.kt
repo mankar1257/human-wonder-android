@@ -30,9 +30,7 @@ class ModelStore(private val context: Context) {
         // Clear out anything older (e.g. a model downloaded by an earlier POC build).
         dir.listFiles()?.forEach { if (it.name != ASSET_NAME) it.delete() }
         if (total > 0 && dir.usableSpace < total - modelFile.length() + 64L * 1024 * 1024) {
-            throw IOException(
-                "Not enough free space on this phone: about ${total / 1_000_000 + 64} MB is needed.",
-            )
+            throw NoRoomException(total / 1_000_000 + 64)
         }
 
         val tmp = File(dir, "$ASSET_NAME.tmp")
@@ -77,4 +75,7 @@ class ModelStore(private val context: Context) {
     private companion object {
         const val ASSET_NAME = "hw-core.gguf"
     }
+
+    /** Not enough free storage to unpack the sky (shown to the person in Orbit 412's words). */
+    class NoRoomException(val neededMb: Long) : IOException("Not enough free space: about $neededMb MB is needed.")
 }

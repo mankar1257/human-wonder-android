@@ -19,14 +19,16 @@ import javax.microedition.khronos.opengles.GL10
 import kotlin.math.max
 
 /**
- * The live procedural galaxy from the Stitch "Talk to Space (Live Galaxy)" screen: the same
- * GLSL shader, drawn with OpenGL ES 2.0 behind the Compose UI.
+ * The live aurora sky behind the chat (after the Stitch home screen), drawn with OpenGL ES 2.0
+ * behind the Compose UI.
  */
 @Composable
 fun GalaxyBackground(
     modifier: Modifier = Modifier,
-    /** 0 = calm night, 1 = the sky is transmitting (nebula, core and aurora brighten). */
+    /** 0 = resting, 1 = Orbit is answering (the aurora lifts and brightens a little). */
     energy: Float = 0f,
+    /** 0 = the empty sky (tall aurora), 1 = a conversation (low, dimmer aurora behind the composer). */
+    calm: Float = 0f,
     /** Change this value to send an "uplink" pulse rising from the bottom of the screen. */
     pulseKey: Int = 0,
 ) {
@@ -35,6 +37,7 @@ fun GalaxyBackground(
         modifier = modifier,
         update = { view ->
             view.setEnergy(energy)
+            view.setCalm(calm)
             view.setPulseKey(pulseKey)
         },
     )
@@ -57,6 +60,8 @@ class GalaxyView(context: Context) : GLSurfaceView(context), Choreographer.Frame
     private var pulseKey = Int.MIN_VALUE
 
     fun setEnergy(target: Float) { renderer.targetEnergy = target.coerceIn(0f, 1f) }
+
+    fun setCalm(value: Float) { renderer.calm = value.coerceIn(0f, 1f) }
 
     fun setPulseKey(key: Int) {
         if (pulseKey != Int.MIN_VALUE && key != pulseKey) renderer.pulse()
@@ -124,6 +129,7 @@ class GalaxyView(context: Context) : GLSurfaceView(context), Choreographer.Frame
 private class GalaxyRenderer : GLSurfaceView.Renderer {
 
     @Volatile var targetEnergy = 0f
+    @Volatile var calm = 0f
     @Volatile private var pulseStart = -1L
     private var energy = 0f
 
@@ -135,6 +141,7 @@ private class GalaxyRenderer : GLSurfaceView.Renderer {
     private var uResolution = -1
     private var uEnergy = -1
     private var uPulse = -1
+    private var uCalm = -1
     private var width = 1
     private var height = 1
     private val start = SystemClock.elapsedRealtime()
@@ -146,7 +153,7 @@ private class GalaxyRenderer : GLSurfaceView.Renderer {
         }
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-        GLES20.glClearColor(0.024f, 0.086f, 0.090f, 1f) // #061617, shown if the shader can't run
+        GLES20.glClearColor(0f, 0f, 0f, 1f) // true black, shown if the shader can't run
         program = buildProgram(VERTEX_SHADER, FRAGMENT_SHADER)
         if (program != 0) {
             aPosition = GLES20.glGetAttribLocation(program, "a_position")
@@ -154,6 +161,7 @@ private class GalaxyRenderer : GLSurfaceView.Renderer {
             uResolution = GLES20.glGetUniformLocation(program, "u_resolution")
             uEnergy = GLES20.glGetUniformLocation(program, "u_energy")
             uPulse = GLES20.glGetUniformLocation(program, "u_pulse")
+            uCalm = GLES20.glGetUniformLocation(program, "u_calm")
         }
     }
 
@@ -174,6 +182,7 @@ private class GalaxyRenderer : GLSurfaceView.Renderer {
         // Ease toward the target so the sky "breathes" up and down instead of switching.
         energy += (targetEnergy - energy) * 0.06f
         GLES20.glUniform1f(uEnergy, energy)
+        GLES20.glUniform1f(uCalm, calm)
         val ps = pulseStart
         GLES20.glUniform1f(uPulse, if (ps < 0) 99f else (SystemClock.elapsedRealtime() - ps) / 1000f)
         GLES20.glEnableVertexAttribArray(aPosition)
@@ -224,10 +233,11 @@ void main() {
 }
 """
 
-        // Fragment shader from the Stitch design (STITCH_SHADER ANIMATION_31), plus two Human
-        // Wonder additions: u_energy (the sky brightens while it is answering) and u_pulse
-        // (an uplink ring that rises from the bottom when a question is sent). Precision falls
-        // back to mediump on GPUs without highp.
+        // The "aurora valley" from the Stitch home screen: a ribbon of violet-blue-teal light,
+        // low in the middle and climbing both sides, over true black. u_calm (0 = empty sky,
+        // 1 = conversation) lowers and dims it so it never sits behind text; u_energy lifts it
+        // slightly while Orbit answers; u_pulse sends a soft ring up when a question is sent.
+        // Precision falls back to mediump on GPUs without highp.
         const val FRAGMENT_SHADER = """
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
@@ -238,10 +248,11 @@ uniform float u_time;
 uniform vec2 u_resolution;
 uniform float u_energy;
 uniform float u_pulse;
+uniform float u_calm;
 
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
 vec2 mod289(vec2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-vec3 permute(vec3 x) { return mod289(((x*34.0)+1.0)*x); }
+vec3 permute(vec3 x) { return mod289(((x * 34.0) + 1.0) * x); }
 
 float snoise(vec2 v) {
     const vec4 C = vec4(0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);
@@ -252,14 +263,14 @@ float snoise(vec2 v) {
     x12.xy -= i1;
     i = mod289(i);
     vec3 p = permute(permute(i.y + vec3(0.0, i1.y, 1.0)) + i.x + vec3(0.0, i1.x, 1.0));
-    vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
-    m = m*m;
-    m = m*m;
+    vec3 m = max(0.5 - vec3(dot(x0, x0), dot(x12.xy, x12.xy), dot(x12.zw, x12.zw)), 0.0);
+    m = m * m;
+    m = m * m;
     vec3 x = 2.0 * fract(p * C.www) - 1.0;
     vec3 h = abs(x) - 0.5;
     vec3 ox = floor(x + 0.5);
     vec3 a0 = x - ox;
-    m *= 1.79284291400159 - 0.85373472095314 * (a0*a0 + h*h);
+    m *= 1.79284291400159 - 0.85373472095314 * (a0 * a0 + h * h);
     vec3 g;
     g.x  = a0.x  * x0.x  + h.x  * x0.y;
     g.yz = a0.yz * x12.xz + h.yz * x12.yw;
@@ -271,7 +282,7 @@ float fbm(vec2 p) {
     float w = 0.5;
     for (int i = 0; i < 4; i++) {
         f += w * snoise(p);
-        p *= 2.05;
+        p *= 2.03;
         w *= 0.5;
     }
     return f;
@@ -285,63 +296,64 @@ float hash21(vec2 p) {
 
 void main() {
     vec2 uv = gl_FragCoord.xy / u_resolution.xy;
-    vec2 p = (gl_FragCoord.xy - 0.5 * u_resolution.xy) / min(u_resolution.x, u_resolution.y);
-    float t = u_time * 0.15;
+    float t = u_time;
+    float calm = u_calm;
+    float e = u_energy;
 
-    vec3 baseColor = vec3(0.024, 0.086, 0.090);
+    // The aurora valley: a ribbon of light, low in the middle, climbing both sides of the screen.
+    float x = uv.x - 0.5;
+    float edge = pow(abs(x) * 2.0, 2.3);
+    float base = mix(0.15, 0.07, calm) + 0.015 * e;
+    float lift = mix(0.56, 0.15, calm);
+    float wobble = fbm(vec2(uv.x * 1.8 + t * 0.025, t * 0.04)) * 0.06;
+    float ridgeY = base + lift * edge + wobble;
+    float d = uv.y - ridgeY;
 
-    float dist = length(p);
-    vec2 spiralCoord = p * 1.6 + vec2(cos(dist * 2.2 - t * 0.6), sin(dist * 2.2 - t * 0.6)) * 0.4;
+    // Falls off quickly above the ribbon and slowly below it (the haze underneath).
+    float above = exp(-max(d, 0.0) / 0.095);
+    float below = mix(1.0, 0.32, smoothstep(0.0, 0.5, -d));
+    float glow = d > 0.0 ? above : below;
 
-    float n1 = fbm(spiralCoord * 1.8 + vec2(t * 0.15, -t * 0.09));
-    float n2 = fbm(p * 2.6 - vec2(t * 0.06, t * 0.12) + vec2(n1 * 0.45));
-    float nebula = clamp(n1 * 0.6 + n2 * 0.4 + 0.2, 0.0, 1.0);
+    // Rays drifting along the ribbon.
+    float rays = fbm(vec2(uv.x * 5.0 - t * 0.05, d * 9.0 + t * 0.02));
+    glow *= 0.72 + 0.55 * rays;
 
-    vec3 cyanGlow = vec3(0.184, 0.902, 0.784);
-    vec3 violetGlow = vec3(0.486, 0.227, 0.929);
-    vec3 skyBlueGlow = vec3(0.12, 0.52, 0.95);
+    float ridge = exp(-abs(d) / 0.045);
 
-    float bottomHaze = smoothstep(0.85, 0.05, uv.y) * 0.9;
-    vec3 aurora = mix(cyanGlow, violetGlow, sin(uv.x * 3.1415 + t * 1.2) * 0.5 + 0.5) * bottomHaze;
+    vec3 deep = vec3(0.07, 0.08, 0.26);
+    vec3 violet = vec3(0.55, 0.40, 1.00);
+    vec3 blue = vec3(0.28, 0.50, 1.00);
+    vec3 cyan = vec3(0.22, 0.92, 0.82);
+    float hx = uv.x + 0.12 * sin(t * 0.06);
+    vec3 band = mix(violet, blue, smoothstep(0.15, 0.55, hx));
+    band = mix(band, cyan, smoothstep(0.62, 1.05, hx) * 0.85);
+    vec3 aurora = mix(deep, band, clamp(ridge * 1.1 + 0.25, 0.0, 1.0)) * glow;
+    aurora += vec3(0.85, 0.85, 1.0) * ridge * ridge * 0.25 * glow;
+    aurora *= mix(1.0, 0.58, calm) * (1.0 + 0.3 * e);
 
-    vec3 cosmicDust = mix(violetGlow, skyBlueGlow, n2) * (nebula * 0.55);
-    cosmicDust += cyanGlow * pow(max(0.0, n1), 2.2) * 0.6;
-
-    float coreGlow = exp(-dist * 2.0) * 0.35;
-
-    vec2 starGrid = gl_FragCoord.xy * 0.16;
+    // A few far stars above the ribbon.
+    vec2 starGrid = gl_FragCoord.xy * 0.11;
     vec2 starId = floor(starGrid);
     float starRand = hash21(starId);
     float star = 0.0;
-    if (starRand > 0.955) {
-        vec2 starPos = fract(starGrid) - 0.5;
-        float twinkle = sin(u_time * 2.8 + starRand * 6.28) * 0.5 + 0.5;
-        float starDist = length(starPos);
-        star = smoothstep(0.24, 0.02, starDist) * (0.65 + 0.35 * twinkle);
+    if (starRand > 0.986) {
+        vec2 sp = fract(starGrid) - 0.5;
+        float tw = sin(t * 1.6 + starRand * 40.0) * 0.5 + 0.5;
+        star = (1.0 - smoothstep(0.0, 0.22, length(sp))) * (0.35 + 0.35 * tw);
+    }
+    star *= smoothstep(0.0, 0.12, d) * mix(1.0, 0.45, calm);
+
+    vec3 col = aurora + vec3(star);
+
+    // Uplink pulse: a soft ring rising from the bottom centre when a question is sent.
+    if (u_pulse < 2.4) {
+        vec2 q = vec2((uv.x - 0.5) * u_resolution.x / u_resolution.y, uv.y + 0.05);
+        float ring = 1.0 - smoothstep(0.0, 0.05, abs(length(q) - u_pulse * 0.5));
+        float fade = 1.0 - u_pulse / 2.4;
+        col += band * ring * fade * fade * 0.35;
     }
 
-    vec2 gridUV = fract(gl_FragCoord.xy / 22.0) - 0.5;
-    float dotDist = length(gridUV);
-    float dotPattern = smoothstep(0.08, 0.03, dotDist) * 0.14;
-
-    float e = u_energy;
-    vec3 finalColor = baseColor;
-    finalColor += cosmicDust * 0.85 * (1.0 + 0.35 * e);
-    finalColor += aurora * 0.85 * (1.0 + 0.55 * e);
-    finalColor += cyanGlow * coreGlow * (0.45 + 0.9 * e);
-    finalColor += vec3(star * 0.92, star * 0.96, star * 1.0) * (1.0 + 0.4 * e);
-    finalColor += vec3(dotPattern);
-
-    // Uplink pulse: a soft ring rising from the bottom centre, fading as it climbs.
-    if (u_pulse < 2.6) {
-        vec2 q = vec2((uv.x - 0.5) * u_resolution.x / u_resolution.y, uv.y + 0.08);
-        float radius = u_pulse * 0.62;
-        float ring = smoothstep(0.045, 0.0, abs(length(q) - radius));
-        float fade = 1.0 - u_pulse / 2.6;
-        finalColor += cyanGlow * ring * fade * fade * 0.55;
-    }
-
-    gl_FragColor = vec4(finalColor, 1.0);
+    gl_FragColor = vec4(col, 1.0);
 }
 """
     }

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Four-point sparkle with a small plus, drawn for Human Wonder (as in the Stitch prompt chips). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path
+        android:pathData="M11,4.5c0.5,4 3.5,7 7.5,7.5c-4,0.5 -7,3.5 -7.5,7.5c-0.5,-4 -3.5,-7 -7.5,-7.5c4,-0.5 7,-3.5 7.5,-7.5Z"
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="1.6"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M19,2.5v4M17,4.5h4"
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="1.6"
+        android:strokeLineCap="round" />
+</vector>

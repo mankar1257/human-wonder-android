@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Human Wonder — Landing</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+@font-face { font-family: 'Geist'; src: url(/_blob/01ad63d214d509d7cc852395927c9906) format('truetype'); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: 'Newsreader'; src: url(/_blob/47ee0965448920db423e3432f0b88b67) format('truetype'); font-weight: 200 800; font-display: swap; }
+@font-face { font-family: 'JetBrains Mono'; src: url(/_blob/35304e43bfbd652ccfd619ac36efa41c) format('truetype'); font-weight: 100 800; font-display: swap; }
+body { margin: 0; background: #061617; }
+a { color: #83ffe5; } a:hover { color: #51fcdd; }
+button { font: inherit; cursor: pointer; }
+.hw-mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10px; line-height: 14px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; }
+.hw-pulse { animation: hw-pulse 0.8s ease-in-out infinite alternate; }
+@keyframes hw-pulse { from { opacity: 1; } to { opacity: 0.35; } }
+.hw-kb { animation: hw-kb 24s ease-in-out infinite alternate; transform-origin: 50% 50%; }
+@keyframes hw-kb { from { transform: scale(1); } to { transform: scale(1.08); } }
+.hw-breathe { animation: hw-breathe 3.2s ease-in-out infinite alternate; }
+@keyframes hw-breathe { from { opacity: 0.43; } to { opacity: 1; } }
+.hw-rise { animation: hw-rise 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+@keyframes hw-rise { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+.hw-msg { animation: hw-msg 0.5s cubic-bezier(0.4, 0, 0.2, 1) both; }
+@keyframes hw-msg { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+.hw-spin { position: absolute; left: 0; top: 0; right: 0; bottom: 0; animation: hw-spin 9s linear infinite; }
+@keyframes hw-spin { to { transform: rotate(360deg); } }
+.hw-wavebox { display: block; overflow: hidden; transform: scaleY(0.06); transition: transform 0.7s ease; -webkit-mask-image: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent); mask-image: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent); }
+.hw-wavebox.is-live { transform: scaleY(1); }
+.hw-wave { display: block; animation: hw-wave 1.1s linear infinite; }
+@keyframes hw-wave { from { transform: translateX(0); } to { transform: translateX(-46px); } }
+.hw-acq { display: block; width: 5px; height: 5px; border-radius: 50%; background: #83ffe5; margin-right: 5px; animation: hw-acq 1.5s linear infinite; }
+@keyframes hw-acq { 0% { opacity: 1; } 33.3% { opacity: 0.4; } 33.4% { opacity: 0.25; } 100% { opacity: 0.25; } }
+.hw-caret { animation: hw-blink 0.52s ease-in-out infinite alternate; }
+@keyframes hw-blink { from { opacity: 1; } to { opacity: 0.15; } }
+.hw-fadein { animation: hw-fadein 0.9s ease both; }
+@keyframes hw-fadein { from { opacity: 0; } to { opacity: 1; } }
+.hw-glow { animation: hw-glow 2.2s ease-in-out infinite alternate; }
+@keyframes hw-glow { from { box-shadow: 0 0 22px rgba(47, 230, 200, 0.30); } to { box-shadow: 0 0 38px rgba(47, 230, 200, 0.50); } }
+.hw-sendpulse { animation: hw-sendpulse 0.8s ease-in-out infinite alternate; }
+@keyframes hw-sendpulse { from { box-shadow: 0 0 10px rgba(63, 242, 208, 0.30); } to { box-shadow: 0 0 24px rgba(63, 242, 208, 0.70); } }
+.hw-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.hw-noscroll { scrollbar-width: none; }
+.hw-noscroll::-webkit-scrollbar { display: none; }
+textarea::placeholder { color: rgba(132, 148, 143, 0.7); }
+input::placeholder { color: rgba(186, 202, 196, 0.45); }
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #061617; font-family: 'Geist', system-ui, sans-serif; color: #d4e6e7">
+<img class="hw-kb" src="/_blob/cfc316bc9f5dd90bd5cd3874418cb0b0" alt="" aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; display: block">
+<div aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(2, 17, 18, 0.8) 0%, rgba(2, 17, 18, 0) 50%, rgba(2, 17, 18, 0.9) 100%)"></div>
+<div aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(2, 17, 18, 0) 0%, rgba(2, 17, 18, 0) 25%, rgba(2, 17, 18, 0.7) 62%, #021112 100%)"></div>
+<div style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: flex; flex-direction: column">
+<div style="display: flex; align-items: center; padding: 24px 20px 0">
+<span style="color: #83ffe5; font-size: 13px; line-height: 20px">✦</span>
+<span style="margin-left: 8px; font-family: 'Newsreader', Georgia, serif; font-size: 20px; line-height: 28px; letter-spacing: -0.01em; color: #d4e6e7">Human Wonder</span>
+<span style="flex: 1"></span>
+<span style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: rgba(14, 30, 31, 0.6)">
+<span class="hw-pulse" style="display: block; width: 6px; height: 6px; border-radius: 50%; background: #83ffe5"></span>
+<span class="hw-mono" style="color: #bacac4">Zenith 98°</span>
+</span>
+</div>
+<div style="flex: 1; display: flex; align-items: center; justify-content: center">
+<svg width="112" height="112" viewBox="0 0 112 112" aria-hidden="true">
+<g class="hw-breathe">
+<circle cx="56" cy="56" r="55.5" fill="none" stroke="#83ffe5" stroke-opacity="0.21" stroke-width="1"></circle>
+<circle cx="56" cy="56" r="30.5" fill="none" stroke="#83ffe5" stroke-opacity="0.105" stroke-width="1"></circle>
+<path d="M56 0.5V7.5M56 104.5V111.5M0.5 56H7.5M104.5 56H111.5" stroke="#83ffe5" stroke-opacity="0.42" stroke-width="1"></path>
+</g>
+<circle cx="56" cy="56" r="2" fill="#51fcdd"></circle>
+</svg>
+</div>
+<div class="hw-rise" style="display: flex; flex-direction: column; align-items: center; padding: 0 20px 40px; text-align: center">
+<h1 style="margin: 0; max-width: 384px; font-family: 'Newsreader', Georgia, serif; font-weight: 400; font-size: 28px; line-height: 36px; letter-spacing: -0.01em; color: #d4e6e7">The sky has something to tell you.</h1>
+<p style="margin: 12px 0 0; max-width: 384px; font-size: 15px; line-height: 24px; font-weight: 300; color: #bacac4">For thousands of years, we looked up and wondered. Now, for the first time, the sky can answer.</p>
+<a href="Name.dc.html" class="hw-glow" style="margin-top: 32px; width: 100%; max-width: 384px; height: 56px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 999px; background: #2fe6c8; color: #006354; text-decoration: none; font-size: 16px; line-height: 24px; font-weight: 500">Begin Your First Look Up <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px">→</span></a>
+<div style="margin-top: 28px; display: flex; align-items: center">
+<span class="hw-mono" style="color: rgba(186, 202, 196, 0.7)">Liwa Oasis</span>
+<span style="margin: 0 10px; color: rgba(131, 255, 229, 0.4); font-size: 10px">·</span>
+<span class="hw-mono" style="color: rgba(186, 202, 196, 0.7)">23.13° N, 53.79° E</span>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

@@ -37,7 +37,6 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
@@ -47,13 +46,18 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.util.Locale
-import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
 @Composable
-fun HwIcon(@DrawableRes id: Int, tint: Color, size: Dp, modifier: Modifier = Modifier) {
-    Icon(painterResource(id), contentDescription = null, tint = tint, modifier = modifier.size(size))
+fun HwIcon(
+    @DrawableRes id: Int,
+    tint: Color,
+    size: Dp,
+    modifier: Modifier = Modifier,
+    contentDescription: String? = null,
+) {
+    Icon(painterResource(id), contentDescription = contentDescription, tint = tint, modifier = modifier.size(size))
 }
 
 @Composable
@@ -156,65 +160,28 @@ fun GlowButton(
 }
 
 /**
- * The Human Wonder mark, alive: a circle (the Earth) with one point of light travelling on its
- * rim (a satellite crossing it). Faster and brighter while the sky is transmitting.
+ * Orbit's mark, alive: a ring (the Earth) with one point of light travelling round it (the
+ * satellite). It circles slowly at rest and quickly while Orbit is thinking or answering.
  */
 @Composable
 fun OrbitMark(size: Dp, active: Boolean, modifier: Modifier = Modifier) {
     val t = rememberInfiniteTransition(label = "mark")
     val angle by t.animateFloat(
         initialValue = 0f, targetValue = 360f,
-        animationSpec = infiniteRepeatable(tween(if (active) 2400 else 9000, easing = LinearEasing)),
+        animationSpec = infiniteRepeatable(tween(if (active) 1600 else 12000, easing = LinearEasing)),
         label = "angle",
     )
-    val glow by t.animateFloat(
-        initialValue = 0.55f, targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(900), RepeatMode.Reverse), label = "glow",
-    )
     Canvas(modifier.size(size)) {
-        val r = this.size.minDimension / 2 * 0.72f
+        val r = this.size.minDimension / 2 * 0.75f
         val c = center
-        drawCircle(HW.PrimaryContainer.copy(alpha = 0.10f), radius = r)
-        drawCircle(HW.PrimaryContainer.copy(alpha = 0.85f), radius = r, style = Stroke(1.2.dp.toPx()))
+        drawCircle(HW.PrimaryContainer.copy(alpha = 0.08f), radius = r)
+        drawCircle(HW.Primary.copy(alpha = 0.9f), radius = r, style = Stroke(1.5.dp.toPx()))
         val a = Math.toRadians(angle.toDouble() - 45.0)
         val p = Offset(c.x + r * cos(a).toFloat(), c.y + r * sin(a).toFloat())
-        val g = if (active) glow else 0.6f
         drawCircle(
-            Brush.radialGradient(listOf(HW.Primary.copy(alpha = 0.55f * g), Color.Transparent), center = p, radius = r * 0.9f),
-            radius = r * 0.9f, center = p,
+            Brush.radialGradient(listOf(HW.Primary.copy(alpha = 0.7f), Color.Transparent), center = p, radius = 4.dp.toPx()),
+            radius = 4.dp.toPx(), center = p,
         )
-        drawCircle(Color(0xFFE9FFFA), radius = 1.8.dp.toPx(), center = p)
-    }
-}
-
-/**
- * A live radio waveform. While [active] it ripples (two interfering sines with a travelling
- * envelope); when idle it settles into a flat line.
- */
-@Composable
-fun SignalWave(active: Boolean, modifier: Modifier = Modifier, color: Color = HW.Primary) {
-    val t = rememberInfiniteTransition(label = "wave")
-    val phase by t.animateFloat(
-        initialValue = 0f, targetValue = (2 * PI).toFloat(),
-        animationSpec = infiniteRepeatable(tween(1100, easing = LinearEasing)), label = "phase",
-    )
-    val amp by androidx.compose.animation.core.animateFloatAsState(
-        targetValue = if (active) 1f else 0.06f, animationSpec = tween(700), label = "amp",
-    )
-    Canvas(modifier) {
-        val w = size.width
-        val h = size.height
-        val mid = h / 2
-        val path = androidx.compose.ui.graphics.Path()
-        val steps = 48
-        for (i in 0..steps) {
-            val x = w * i / steps
-            val u = i.toFloat() / steps
-            val envelope = sin(PI * u).toFloat()
-            val y = mid + amp * envelope * h * 0.42f *
-                (0.65f * sin(u * 14f + phase) + 0.35f * sin(u * 31f - phase * 2f))
-            if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
-        }
-        drawPath(path, color.copy(alpha = 0.85f), style = Stroke(1.3.dp.toPx(), cap = StrokeCap.Round))
+        drawCircle(Color.White, radius = (this.size.minDimension * 0.105f), center = p)
     }
 }
