@@ -27,25 +27,35 @@ say()  { printf '\n\033[1;36m==> %s\033[0m\n' "$*"; }
 warn() { printf '\033[1;33m%s\033[0m\n' "$*"; }
 die()  { printf '\n\033[1;31mERROR: %s\033[0m\n' "$*"; exit 1; }
 
-# fetch OUT URL [URL...]: download OUT from the first source that works. Any source but the last
-# is dropped if it runs under 150 KB/s for 30 s (so a slow mirror never holds the build up); the
-# last source is kept unless it stalls almost completely (under 5 KB/s for 2 minutes).
+# fetch_one OUT URL MODE: "quick" drops a source that runs under 150 KB/s for 30 s (so a slow
+# mirror never holds the build up); "patient" keeps it unless it nearly stops (under 5 KB/s for
+# 2 minutes).
+fetch_one() {
+  local out="$1" url="$2" opts
+  if [ "$3" = quick ]; then
+    opts=(--retry 1 --speed-limit 150000 --speed-time 30)
+  else
+    opts=(--retry 4 --retry-delay 3 --retry-all-errors --speed-limit 5000 --speed-time 120)
+  fi
+  rm -f "$out"
+  echo "    from ${url%%\?*}"
+  curl -fL --connect-timeout 20 "${opts[@]}" -o "$out" "$url"
+}
+
+# fetch OUT URL [URL...]: download OUT from the first source that works; every source but the last
+# is tried "quick", the last one "patient".
 fetch() {
-  local out="$1"; shift
-  local url opts
+  local out="$1" url
+  shift
   while [ $# -gt 0 ]; do
-    url="$1"; shift
+    url="$1"
+    shift
     if [ $# -gt 0 ]; then
-      opts=(--retry 1 --speed-limit 150000 --speed-time 30)
+      fetch_one "$out" "$url" quick && return 0
+      warn "That source is too slow or failed; trying the next one."
     else
-      opts=(--retry 4 --retry-delay 3 --retry-all-errors --speed-limit 5000 --speed-time 120)
+      fetch_one "$out" "$url" patient && return 0
     fi
-    rm -f "$out"
-    echo "    from ${url%%\?*}"
-    if curl -fL --connect-timeout 20 "${opts[@]}" -o "$out" "$url"; then
-      return 0
-    fi
-    [ $# -gt 0 ] && warn "That source is too slow or failed; trying the next one."
   done
   return 1
 }
@@ -176,6 +186,53 @@ else
   mv "$TOOLS/llama-extract/llama.cpp-$LLAMA_PIN" "$LLAMA_DIR"
   printf '%s\n' "$LLAMA_PIN" > "$LLAMA_DIR/.hw-llama-commit"
   rm -rf "$TOOLS/llama-extract" "$TOOLS/llama.cpp.tar.gz" "$LLAMA_DIR.previous"
+fi
+
+# 3c. Gradle itself -----------------------------------------------------------------------------
+# services.gradle.org now hands the download to GitHub's file servers, which can crawl or time out
+# on some connections (the wrapper gives up after 10 s). So fetch the zip here: the official
+# SHA-256 comes from gradle.org, the bytes from the first source that is fast, and the zip goes
+# where the wrapper looks first.
+WRAPPER_PROPS="$PROJECT/gradle/wrapper/gradle-wrapper.properties"
+GRADLE_URL=$(sed -n 's/^distributionUrl=//p' "$WRAPPER_PROPS" | sed 's/\\:/:/g' | tr -d '\r')
+GRADLE_ZIP=$(basename "$GRADLE_URL")
+GRADLE_VER=${GRADLE_ZIP%-bin.zip}
+GRADLE_VER=${GRADLE_VER#gradle-}
+GRADLE_HASH=$("$JAVA_HOME/bin/java" "$PROJECT/tools/WrapperHash.java" "$GRADLE_URL")
+GRADLE_DIST="${GRADLE_USER_HOME:-$HOME/.gradle}/wrapper/dists/${GRADLE_ZIP%.zip}/$GRADLE_HASH"
+if [ -f "$GRADLE_DIST/$GRADLE_ZIP.ok" ] || [ -f "$GRADLE_DIST/$GRADLE_ZIP" ]; then
+  say "Gradle $GRADLE_VER is already downloaded"
+else
+  say "Downloading Gradle $GRADLE_VER (about 150 MB, one time)"
+  mkdir -p "$GRADLE_DIST"
+  GRADLE_SHA=$(curl -fsSL --connect-timeout 20 --max-time 180 --retry 3 --retry-all-errors "$GRADLE_URL.sha256" 2>/dev/null | tr -d '[:space:]' || true)
+  if [[ "$GRADLE_SHA" =~ ^[0-9a-f]{64}$ ]]; then
+    echo "    official SHA-256: $GRADLE_SHA"
+    sources=("$GRADLE_URL"
+             "https://mirrors.cloud.tencent.com/gradle/$GRADLE_ZIP"
+             "https://mirrors.huaweicloud.com/gradle/$GRADLE_ZIP"
+             "https://mirrors.aliyun.com/gradle/distributions/v$GRADLE_VER/$GRADLE_ZIP"
+             "$GRADLE_URL")
+  else
+    warn "Couldn't read Gradle's official checksum, so only gradle.org itself will be used."
+    sources=("$GRADLE_URL")
+  fi
+  got_gradle=""
+  for i in "${!sources[@]}"; do
+    if [ "$i" -lt $(( ${#sources[@]} - 1 )) ]; then mode=quick; else mode=patient; fi
+    fetch_one "$GRADLE_DIST/$GRADLE_ZIP.download" "${sources[$i]}" "$mode" || true
+    [ -s "$GRADLE_DIST/$GRADLE_ZIP.download" ] || continue
+    if [ -n "$GRADLE_SHA" ] && [ "$(shasum -a 256 "$GRADLE_DIST/$GRADLE_ZIP.download" | awk '{print $1}')" != "$GRADLE_SHA" ]; then
+      warn "That copy doesn't match the official checksum; trying the next source."
+      rm -f "$GRADLE_DIST/$GRADLE_ZIP.download"
+      continue
+    fi
+    got_gradle=yes
+    break
+  done
+  [ -n "$got_gradle" ] || die "Couldn't download Gradle $GRADLE_VER. Check the internet connection and double-click again."
+  mv "$GRADLE_DIST/$GRADLE_ZIP.download" "$GRADLE_DIST/$GRADLE_ZIP"
+  echo "    Gradle $GRADLE_VER downloaded and verified"
 fi
 
 # 4. Build ----------------------------------------------------------------------------------------
