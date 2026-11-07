@@ -28,6 +28,17 @@ Rules from now on:
 2. No decorative motion or glow on reading screens; brand mark only in the header lockup.
 3. Check "would a top-tier first-party app ship this?" before showing a screen.
 
+## 2026-11-07: v2 first build and the owner's network
+- GitHub's file servers (release downloads, objects CDN) crawl at ~20 KB/s or time out on the
+  owner's connection, while Amazon/Google/CloudFront run at ~3 MB/s. Never depend on a GitHub
+  download in the build: Java comes from Corretto first; llama.cpp is delivered by me (git fetch
+  in the cloud + bridge); Gradle is fetched by the script from mirrors and checked against
+  gradle.org's SHA-256, then placed where the wrapper looks (tools/WrapperHash.java).
+- The build script is one { ... } block so it can be updated while a build runs, and it logs to
+  tools/build.log so progress can be read through the bridge without asking the owner.
+- device_commit_files can deliver a stale copy when the same staged path is reused: give every
+  staged file a new name, and always md5-check on the Mac after committing.
+
 ## Earlier lessons
 - Show the design in the preview before building (builds cost the owner 5-15 minutes).
 - Never reveal the model or how it works in any user-facing text, error, or status.
