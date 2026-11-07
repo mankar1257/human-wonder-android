@@ -1,4 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.net.HttpURLConnection
+import java.net.URI
+import java.security.MessageDigest
 
 plugins {
     alias(libs.plugins.android.application)
@@ -44,13 +47,13 @@ val fetchModel = tasks.register("fetchModel") {
             local.copyTo(part, overwrite = true)
         } else {
             logger.lifecycle("Downloading the on-device model (${bytes / 1_000_000} MB, one time)...")
-            val conn = java.net.URI(url).toURL().openConnection() as java.net.HttpURLConnection
+            val conn = URI(url).toURL().openConnection() as HttpURLConnection
             conn.instanceFollowRedirects = true
             conn.connectTimeout = 30_000
             conn.readTimeout = 60_000
             conn.inputStream.use { input -> part.outputStream().use { input.copyTo(it, 1 shl 20) } }
         }
-        val digest = java.security.MessageDigest.getInstance("SHA-256")
+        val digest = MessageDigest.getInstance("SHA-256")
         part.inputStream().use { input ->
             val buffer = ByteArray(1 shl 20)
             while (true) {
@@ -59,7 +62,7 @@ val fetchModel = tasks.register("fetchModel") {
                 digest.update(buffer, 0, n)
             }
         }
-        val hex = digest.digest().joinToString("") { "%02x".format(it) }
+        val hex = digest.digest().joinToString("") { b -> "%02x".format(b) }
         check(hex == sha) { "Model checksum mismatch ($hex); delete app/build/hw-model and retry." }
         target.delete()
         check(part.renameTo(target)) { "Could not move the model into ${target.path}" }
