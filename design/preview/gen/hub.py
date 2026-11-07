@@ -3,6 +3,8 @@
 Run: python3 design/preview/gen/hub.py  (writes design/preview/project/{Home,Drawer,Profile}.dc.html)
 Shared CSS comes from Chat.dc.html so every screen uses the same fonts and classes.
 """
+import sys, pathlib as _pl
+sys.path.insert(0, str(_pl.Path(__file__).resolve().parent))
 import pathlib
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -101,6 +103,7 @@ def home_content():
 <h1 style="margin: 0; padding: 16px 24px 0; font-size: 30px; line-height: 36px; font-weight: 300; letter-spacing: -0.02em; color: #ffffff">{{{{greeting}}}}, {{{{name}}}}</h1>
 <section aria-label="Orbit 412" style="position: relative; margin: 20px 16px 0; display: flex; flex-direction: column; border-radius: 24px; overflow: hidden; background: #05080a; border: 1px solid rgba(255, 255, 255, 0.08)">
 <img src="{EARTH}" alt="" aria-hidden="true" style="position: absolute; left: 0; top: 0; margin-top: -30%; width: 100%; height: auto; display: block">
+<canvas ref="{{{{orbitRef}}}}" aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; pointer-events: none"></canvas>
 <div aria-hidden="true" style="flex: 1 0 120px"></div>
 <div style="position: relative; padding: 56px 20px 20px; background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0.8) 56px, rgba(0, 0, 0, 0.92) 100%)">
 <span style="display: flex; align-items: center; gap: 8px; font-size: 13px; line-height: 18px; color: #c5cdcb"><span class="hw-pulse" style="display: block; flex-shrink: 0; width: 6px; height: 6px; border-radius: 50%; background: #83ffe5"></span>Overhead now, 412 km up</span>
@@ -163,12 +166,19 @@ def drawer_sheet():
 </a>
 </nav>'''
 
+from orbit_js import orbit_methods, CARD_PLACE
+
 HOME_JS = """class Component extends DCLogic {
+  constructor(...args) {
+    super(...args);
+    this._orbitRef = (el) => { this.orbitEl = el; };
+  }
+""" + orbit_methods(CARD_PLACE, 60000, 0.30, False) + """
   renderVals() {
     var name = (this.props.name || '').trim() || 'Wanderer';
     var h = new Date().getHours();
     var greeting = h < 5 ? 'Good night' : h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : h < 22 ? 'Good evening' : 'Good night';
-    return { name: name, initial: name.charAt(0).toUpperCase(), greeting: greeting };
+    return { name: name, initial: name.charAt(0).toUpperCase(), greeting: greeting, orbitRef: this._orbitRef };
   }
 }"""
 

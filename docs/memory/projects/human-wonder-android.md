@@ -35,3 +35,5 @@ bundled in the APK as `assets/hw-core.gguf` (fetched + SHA-256 checked at build 
 - 2026-11-07: Owner chose to fork OfflineLLM (jegly, Apache-2.0) as v2; phone is Android 13+.
 - 2026-11-07: Star-trail Name screen and aurora Home called "too fancy and childish" -> Earth-from-
   orbit photo on Name, plain black Home with one photo card, quiet list, plain chips, solid avatar.
+- 2026-11-07: Owner missed the moving orbit ("that was cool") -> Orbit 412 now glides along the
+  Earth's horizon on Name and across the Home photo card (still on Welcome and the empty chat).

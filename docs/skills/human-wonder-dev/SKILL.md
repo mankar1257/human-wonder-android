@@ -74,14 +74,18 @@ Orbit mark on every list row, sparkle icons on chips, rainbow-gradient avatars.
   something to tell you."; "Human Wonder gives the sky a voice: Orbit 412, a satellite passing
   over you tonight."; teal "Begin your first look up".
 - Name: black sky; the Earth at night from orbit (`bg_earth_orbit`, the Gulf and Liwa) starts 17%
-  down the screen with the same slow zoom; scrim black 0-17%, clear 33-58%, black by 92%.
+  down the screen (static); scrim black 0-17%, clear 33-58%, black by 92%. Orbit 412 glides
+  just above the horizon, label above it (`SatelliteArc(place = ::nameScreenArc, labelAbove)`):
+  the owner loves seeing the orbit move, so keep a pass on every photo of the sky.
   "What should Orbit 412 call you?" (32/38 light, keep "Orbit 412" unbroken), plain field
   (56dp, radius 16, rgba(14,17,19,.82), white 16% border, no icon), teal "Meet Orbit 412",
   lock + "Your name stays on this phone." in #8D9997.
 - Home (v2): plain black, no shader. Header menu / lockup / solid avatar (#1F2629, white 12%
   border). Greeting 30/36 light. Orbit 412 photo card (radius 24): Earth photo at card width,
   shifted up 30% of the width, a 120dp clear band, then status / "Orbit 412" 24/30 / one line /
-  teal 56dp button on a dark band that grows with the text. "Recent transmissions" + See all,
+  teal 56dp button on a dark band that grows with the text. Orbit 412 crosses the card's photo
+  above the horizon, no label (`place = ::homeCardArc`). Arc numbers: apex y=357, drop 40 px on
+  the 768x1376 photo (Sky.kt EARTH_ARC_*, preview gen/orbit_js.py). "Recent transmissions" + See all,
   grouped list (radius 20, white 4% fill, 8% border), rows title + time + grey chevron.
   "Try asking": outlined chips that wrap, no icons.
 - Chat (Gemini + Stitch home): aurora-valley shader + faint dot grid; `u_calm` sinks the aurora

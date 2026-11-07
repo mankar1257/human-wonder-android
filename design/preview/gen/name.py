@@ -2,9 +2,11 @@
 
 Run: python3 design/preview/gen/name.py  (rewrites design/preview/project/Name.dc.html in place,
 keeping its <helmet> CSS). The look: black sky, the Earth at night from orbit below the question,
-a plain field and the teal button. No star trails, no satellite drawing, no decorative glow.
+a plain field and the teal button, with Orbit 412 gliding along the horizon (the one motion).
 """
-import pathlib
+import pathlib, sys
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 HERE = pathlib.Path(__file__).resolve().parent
 PATH = HERE.parent / "project" / "Name.dc.html"
@@ -30,9 +32,10 @@ LOCKUP = '''<div style="display: flex; align-items: center; gap: 9px">
 
 BODY = f'''<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #000000; font-family: 'Geist', system-ui, sans-serif; color: #eceff0">
 <div aria-hidden="true" style="position: absolute; left: 0; top: 17%; width: 100%; height: 83%; overflow: hidden">
-<img class="hw-kb" src="{EARTH}" alt="" style="width: 100%; height: 100%; object-fit: cover; object-position: 50% 0%; display: block">
+<img src="{EARTH}" alt="" style="width: 100%; height: 100%; object-fit: cover; object-position: 50% 0%; display: block">
 </div>
 <div aria-hidden="true" style="{FILL}; background: linear-gradient(to bottom, #000000 0%, #000000 17%, rgba(0, 0, 0, 0) 33%, rgba(0, 0, 0, 0) 58%, rgba(0, 0, 0, 0.78) 76%, #000000 92%)"></div>
+<canvas ref="{{{{orbitRef}}}}" aria-hidden="true" style="{FILL}; display: block; pointer-events: none"></canvas>
 <div style="{FILL}; display: flex; flex-direction: column">
 <header style="height: 64px; flex-shrink: 0; display: flex; align-items: center; padding: 0 4px">
 <a href="Main.dc.html" aria-label="Back" class="hw-iconbtn" style="width: 48px; height: 48px; color: #c5cdcb">{svg(BACK, 22)}</a>
@@ -59,15 +62,20 @@ BODY = f'''<div style="position: relative; width: 390px; height: 844px; overflow
 </div>
 '''
 
+from orbit_js import orbit_methods, NAME_PLACE
+
 JS = '''class Component extends DCLogic {
   constructor(...args) {
     super(...args);
     this.state = { name: '' };
+    this._orbitRef = (el) => { this.orbitEl = el; };
   }
+''' + orbit_methods(NAME_PLACE, 60000, 0.22, True) + '''
 
   renderVals() {
     return {
       name: this.state.name,
+      orbitRef: this._orbitRef,
       onName: (e) => this.setState({ name: e.target.value.slice(0, 40) }),
     };
   }

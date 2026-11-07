@@ -62,9 +62,10 @@ input::placeholder { color: rgba(186, 202, 196, 0.45); }
 </helmet>
 <div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #000000; font-family: 'Geist', system-ui, sans-serif; color: #eceff0">
 <div aria-hidden="true" style="position: absolute; left: 0; top: 17%; width: 100%; height: 83%; overflow: hidden">
-<img class="hw-kb" src="/_blob/8ee8bb7af970b49cfab3b586c5e1f849" alt="" style="width: 100%; height: 100%; object-fit: cover; object-position: 50% 0%; display: block">
+<img src="/_blob/8ee8bb7af970b49cfab3b586c5e1f849" alt="" style="width: 100%; height: 100%; object-fit: cover; object-position: 50% 0%; display: block">
 </div>
 <div aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 390px; height: 844px; background: linear-gradient(to bottom, #000000 0%, #000000 17%, rgba(0, 0, 0, 0) 33%, rgba(0, 0, 0, 0) 58%, rgba(0, 0, 0, 0.78) 76%, #000000 92%)"></div>
+<canvas ref="{{orbitRef}}" aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 390px; height: 844px; display: block; pointer-events: none"></canvas>
 <div style="position: absolute; left: 0; top: 0; width: 390px; height: 844px; display: flex; flex-direction: column">
 <header style="height: 64px; flex-shrink: 0; display: flex; align-items: center; padding: 0 4px">
 <a href="Main.dc.html" aria-label="Back" class="hw-iconbtn" style="width: 48px; height: 48px; color: #c5cdcb"><svg width="22" height="22" viewBox="0 -960 960 960" aria-hidden="true" style="display: block; flex-shrink: 0"><path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" fill="currentColor"></path></svg></a>
@@ -101,11 +102,70 @@ class Component extends DCLogic {
   constructor(...args) {
     super(...args);
     this.state = { name: '' };
+    this._orbitRef = (el) => { this.orbitEl = el; };
   }
+
+  componentDidMount() {
+    this._t0 = performance.now();
+    var loop = (now) => { this.drawOrbit(now); this._raf = requestAnimationFrame(loop); };
+    this._raf = requestAnimationFrame(loop);
+  }
+
+  componentWillUnmount() {
+    cancelAnimationFrame(this._raf);
+  }
+
+  drawOrbit(now) {
+    var c = this.orbitEl;
+    if (!c) return;
+    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    var w = c.clientWidth, h = c.clientHeight;
+    if (!w || !h) return;
+    if (c.width !== Math.round(w * dpr) || c.height !== Math.round(h * dpr)) {
+      c.width = Math.round(w * dpr);
+      c.height = Math.round(h * dpr);
+    }
+    var ctx = c.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    var place = (() => { var boxH = 0.83 * h; var s = Math.max(w / 768, boxH / 1376); return [0.17 * h + 357 * s, 40 * s]; })();
+    var arcY = place[0], drop = place[1];
+    var p0x = -0.12 * w, p0y = arcY + drop, p1x = 0.5 * w, p1y = arcY - drop, p2x = 1.12 * w, p2y = arcY + drop;
+    var at = (u) => {
+      var a = (1 - u) * (1 - u), b = 2 * (1 - u) * u, q = u * u;
+      return [a * p0x + b * p1x + q * p2x, a * p0y + b * p1y + q * p2y];
+    };
+    var circle = (x, y, r) => { ctx.beginPath(); ctx.arc(x, y, Math.max(0.1, r), 0, Math.PI * 2); };
+    var travel = ((now - this._t0) / 60000 + 0.22) % 1;
+    var u = 0.08 + 0.84 * travel;
+    var sat = at(u);
+    // Comet trail: only where Orbit 412 has just been.
+    for (var k = 1; k <= 18; k++) {
+      var pt = at(Math.max(0, u - k * 0.004));
+      ctx.fillStyle = 'rgba(131, 255, 229, ' + (0.32 * (1 - k / 19)).toFixed(3) + ')';
+      circle(pt[0], pt[1], 2.0 - k * 0.09);
+      ctx.fill();
+    }
+    var glow = ctx.createRadialGradient(sat[0], sat[1], 0, sat[0], sat[1], 13);
+    glow.addColorStop(0, 'rgba(131, 255, 229, 0.5)');
+    glow.addColorStop(1, 'rgba(131, 255, 229, 0)');
+    ctx.fillStyle = glow;
+    circle(sat[0], sat[1], 13);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    circle(sat[0], sat[1], 2.3);
+    ctx.fill();
+    ctx.font = '500 11px Geist, system-ui, sans-serif';
+    ctx.textBaseline = 'bottom';
+    ctx.fillStyle = 'rgba(236, 239, 240, 0.78)';
+    ctx.fillText('Orbit 412', sat[0] + 9, sat[1] - 7);
+  }
+
 
   renderVals() {
     return {
       name: this.state.name,
+      orbitRef: this._orbitRef,
       onName: (e) => this.setState({ name: e.target.value.slice(0, 40) }),
     };
   }
