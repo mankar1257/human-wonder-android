@@ -86,6 +86,9 @@ fun DotGrid(modifier: Modifier = Modifier, alpha: Float = 0.09f) {
     )
 }
 
+/** One calm pass of Orbit 412 across the screen (same everywhere; the owner asked for slow). */
+const val ORBIT_PASS_MS = 90_000
+
 /**
  * Orbit 412 gliding across the sky with a comet trail and its name beside it. Its path is an
  * invisible arc placed by [place] (apex y and end drop in px, from the canvas size; used over the
@@ -100,7 +103,7 @@ fun SatelliteArc(
     arcBelowTop: Dp? = null,
     arcFraction: Float = 0.4f,
     dropFraction: Float = 0.05f,
-    periodMs: Int = 75_000,
+    periodMs: Int = ORBIT_PASS_MS,
     startAt: Float = 0.3f,
     place: ((Size) -> Offset)? = null,
     label: Boolean = true,

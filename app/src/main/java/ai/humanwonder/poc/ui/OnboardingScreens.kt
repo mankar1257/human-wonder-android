@@ -107,7 +107,7 @@ fun LandingScreen(onBegin: () -> Unit) {
                 0.46f to Color.Transparent, 0.62f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.72f),
             ),
         )
-        SatelliteArc(Modifier.fillMaxSize(), arcFraction = 0.45f, dropFraction = 0.06f, periodMs = 60_000, startAt = 0.18f)
+        SatelliteArc(Modifier.fillMaxSize(), arcFraction = 0.45f, dropFraction = 0.06f, startAt = 0.18f)
 
         Column(Modifier.fillMaxSize().safeDrawingPadding()) {
             Box(Modifier.fillMaxWidth().height(64.dp), contentAlignment = Alignment.Center) {
@@ -187,7 +187,6 @@ fun NameScreen(
             Modifier.fillMaxSize(),
             place = ::nameScreenArc,
             labelAbove = true,
-            periodMs = 60_000,
             startAt = 0.22f,
         )
 

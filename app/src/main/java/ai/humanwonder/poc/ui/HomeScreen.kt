@@ -227,7 +227,6 @@ private fun OrbitCard(sky: SkyState, onTalk: () -> Unit, onRetry: () -> Unit) {
             Modifier.matchParentSize(),
             place = ::homeCardArc,
             label = false,
-            periodMs = 60_000,
             startAt = 0.30f,
         )
         Column(Modifier.fillMaxWidth()) {
