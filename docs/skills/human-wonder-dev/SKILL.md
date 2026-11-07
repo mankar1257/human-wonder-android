@@ -23,15 +23,32 @@ sell Human Wonder: brand and persona come first. Read this and `CLAUDE.md` +
   `c0b04488-5a95-4a93-a2de-52267f7dfd47`. Source in the repo at `design/preview/project/`
   (Main, Name, Chat, Transmission `.dc.html` + `canvas.json`); read `design/preview/README.md`.
 
-Code map (`app/src/main/java/ai/humanwonder/poc/`): `MainActivity.kt` (screens, voice input),
-`ChatViewModel.kt` (state, streaming, Orbit 412 system prompt, `visibleAnswer()` sanitizer,
-`lostSignalMessage()`), `model/ModelStore.kt` (unpacks the bundled model on first launch),
-`ui/OnboardingScreens.kt`, `ui/ChatScreen.kt`, `ui/Components.kt` (BrandLockup, PrimaryButton,
-OrbitMark, HwIcon), `ui/Sky.kt` (DotGrid, SatelliteArc, StarTrailSky, DuneHorizon),
-`ui/GalaxyBackground.kt` (aurora shader, single source of truth), `ui/Theme.kt`. `lib/` is the
-llama.cpp JNI wrapper. `app/build.gradle.kts` `fetchModel` downloads and SHA-checks the model into
-the APK (imports java.net / java.security at the top: in Gradle Kotlin DSL a bare `java.` is the
-java extension, not the package).
+v2 (branch `v2-offlinellm`) is built on OfflineLLM (jegly/OfflineLLM b001c2c, Apache-2.0): Hilt,
+Room, Navigation Compose, its SettingsRepository and its `smollm` llama.cpp module, with
+Human Wonder's persona, UI, model and build. Attribution: `NOTICE`, `third_party_licenses/`,
+`app/src/main/assets/licenses/NOTICE.txt`.
+
+Code map (`app/src/main/java/ai/humanwonder/poc/`):
+- `MainActivity.kt` (Hilt entry point, NavGraph, keep-awake), `HumanWonderApplication.kt`,
+  `AppViewModel.kt` (profile, sky state, side-menu list/search, settings actions, export),
+  `ChatViewModel.kt` (one chat: Room messages + streaming answer, TTS, haptics),
+  `ChatState.kt` (Perspective, Tone, SkyState, ChatMessage, UiState).
+- `ai/Persona.kt`: Orbit 412 system prompt (name + home sky), Perspective/Tone hints + `/no_think`,
+  `visibleAnswer()` sanitizer, `lostSignalMessage()`. `ai/ModelManager.kt`: copies
+  `assets/hw-core.gguf` on first launch (Aligning n% → Waking → Ready → Failed), `prepareChat()`
+  points the native chat at a conversation. `ai/InferenceEngine.kt`: SmolLM wrapper.
+- `data/` Room (`Conversation`, `Message`, DAOs) + `ChatRepository`, `SettingsRepository`
+  (encrypted prefs, the profile as a StateFlow). `di/` Hilt modules. `utils/` TtsHelper etc.
+- `ui/`: `OnboardingScreens.kt`, `ChatScreen.kt` (composer row measured by a SubcomposeLayout),
+  `HomeScreen.kt`, `ConversationDrawer.kt` (side menu), `ProfileScreen.kt`, `LicensesScreen.kt`,
+  `Components.kt` (BrandLockup fixed-dp logo, PrimaryButton, OrbitMark, HwIcon, InitialAvatar,
+  `glass()`), `Sky.kt`, `GalaxyBackground.kt` (aurora shader, single source of truth), `Theme.kt`
+  (`capScale()`: 28sp+ text grows at most 1.15× with font scale). `ui/navigation/` Routes, NavGraph.
+- `smollm/` (package `ai.humanwonder.poc.smollm`): JNI glue + `third_party/llama.cpp` (submodule
+  pinned to 620d222, also written in `third_party/llama.cpp.commit`). CPU only (no Vulkan).
+- `app/build.gradle.kts` `fetchModel` downloads and SHA-checks the model into the APK (imports
+  java.net / java.security at the top: in Gradle Kotlin DSL a bare `java.` is the java extension,
+  not the package).
 
 ## Non-negotiables
 
@@ -76,8 +93,12 @@ dotted arc lines.
   Orbit 412 call you?" (keep "Orbit 412" unbroken); glass name field; teal "Meet Orbit 412".
 - Chat (Gemini + Stitch home): aurora-valley shader + faint dot grid; `u_calm` sinks the aurora
   when talking. Answers Geist 16/25 #E8ECEC, no glow; newest ~18 chars fade in. User bubble
-  #1D2225. Orbit mark + "Orbit 412" per answer, copy action. Composer: Orbit/Ground, tone chip,
-  mic, send (grey / teal / stop). Header: back, Human Wonder lockup + status, new conversation.
+  #1D2225. Orbit mark + "Orbit 412" per answer, copy action. Composer (padding 14/8/8/12, row gap
+  4): Orbit/Ground, tone chip, mic and send as fixed 48dp targets (send: 40dp circle inside);
+  narrow rows hide the tone label first, then the Orbit/Ground labels. Header: "Open menu",
+  Human Wonder lockup + status, new conversation. System back → Home.
+- Home, side menu, Profile & settings: values in `design/preview/gen/hub.py` (glass
+  rgba(20,24,30,.72) radius 24, sheet #0B0D12, avatar gradient #2FE6C8 → #7C5CFF).
 - Orbit 412 crossing a sky (`SatelliteArc`): 18-dot comet trail, glow r13 at 0.5, core r2.3,
   label 11sp medium at 0.78, no arc line.
 
@@ -100,7 +121,11 @@ dotted arc lines.
    there; overwrite removed files with a stub). Compare md5sums.
 6. The owner double-clicks "Build Human Wonder.command" (`tools/build-on-mac.sh`; tools in
    `~/human-wonder-android-tools`). Output `HumanWonder-POC.apk` (~500 MB, next to the command);
-   installs over USB if a phone is connected. Model cached in `app/build/hw-model/`.
+   installs over USB if a phone is connected. Model cached in `app/build/hw-model/`. v2 needs
+   Java 21 (downloaded to `jdk21/`), `platforms;android-37`, NDK 29.0.14206865, CMake 3.31.6;
+   the script fetches llama.cpp at the pinned commit as a GitHub tarball when the folder lacks
+   it (marker `third_party/llama.cpp/.hw-llama-commit`), since synced copies have no submodule.
+   First v2 build ~15-30 min (Gradle 9 toolchain download + llama.cpp with 7 CPU variants).
 7. Errors print in the Terminal; ask the owner to paste them (`tools/build.log` may be stale).
    Success check: `HumanWonder-POC.apk` modified time and ~500 MB size.
 
@@ -109,7 +134,10 @@ dotted arc lines.
 - GitHub Actions cannot run (mankar1257 billing lock). Build on the Mac.
 - POC signing key in `keystore/`; installs update over each other.
 - The public GitHub README and the GGUF metadata reveal the setup to anyone who looks.
-- First launch unpacks the model (status "Orbit 412 is rising over the horizon, n%").
-- Candidate open-source bases (Apache-2.0, Kotlin/Compose/llama.cpp): jegly/OfflineLLM (zero
-  network, bundled model, Room history, settings; minSdk 33), shubham0204/SmolChat-Android
-  (ObjectBox history, drawer, model downloads).
+- First launch unpacks the model (status "Orbit 412 is rising over the horizon, n%"); phones that
+  ran v1 already have the copy (same path, `files/models/hw-core.gguf`).
+- Toolchain is OfflineLLM's (Gradle 9.8.2, AGP 9.5.1 built-in Kotlin, Kotlin 2.4.21, KSP 2.3.13,
+  Hilt 2.60.1, Room 2.8.5, compileSdk 37, minSdk 33). Bump versions only together with OfflineLLM.
+- versionCode starts at 200 (v1 was 2), versionName 2.0; same keystore, so v2 installs over v1.
+- The open-source licenses screen shows the bundled notices verbatim, which name OfflineLLM and
+  ggml: that is the one place such names appear, for license compliance.

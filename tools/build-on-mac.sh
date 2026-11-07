@@ -14,7 +14,11 @@ export ANDROID_HOME="$TOOLS/android-sdk"
 export ANDROID_SDK_ROOT="$ANDROID_HOME"
 NDK_VERSION="29.0.14206865"
 CMAKE_VERSION="3.31.6"
+# compileSdk 37 (the OfflineLLM library set needs it). Newer sdkmanager builds may name it 37.0.
+PLATFORM="platforms;android-37"
 APK_OUT="$PROJECT/HumanWonder-POC.apk"
+LLAMA_DIR="$PROJECT/third_party/llama.cpp"
+LLAMA_PIN="$(tr -d '[:space:]' 2>/dev/null < "$PROJECT/third_party/llama.cpp.commit" || true)"
 
 say()  { printf '\n\033[1;36m==> %s\033[0m\n' "$*"; }
 warn() { printf '\033[1;33m%s\033[0m\n' "$*"; }
@@ -27,19 +31,21 @@ case "$(uname -m)" in
 esac
 
 [ -f "$PROJECT/settings.gradle.kts" ] || die "Can't find the project next to this script ($PROJECT)."
-[ -f "$PROJECT/third_party/llama.cpp/CMakeLists.txt" ] || die "third_party/llama.cpp is missing. If you cloned from GitHub, use: git clone --recursive ..."
+[ -n "$LLAMA_PIN" ] || die "third_party/llama.cpp.commit is missing; copy the whole project folder again."
 
 cat <<EOF
 
 Human Wonder POC: Android build
 -------------------------------
 This will:
-  1. Download a Java 17 runtime (Eclipse Temurin, about 190 MB) unless you already have one.
+  1. Download a Java 21 runtime (Eclipse Temurin, about 200 MB) unless you already have one.
   2. Download Google's Android command-line tools and ask YOU to accept the Android SDK licenses.
   3. Install the Android SDK pieces the app needs (about 2-3 GB download, ~5 GB on disk) into:
        $TOOLS
-  4. Build the app (the first build compiles llama.cpp: about 10-20 minutes).
-  5. Install it on your phone if one is connected by USB with USB debugging on.
+  4. Fetch the pinned llama.cpp source (about 60 MB) if this folder doesn't have it yet.
+  5. Build the app. The first v2 build downloads the new build tools (Gradle 9, about 1 GB) and
+     compiles llama.cpp: about 15-30 minutes. Later builds take a few minutes.
+  6. Install it on your phone if one is connected by USB with USB debugging on.
 
 EOF
 read -r -p "Continue? [y/N] " answer
@@ -47,28 +53,30 @@ case "$answer" in y|Y|yes|YES) ;; *) echo "Cancelled."; exit 0 ;; esac
 
 mkdir -p "$TOOLS"
 free_gb=$(df -g "$HOME" | awk 'NR==2 {print $4}')
-if [ "${free_gb:-0}" -lt 7 ]; then
-  warn "Only ${free_gb} GB free on this disk; about 7 GB is recommended."
+if [ "${free_gb:-0}" -lt 8 ]; then
+  warn "Only ${free_gb} GB free on this disk; about 8 GB is recommended."
   read -r -p "Try anyway? [y/N] " a2
   case "$a2" in y|Y) ;; *) exit 1 ;; esac
 fi
 
-# 1. Java 17 -----------------------------------------------------------------------------------
-if JH=$(/usr/libexec/java_home -v 17 2>/dev/null); then
+# 1. Java 21 -----------------------------------------------------------------------------------
+# v2 builds with Gradle 9 and Android Gradle Plugin 9, on Java 21 like OfflineLLM's own CI.
+# (The Java 17 that v1 downloaded into $TOOLS/jdk is left alone; it is no longer used.)
+if JH=$(/usr/libexec/java_home -v 21 2>/dev/null); then
   export JAVA_HOME="$JH"
-  say "Using your installed Java 17: $JAVA_HOME"
-elif [ -x "$TOOLS/jdk/Contents/Home/bin/java" ]; then
-  export JAVA_HOME="$TOOLS/jdk/Contents/Home"
-  say "Using the Java 17 downloaded earlier"
+  say "Using your installed Java 21: $JAVA_HOME"
+elif [ -x "$TOOLS/jdk21/Contents/Home/bin/java" ]; then
+  export JAVA_HOME="$TOOLS/jdk21/Contents/Home"
+  say "Using the Java 21 downloaded earlier"
 else
-  say "Downloading Java 17 (Eclipse Temurin, $JDK_ARCH)"
-  curl -fL --retry 3 -o "$TOOLS/jdk.tar.gz" \
-    "https://api.adoptium.net/v3/binary/latest/17/ga/mac/$JDK_ARCH/jdk/hotspot/normal/eclipse"
-  rm -rf "$TOOLS/jdk-extract" && mkdir -p "$TOOLS/jdk-extract"
-  tar -xzf "$TOOLS/jdk.tar.gz" -C "$TOOLS/jdk-extract"
-  mv "$TOOLS"/jdk-extract/* "$TOOLS/jdk"
-  rm -rf "$TOOLS/jdk-extract" "$TOOLS/jdk.tar.gz"
-  export JAVA_HOME="$TOOLS/jdk/Contents/Home"
+  say "Downloading Java 21 (Eclipse Temurin, $JDK_ARCH)"
+  curl -fL --retry 3 -o "$TOOLS/jdk21.tar.gz" \
+    "https://api.adoptium.net/v3/binary/latest/21/ga/mac/$JDK_ARCH/jdk/hotspot/normal/eclipse"
+  rm -rf "$TOOLS/jdk21-extract" "$TOOLS/jdk21" && mkdir -p "$TOOLS/jdk21-extract"
+  tar -xzf "$TOOLS/jdk21.tar.gz" -C "$TOOLS/jdk21-extract"
+  mv "$TOOLS"/jdk21-extract/* "$TOOLS/jdk21"
+  rm -rf "$TOOLS/jdk21-extract" "$TOOLS/jdk21.tar.gz"
+  export JAVA_HOME="$TOOLS/jdk21/Contents/Home"
 fi
 "$JAVA_HOME/bin/java" -version 2>&1 | head -1
 
@@ -92,13 +100,48 @@ fi
 say "Android SDK licenses: please read them and answer 'y' to accept"
 "$SDKMANAGER" --licenses
 
-say "Installing SDK packages (platform-tools, Android 16 platform, NDK $NDK_VERSION, CMake $CMAKE_VERSION)"
-"$SDKMANAGER" --install "platform-tools" "platforms;android-36" "ndk;$NDK_VERSION" "cmake;$CMAKE_VERSION"
+say "Installing SDK packages (platform-tools, Android 17 platform, NDK $NDK_VERSION, CMake $CMAKE_VERSION)"
+"$SDKMANAGER" --install "platform-tools" "ndk;$NDK_VERSION" "cmake;$CMAKE_VERSION"
+if ! "$SDKMANAGER" --install "$PLATFORM"; then
+  warn "sdkmanager has no '$PLATFORM'; trying '${PLATFORM}.0'."
+  "$SDKMANAGER" --install "${PLATFORM}.0" || warn "Could not install the Android 17 platform now; Gradle will try to fetch it during the build."
+fi
+
+# 3b. llama.cpp at the pinned commit ------------------------------------------------------------
+# The project folder may be a copy without the git submodule, or hold the older llama.cpp that
+# v1 used. Fetch the exact commit OfflineLLM pins (as a GitHub tarball: no git needed).
+llama_ok() {
+  [ -f "$LLAMA_DIR/CMakeLists.txt" ] || return 1
+  [ "$(tr -d '[:space:]' 2>/dev/null < "$LLAMA_DIR/.hw-llama-commit")" = "$LLAMA_PIN" ] && return 0
+  # A git checkout at the right commit is fine too (only asked when Apple's git tools exist,
+  # so the Mac never pops up an "install developer tools" dialog).
+  if [ -e "$LLAMA_DIR/.git" ] && xcode-select -p >/dev/null 2>&1; then
+    [ "$(git -C "$LLAMA_DIR" rev-parse HEAD 2>/dev/null)" = "$LLAMA_PIN" ] && return 0
+  fi
+  return 1
+}
+if llama_ok; then
+  say "llama.cpp is at the pinned commit ${LLAMA_PIN:0:7}"
+else
+  say "Fetching llama.cpp ${LLAMA_PIN:0:7} (one time)"
+  curl -fL --retry 3 -o "$TOOLS/llama.cpp.tar.gz" "https://github.com/ggml-org/llama.cpp/archive/$LLAMA_PIN.tar.gz"
+  rm -rf "$TOOLS/llama-extract" && mkdir -p "$TOOLS/llama-extract"
+  tar -xzf "$TOOLS/llama.cpp.tar.gz" -C "$TOOLS/llama-extract"
+  [ -f "$TOOLS/llama-extract/llama.cpp-$LLAMA_PIN/CMakeLists.txt" ] || die "The llama.cpp download looks incomplete; run this again."
+  if [ -e "$LLAMA_DIR" ]; then
+    rm -rf "$LLAMA_DIR.previous"
+    mv "$LLAMA_DIR" "$LLAMA_DIR.previous"
+  fi
+  mkdir -p "$(dirname "$LLAMA_DIR")"
+  mv "$TOOLS/llama-extract/llama.cpp-$LLAMA_PIN" "$LLAMA_DIR"
+  printf '%s\n' "$LLAMA_PIN" > "$LLAMA_DIR/.hw-llama-commit"
+  rm -rf "$TOOLS/llama-extract" "$TOOLS/llama.cpp.tar.gz" "$LLAMA_DIR.previous"
+fi
 
 # 4. Build ----------------------------------------------------------------------------------------
 printf 'sdk.dir=%s\n' "$ANDROID_HOME" > "$PROJECT/local.properties"
 chmod +x "$PROJECT/gradlew"
-say "Building the app (first time: about 10-20 minutes)"
+say "Building the app (first v2 build: about 15-30 minutes)"
 ( cd "$PROJECT" && ./gradlew :app:assembleRelease --no-daemon --console=plain )
 cp "$PROJECT/app/build/outputs/apk/release/app-release.apk" "$APK_OUT"
 say "APK ready: $APK_OUT"
