@@ -142,8 +142,8 @@ fun LandingScreen(onBegin: () -> Unit) {
 
 /**
  * Name: black sky over the Earth at night seen from orbit (the Gulf and Liwa, the view Orbit 412
- * has of you), a plain field and the teal button. Matches the preview's Name artboard: the photo
- * starts 17% down the screen, breathing with the same slow zoom as the welcome photo.
+ * has of you), a plain field and the teal button, with Orbit 412 gliding along the horizon (the
+ * screen's one motion). Matches the preview's Name artboard: the photo starts 17% down the screen.
  */
 @Composable
 fun NameScreen(
@@ -155,12 +155,6 @@ fun NameScreen(
     var name by rememberSaveable { mutableStateOf(initialName) }
     var focused by remember { mutableStateOf(false) }
     val submit = { if (!entering) onEnter(name.ifBlank { "Wanderer" }) }
-
-    val t = rememberInfiniteTransition(label = "kenburns")
-    val zoom by t.animateFloat(
-        initialValue = 1.0f, targetValue = 1.08f,
-        animationSpec = infiniteRepeatable(tween(24_000), RepeatMode.Reverse), label = "z",
-    )
 
     BoxWithConstraints(Modifier.fillMaxSize().background(HW.Space)) {
         val h = maxHeight
@@ -176,7 +170,7 @@ fun NameScreen(
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 alignment = Alignment.TopCenter,
-                modifier = Modifier.fillMaxSize().graphicsLayer { scaleX = zoom; scaleY = zoom },
+                modifier = Modifier.fillMaxSize(),
             )
         }
         Box(
@@ -187,6 +181,14 @@ fun NameScreen(
                     1f to Color.Black,
                 ),
             ),
+        )
+        // The one motion on this screen: Orbit 412 gliding just above the Earth's horizon.
+        SatelliteArc(
+            Modifier.fillMaxSize(),
+            place = ::nameScreenArc,
+            labelAbove = true,
+            periodMs = 60_000,
+            startAt = 0.22f,
         )
 
         Column(Modifier.fillMaxSize().safeDrawingPadding()) {

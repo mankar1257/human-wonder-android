@@ -223,6 +223,13 @@ private fun OrbitCard(sky: SkyState, onTalk: () -> Unit, onRetry: () -> Unit) {
             alignment = EarthOnCard,
             modifier = Modifier.matchParentSize(),
         )
+        SatelliteArc(
+            Modifier.matchParentSize(),
+            place = ::homeCardArc,
+            label = false,
+            periodMs = 60_000,
+            startAt = 0.30f,
+        )
         Column(Modifier.fillMaxWidth()) {
             Spacer(Modifier.height(120.dp))
             Column(

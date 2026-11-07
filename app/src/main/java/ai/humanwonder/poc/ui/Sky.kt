@@ -44,12 +44,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PointMode
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
@@ -86,8 +88,9 @@ fun DotGrid(modifier: Modifier = Modifier, alpha: Float = 0.09f) {
 
 /**
  * Orbit 412 gliding across the sky with a comet trail and its name beside it. Its path is an
- * invisible arc placed either a fixed distance below the top inset ([arcBelowTop], used in the
- * chat) or at a fraction of the screen height ([arcFraction] with [dropFraction], over photos).
+ * invisible arc placed by [place] (apex y and end drop in px, from the canvas size; used over the
+ * Earth photo), or a fixed distance below the top inset ([arcBelowTop], used in the chat), or at a
+ * fraction of the screen height ([arcFraction] with [dropFraction], over the welcome photo).
  * Matches the preview canvas exactly (trail, glow, core and label values).
  */
 @Composable
@@ -99,10 +102,14 @@ fun SatelliteArc(
     dropFraction: Float = 0.05f,
     periodMs: Int = 75_000,
     startAt: Float = 0.3f,
+    place: ((Size) -> Offset)? = null,
+    label: Boolean = true,
+    labelAbove: Boolean = false,
 ) {
     val density = LocalDensity.current
     val top = WindowInsets.safeDrawing.asPaddingValues().calculateTopPadding()
     val measurer = rememberTextMeasurer()
+    val labelStyle = HWType.ChatMeta.copy(fontSize = 11.sp, fontWeight = FontWeight.Medium, color = HW.Ink.copy(alpha = 0.78f))
     val t = rememberInfiniteTransition(label = "orbit")
     val travel by t.animateFloat(0f, 1f, infiniteRepeatable(tween(periodMs, easing = LinearEasing)), label = "travel")
 
@@ -110,7 +117,11 @@ fun SatelliteArc(
         val w = size.width
         val arcY: Float
         val drop: Float
-        if (arcBelowTop != null) {
+        if (place != null) {
+            val spot = place(size)
+            arcY = spot.x
+            drop = spot.y
+        } else if (arcBelowTop != null) {
             arcY = with(density) { (top + arcBelowTop).toPx() }
             drop = 70.dp.toPx()
         } else {
@@ -137,12 +148,32 @@ fun SatelliteArc(
             radius = 13.dp.toPx(), center = sat,
         )
         drawCircle(Color.White, radius = 2.3.dp.toPx(), center = sat)
-        drawText(
-            measurer, "Orbit 412",
-            topLeft = Offset(sat.x + 9.dp.toPx(), sat.y + 7.dp.toPx()),
-            style = HWType.ChatMeta.copy(fontSize = 11.sp, fontWeight = FontWeight.Medium, color = HW.Ink.copy(alpha = 0.78f)),
-        )
+        if (label) {
+            val text = measurer.measure(AnnotatedString("Orbit 412"), labelStyle)
+            val y = if (labelAbove) sat.y - 7.dp.toPx() - text.size.height else sat.y + 7.dp.toPx()
+            drawText(text, topLeft = Offset(sat.x + 9.dp.toPx(), y))
+        }
     }
+}
+
+// Orbit 412's pass over bg_earth_orbit.jpg (768 x 1376). The top of the airglow peaks at y=402 in
+// the middle of the photo and sits ~26 px lower at the edges; Orbit 412 flies 45 px above it
+// (apex y=357, ends 40 px lower). Same numbers as design/preview/gen/orbit_js.py.
+private const val EARTH_W = 768f
+private const val EARTH_H = 1376f
+private const val EARTH_ARC_Y = 357f
+private const val EARTH_ARC_DROP = 40f
+
+/** Name screen: the photo box starts 17% down, is 83% tall, cropped to fill and top-aligned. */
+fun nameScreenArc(size: Size): Offset {
+    val s = max(size.width / EARTH_W, 0.83f * size.height / EARTH_H)
+    return Offset(0.17f * size.height + EARTH_ARC_Y * s, EARTH_ARC_DROP * s)
+}
+
+/** Home card: the photo is drawn at card width and raised by 30% of the width. */
+fun homeCardArc(size: Size): Offset {
+    val s = size.width / EARTH_W
+    return Offset(EARTH_ARC_Y * s - 0.30f * size.width, EARTH_ARC_DROP * s)
 }
 
 // --------------------------------------------------------------------------------- star trails
