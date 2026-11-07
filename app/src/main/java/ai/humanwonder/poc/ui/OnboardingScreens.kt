@@ -119,7 +119,7 @@ fun LandingScreen(onBegin: () -> Unit) {
                 ) {
                     Text(
                         "The sky has something to tell you.",
-                        color = Color.White, style = HWType.WelcomeHero, textAlign = TextAlign.Center,
+                        color = Color.White, style = HWType.WelcomeHero.capScale(), textAlign = TextAlign.Center,
                     )
                     Spacer(Modifier.height(14.dp))
                     Text(
@@ -184,7 +184,7 @@ fun NameScreen(
                 ) {
                     Text(
                         "What should Orbit\u00A0412 call you?",
-                        color = Color.White, style = HWType.WelcomeTitle, textAlign = TextAlign.Center,
+                        color = Color.White, style = HWType.WelcomeTitle.capScale(), textAlign = TextAlign.Center,
                     )
                     Spacer(Modifier.height(14.dp))
                     Text(

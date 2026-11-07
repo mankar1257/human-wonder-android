@@ -43,12 +43,18 @@ fun GalaxyBackground(
     )
 }
 
-/** Lets the Activity pause/resume the GL thread with its own lifecycle. */
+/**
+ * Lets the Activity pause/resume the GL threads with its own lifecycle. Home and Chat each have
+ * a sky (both exist for a moment while one screen fades into the other), so every view is tracked.
+ */
 object GalaxyLifecycle {
-    private var view: WeakReference<GalaxyView>? = null
-    internal fun attach(v: GalaxyView) { view = WeakReference(v) }
-    fun onPause() { view?.get()?.pause() }
-    fun onResume() { view?.get()?.resume() }
+    private val views = mutableListOf<WeakReference<GalaxyView>>()
+    internal fun attach(v: GalaxyView) {
+        views.removeAll { it.get() == null }
+        views.add(WeakReference(v))
+    }
+    fun onPause() { views.mapNotNull { it.get() }.forEach { it.pause() } }
+    fun onResume() { views.mapNotNull { it.get() }.forEach { it.resume() } }
 }
 
 @SuppressLint("ViewConstructor")
@@ -100,6 +106,8 @@ class GalaxyView(context: Context) : GLSurfaceView(context), Choreographer.Frame
     }
 
     fun resume() {
+        // A sky whose screen has gone keeps no frame loop running.
+        if (!isAttachedToWindow) return
         onResume()
         start()
     }

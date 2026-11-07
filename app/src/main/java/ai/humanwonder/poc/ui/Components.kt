@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
@@ -36,12 +37,15 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.em
@@ -140,21 +144,81 @@ fun PrimaryButton(
     }
 }
 
-/** The Human Wonder logo: the orbit mark (a ring with Orbit 412 circling it) and the wordmark. */
+/**
+ * The Human Wonder logo: the orbit mark (a ring with Orbit 412 circling it) and the wordmark.
+ * It is a logo, so the wordmark is sized in dp and does not grow with the system font size.
+ */
 @Composable
-fun BrandLockup(modifier: Modifier = Modifier, markSize: Dp = 22.dp, textSize: TextUnit = 17.sp) {
+fun BrandLockup(modifier: Modifier = Modifier, markSize: Dp = 22.dp, textSize: Dp = 17.dp) {
+    val density = LocalDensity.current
+    val fixed = with(density) { HWType.ChatTitle.copy(fontSize = textSize.toSp(), lineHeight = 22.dp.toSp(), letterSpacing = (-0.01).em) }
     Row(
         modifier.semantics(mergeDescendants = true) {},
         verticalAlignment = Alignment.CenterVertically,
     ) {
         OrbitMark(markSize, active = false)
         Spacer(Modifier.width(if (markSize >= 22.dp) 9.dp else 8.dp))
+        Text("Human Wonder", color = Color.White, style = fixed, maxLines = 1, softWrap = false)
+    }
+}
+
+/** The person's initial on the Human Wonder gradient (teal to iris), as on Home and in the side menu. */
+@Composable
+fun InitialAvatar(name: String, size: Dp = 36.dp, fontSize: TextUnit = 15.sp, modifier: Modifier = Modifier) {
+    Box(
+        modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(Brush.linearGradient(listOf(HW.PrimaryContainer, HW.Iris))),
+        contentAlignment = Alignment.Center,
+    ) {
         Text(
-            "Human Wonder",
-            color = Color.White,
-            style = HWType.ChatTitle.copy(fontSize = textSize, letterSpacing = (-0.01).em),
+            initialOf(name),
+            color = HW.OnAccent,
+            style = HWType.ChatTitle.copy(fontSize = fontSize, lineHeight = fontSize, fontWeight = FontWeight.SemiBold),
+            maxLines = 1,
         )
     }
+}
+
+/** First letter of the name, upper case ("W" for Wanderer when there is no name yet). */
+fun initialOf(name: String): String {
+    val trimmed = name.trim()
+    if (trimmed.isEmpty()) return "W"
+    // Whole code point, so a name that starts with an emoji or a non-Latin letter stays intact.
+    return String(Character.toChars(trimmed.codePointAt(0))).uppercase()
+}
+
+/** A 48dp round icon button (the header buttons on every screen). */
+@Composable
+fun HwIconButton(
+    @DrawableRes icon: Int,
+    description: String,
+    modifier: Modifier = Modifier,
+    tint: Color = HW.IconMuted,
+    iconSize: Dp = 24.dp,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier.size(48.dp).clip(CircleShape).clickable(role = Role.Button, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) { HwIcon(icon, tint, iconSize, contentDescription = description) }
+}
+
+/** Glass card or group: radius 24, rgba(20, 24, 30, 0.72), white 10% hairline. */
+fun Modifier.glass(shape: Shape = RoundedCornerShape(24.dp)): Modifier =
+    this.clip(shape).background(HW.Glass).border(1.dp, HW.GlassBorder, shape)
+
+/** A 1dp white 7% divider inside glass groups. */
+@Composable
+fun GlassDivider(modifier: Modifier = Modifier, inset: Dp = 16.dp) {
+    Box(modifier.fillMaxWidth().padding(horizontal = inset).height(1.dp).background(HW.Divider))
+}
+
+/** Section label above a group: 13/18 medium #8D9997, sentence case. */
+@Composable
+fun SectionLabel(text: String, modifier: Modifier = Modifier) {
+    Text(text, color = HW.InkTertiary, style = HWType.ChatLabel, modifier = modifier)
 }
 
 /**

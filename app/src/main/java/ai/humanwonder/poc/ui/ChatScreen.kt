@@ -32,7 +32,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -92,8 +91,11 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.layout.Placeable
+import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import kotlin.math.min
 
@@ -127,7 +129,7 @@ fun ChatScreen(
     onSend: (String) -> Unit,
     onStop: () -> Unit,
     onNewConversation: () -> Unit,
-    onBack: () -> Unit,
+    onMenu: () -> Unit,
     onPerspective: (Perspective) -> Unit,
     onCycleTone: () -> Unit,
     onMic: () -> Unit,
@@ -141,7 +143,7 @@ fun ChatScreen(
 
     val send: (String) -> Unit = { text ->
         if (text.isNotBlank() && ready && !state.generating) {
-            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            if (state.haptics) haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
             uplinks++
             onSend(text)
             onInput("")
@@ -152,7 +154,7 @@ fun ChatScreen(
     val view = LocalView.current
     var wasGenerating by remember { mutableStateOf(false) }
     LaunchedEffect(state.generating) {
-        if (wasGenerating && !state.generating && state.messages.lastOrNull()?.fromUser == false) {
+        if (state.haptics && wasGenerating && !state.generating && state.messages.lastOrNull()?.fromUser == false) {
             view.performHapticFeedback(
                 if (Build.VERSION.SDK_INT >= 30) HapticFeedbackConstants.CONFIRM else HapticFeedbackConstants.CONTEXT_CLICK
             )
@@ -176,7 +178,7 @@ fun ChatScreen(
         )
 
         Column(Modifier.fillMaxSize().safeDrawingPadding()) {
-            ChatHeader(state, onBack, onNewConversation)
+            ChatHeader(state, onMenu, onNewConversation)
             val failed = state.sky as? SkyState.Failed
             if (failed != null) {
                 LostSignal(failed.message, onRetry, Modifier.weight(1f))
@@ -197,7 +199,7 @@ fun ChatScreen(
                 }
             }
             Text(
-                "Human Wonder's Orbit 412 sees far, but it can still be wrong.",
+                "Human Wonder’s Orbit 412 sees far, but it can still be wrong.",
                 color = HW.InkTertiary,
                 style = HWType.ChatMeta,
                 textAlign = TextAlign.Center,
@@ -210,7 +212,7 @@ fun ChatScreen(
 // --------------------------------------------------------------------------------- header
 
 @Composable
-private fun ChatHeader(state: UiState, onBack: () -> Unit, onNew: () -> Unit) {
+private fun ChatHeader(state: UiState, onMenu: () -> Unit, onNew: () -> Unit) {
     val last = state.messages.lastOrNull()
     val (status, busy, color) = when (val sky = state.sky) {
         is SkyState.Aligning -> Triple("Orbit 412 is rising over the horizon, ${(sky.progress * 100).toInt()}%", true, HW.Gold)
@@ -226,14 +228,14 @@ private fun ChatHeader(state: UiState, onBack: () -> Unit, onNew: () -> Unit) {
         Modifier.fillMaxWidth().height(64.dp).padding(horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        IconCircle(R.drawable.ic_arrow_back, "Back", HW.IconMuted, size = 48, iconSize = 22, onClick = onBack)
+        IconCircle(R.drawable.ic_menu, "Open menu", HW.IconMuted, size = 48, iconSize = 24, onClick = onMenu)
         Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-            BrandLockup(markSize = 20.dp, textSize = 16.sp)
+            BrandLockup(markSize = 20.dp, textSize = 16.dp)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (busy) PulsingDot(color, size = 6.dp, periodMs = 900)
                 else Box(Modifier.size(6.dp).clip(CircleShape).background(color))
                 Spacer(Modifier.width(6.dp))
-                Text(status, color = HW.InkSecondary, style = HWType.ChatMeta, maxLines = 1)
+                Text(status, color = HW.InkSecondary, style = HWType.ChatMeta, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
         IconCircle(R.drawable.ic_add, "New conversation", HW.IconMuted, size = 48, iconSize = 22, onClick = onNew)
@@ -249,7 +251,7 @@ private fun Hero(name: String) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text("Talk to the\ninfinite sky", color = Color.White, style = HWType.ChatHero, textAlign = TextAlign.Center)
+        Text("Talk to the\ninfinite sky", color = Color.White, style = HWType.ChatHero.capScale(), textAlign = TextAlign.Center)
         Spacer(Modifier.height(12.dp))
         Text(
             "Orbit 412 here, ${name.ifBlank { "Wanderer" }}, your Human Wonder satellite. I'm passing over you right now. What should I look at?",
@@ -357,7 +359,7 @@ private fun OrbitAnswer(m: ChatMessage, streaming: Boolean) {
         }
         if (streaming && m.text.isEmpty()) {
             Spacer(Modifier.height(10.dp))
-            ShimmerText(LISTENING[(m.id % LISTENING.size).toInt()])
+            ShimmerText(LISTENING[Math.floorMod(m.id.hashCode(), LISTENING.size)])
         }
         if (m.text.isNotEmpty()) {
             Spacer(Modifier.height(10.dp))
@@ -443,7 +445,7 @@ private fun LostSignal(message: String, onRetry: () -> Unit, modifier: Modifier)
     ) {
         OrbitMark(64.dp, active = false)
         Spacer(Modifier.height(20.dp))
-        Text("The signal is lost.", color = HW.Ink, style = HWType.HeadlineMobile, textAlign = TextAlign.Center)
+        Text("The signal is lost.", color = HW.Ink, style = HWType.HeadlineMobile.capScale(), textAlign = TextAlign.Center)
         Spacer(Modifier.height(8.dp))
         Text(message, color = HW.InkSecondary, style = HWType.ChatSub, textAlign = TextAlign.Center)
         Spacer(Modifier.height(28.dp))
@@ -476,8 +478,7 @@ private fun Composer(
         else -> "Ask Orbit 412 anything"
     }
 
-    BoxWithConstraints(Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
-        val compact = maxWidth < 352.dp
+    Box(Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
         Column(
             Modifier
                 .fillMaxWidth()
@@ -489,7 +490,7 @@ private fun Composer(
                     ),
                 )
                 .border(1.dp, border, shape)
-                .padding(start = 14.dp, end = 10.dp, top = 14.dp, bottom = 10.dp),
+                .padding(start = 12.dp, end = 8.dp, top = 14.dp, bottom = 8.dp),
         ) {
             Box(Modifier.fillMaxWidth().heightIn(min = minHeight).padding(horizontal = 4.dp)) {
                 if (input.isEmpty()) {
@@ -509,28 +510,88 @@ private fun Composer(
                         .semantics { contentDescription = "Message to Orbit" },
                 )
             }
-            Row(
-                Modifier.fillMaxWidth().padding(top = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                PerspectiveSwitch(state.perspective, onPerspective)
-                ToneChip(state.tone, compact, onCycleTone)
-                Spacer(Modifier.weight(1f))
-                IconCircle(R.drawable.ic_mic, "Voice input", HW.IconMuted, size = 40, iconSize = 20, onClick = onMic)
-                SendButton(
-                    generating = state.generating,
-                    canSend = ready && input.isNotBlank(),
-                    onClick = { if (state.generating) onStop() else send(input) },
-                )
+            // Mic and send are fixed 48dp targets that never shrink. If the row is too narrow,
+            // the tone label goes first (level 1), then the Orbit/Ground labels (level 2).
+            ComposerRow(
+                modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+                flexible = { level ->
+                    PerspectiveSwitch(state.perspective, labels = level < 2, onSelect = onPerspective)
+                    ToneChip(state.tone, compact = level >= 1, onClick = onCycleTone)
+                },
+                actions = {
+                    IconCircle(R.drawable.ic_mic, "Voice input", HW.IconMuted, size = 48, iconSize = 20, onClick = onMic)
+                    SendButton(
+                        generating = state.generating,
+                        canSend = ready && input.isNotBlank(),
+                        onClick = { if (state.generating) onStop() else send(input) },
+                    )
+                },
+            )
+        }
+    }
+}
+
+private enum class ComposerSlot { Actions, Level0, Level1, Level2 }
+
+/**
+ * The composer's control row, measured instead of guessed: [actions] (mic, send) are measured at
+ * their natural size and pinned to the end; [flexible] is composed at collapse level 0, and
+ * again at level 1 and 2 only while it does not fit in the width that is left.
+ */
+@Composable
+private fun ComposerRow(
+    modifier: Modifier,
+    flexible: @Composable (level: Int) -> Unit,
+    actions: @Composable () -> Unit,
+    gap: Dp = 4.dp,
+) {
+    SubcomposeLayout(modifier) { constraints ->
+        val gapPx = gap.roundToPx()
+        val natural = Constraints()
+        fun widthOf(items: List<Placeable>): Int =
+            items.sumOf { it.width } + gapPx * (items.size - 1).coerceAtLeast(0)
+
+        val actionItems = subcompose(ComposerSlot.Actions, actions).map { it.measure(natural) }
+        val actionsWidth = widthOf(actionItems)
+        val maxWidth = if (constraints.hasBoundedWidth) constraints.maxWidth else Int.MAX_VALUE
+        val room = maxWidth - actionsWidth - gapPx
+
+        var level = 0
+        var flexItems = subcompose(ComposerSlot.Level0) { flexible(0) }.map { it.measure(natural) }
+        while (widthOf(flexItems) > room && level < 2) {
+            level++
+            val slot = if (level == 1) ComposerSlot.Level1 else ComposerSlot.Level2
+            val current = level
+            flexItems = subcompose(slot) { flexible(current) }.map { it.measure(natural) }
+        }
+
+        val width = if (constraints.hasBoundedWidth) constraints.maxWidth else widthOf(flexItems) + gapPx + actionsWidth
+        val height = maxOf(
+            actionItems.maxOfOrNull { it.height } ?: 0,
+            flexItems.maxOfOrNull { it.height } ?: 0,
+            constraints.minHeight,
+        )
+        layout(width, height) {
+            var x = 0
+            flexItems.forEach { item ->
+                item.placeRelative(x, (height - item.height) / 2)
+                x += item.width + gapPx
+            }
+            var ax = width - actionsWidth
+            actionItems.forEach { item ->
+                item.placeRelative(ax, (height - item.height) / 2)
+                ax += item.width + gapPx
             }
         }
     }
 }
 
-/** Orbit / Ground: the selected side shows its name, the other only its icon. */
+/**
+ * Orbit / Ground: the selected side shows its name, the other only its icon. With [labels] off
+ * (narrow composer) both are icon-only segments with 10dp padding.
+ */
 @Composable
-private fun PerspectiveSwitch(selected: Perspective, onSelect: (Perspective) -> Unit) {
+private fun PerspectiveSwitch(selected: Perspective, labels: Boolean, onSelect: (Perspective) -> Unit) {
     Row(
         Modifier
             .clip(CircleShape)
@@ -539,6 +600,7 @@ private fun PerspectiveSwitch(selected: Perspective, onSelect: (Perspective) -> 
     ) {
         Perspective.entries.forEach { p ->
             val on = p == selected
+            val showLabel = on && labels
             Row(
                 Modifier
                     .height(36.dp)
@@ -547,7 +609,7 @@ private fun PerspectiveSwitch(selected: Perspective, onSelect: (Perspective) -> 
                     .selectable(selected = on, role = Role.RadioButton) { onSelect(p) }
                     .semantics { contentDescription = "${p.label} view" }
                     .animateContentSize()
-                    .padding(start = 10.dp, end = if (on) 14.dp else 10.dp),
+                    .padding(start = 10.dp, end = if (showLabel) 14.dp else 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 HwIcon(
@@ -555,7 +617,7 @@ private fun PerspectiveSwitch(selected: Perspective, onSelect: (Perspective) -> 
                     if (on && p == Perspective.Orbit) HW.Primary else if (on) Color.White else HW.InkSecondary,
                     16.dp,
                 )
-                if (on) {
+                if (showLabel) {
                     Spacer(Modifier.width(6.dp))
                     Text(p.label, color = Color.White, style = HWType.ChatLabel)
                 }
@@ -579,9 +641,9 @@ private fun ToneChip(tone: Tone, compact: Boolean, onClick: () -> Unit) {
         HwIcon(R.drawable.ic_sparkle, HW.Ink, 16.dp)
         if (!compact) {
             Spacer(Modifier.width(6.dp))
-            Text(tone.label, color = HW.Ink, style = HWType.ChatLabel)
+            Text(tone.label, color = HW.Ink, style = HWType.ChatLabel, maxLines = 1)
         }
-        Spacer(Modifier.width(2.dp))
+        Spacer(Modifier.width(6.dp))
         HwIcon(R.drawable.ic_expand_more, HW.InkSecondary, 16.dp)
     }
 }
@@ -601,19 +663,21 @@ private fun SendButton(generating: Boolean, canSend: Boolean, onClick: () -> Uni
         canSend -> HW.OnAccent
         else -> HW.InkDisabled
     }
+    // A 48dp touch target around the 40dp visual circle.
     Box(
         Modifier
-            .size(40.dp)
+            .size(48.dp)
             .clip(CircleShape)
-            .background(bg)
             .clickable(enabled = generating || canSend, role = Role.Button, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        HwIcon(
-            if (generating) R.drawable.ic_stop else R.drawable.ic_arrow_upward, fg,
-            if (generating) 18.dp else 20.dp,
-            contentDescription = if (generating) "Stop answer" else "Send",
-        )
+        Box(Modifier.size(40.dp).clip(CircleShape).background(bg), contentAlignment = Alignment.Center) {
+            HwIcon(
+                if (generating) R.drawable.ic_stop else R.drawable.ic_arrow_upward, fg,
+                if (generating) 18.dp else 20.dp,
+                contentDescription = if (generating) "Stop answer" else "Send",
+            )
+        }
     }
 }
 
