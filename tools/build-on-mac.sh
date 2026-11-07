@@ -51,6 +51,11 @@ EOF
 read -r -p "Continue? [y/N] " answer
 case "$answer" in y|Y|yes|YES) ;; *) echo "Cancelled."; exit 0 ;; esac
 
+# Keep a copy of everything below in tools/build.log, so progress and errors can be read later.
+mkdir -p "$PROJECT/tools"
+exec > >(tee "$PROJECT/tools/build.log") 2>&1
+echo "Build started $(date)"
+
 mkdir -p "$TOOLS"
 free_gb=$(df -g "$HOME" | awk 'NR==2 {print $4}')
 if [ "${free_gb:-0}" -lt 8 ]; then
