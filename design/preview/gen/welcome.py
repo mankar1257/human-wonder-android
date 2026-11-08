@@ -47,7 +47,7 @@ def ascent(target, label):
 <span aria-hidden="true" style="display: flex; flex-direction: column; align-items: center; gap: 2px">
 {chevrons}
 </span>
-<span class="hw-sweep" aria-hidden="true" style="font-size: 15px; line-height: 20px; font-weight: 500; letter-spacing: 0.01em; white-space: nowrap">{label}</span>
+<span class="hw-sweep" aria-hidden="true" style="font-size: 15px; line-height: 20px; font-weight: 500; letter-spacing: 0.01em; text-align: center; text-wrap: balance">{label}</span>
 </a>
 '''
 
