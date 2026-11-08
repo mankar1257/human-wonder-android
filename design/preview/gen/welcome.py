@@ -47,7 +47,7 @@ def ascent(target, label):
 <span aria-hidden="true" style="display: flex; flex-direction: column; align-items: center; gap: 2px">
 {chevrons}
 </span>
-<span class="hw-sweep" aria-hidden="true" style="font-size: 15px; line-height: 20px; font-weight: 500; letter-spacing: 0.01em; text-align: center; text-wrap: balance">{label}</span>
+<span class="hw-sweep" aria-hidden="true" style="font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: 0.01em; text-align: center; text-wrap: balance">{label}</span>
 </a>
 '''
 
@@ -56,7 +56,7 @@ def build(src, target, label, title, subtitle, render_vals):
     # Bottom block: everything between the flex spacer and the end of the content column.
     src = re.sub(r'(<div style="flex: 1"></div>\n)[\s\S]*?(?=</div>\n</div>\n</x-dc>)',
                  lambda m: m.group(1) + ascent(target, label), src, count=1)
-    src = re.sub(r'(<h1 class="hw-balance" style="margin: 0; font-size: 40px;[^"]*">)[^<]*(</h1>)',
+    src = re.sub(r'(<h1 class="hw-balance" style="margin: 0; font-size: \d+px;[^"]*">)[^<]*(</h1>)',
                  lambda m: m.group(1) + title + m.group(2), src, count=1)
     src = re.sub(r'<p( class="hw-balance")? (style="margin: 14px 0 0; max-width: 310px;[^"]*">)[^<]*(</p>)',
                  lambda m: '<p class="hw-balance" ' + m.group(2) + subtitle + m.group(3), src, count=1)

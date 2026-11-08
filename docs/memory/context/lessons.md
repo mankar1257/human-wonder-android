@@ -39,6 +39,13 @@ Rules from now on:
 - device_commit_files can deliver a stale copy when the same staged path is reused: give every
   staged file a new name, and always md5-check on the Mac after committing.
 
+## 2026-11-08: "all the words seem a little big"
+The type scale was a step too large for a premium feel (display 40-42sp, body 16sp). Now:
+display 34/40, name question 28/34, answers 15/24, sub-lines 14/21, row/titles 15/21,
+menu/segments 14/20, chips 13/18, labels 12/17 (never below 12sp). Same steps in the preview
+(font-size/line-height pairs mapped in every .dc.html and generator). Premium = restrained type.
+A phone's own Font size setting also scales everything; mention it when text "looks big".
+
 ## Earlier lessons
 - Show the design in the preview before building (builds cost the owner 5-15 minutes).
 - Never reveal the model or how it works in any user-facing text, error, or status.

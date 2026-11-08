@@ -69,11 +69,11 @@ EARTH = "/_blob/8ee8bb7af970b49cfab3b586c5e1f849"
 ROOT = "position: relative; width: 390px; height: 844px; overflow: hidden; background: #000000; font-family: 'Geist', system-ui, sans-serif; color: #eceff0"
 FILL = "position: absolute; left: 0; top: 0; width: 390px; height: 844px"
 ICONBTN = "width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: #c5cdcb; text-decoration: none"
-SECTION = "margin: 0; font-size: 13px; line-height: 18px; font-weight: 500; color: #8d9997"
+SECTION = "margin: 0; font-size: 12px; line-height: 17px; font-weight: 500; color: #8d9997"
 GLASS = "border-radius: 24px; background: rgba(20, 24, 30, 0.72); border: 1px solid rgba(255, 255, 255, 0.10)"
-CTA = "height: 56px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border-radius: 999px; background: #83ffe5; color: #00201a; text-decoration: none; font-size: 16px; line-height: 24px; font-weight: 500"
+CTA = "height: 56px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border-radius: 999px; background: #83ffe5; color: #00201a; text-decoration: none; font-size: 15px; line-height: 22px; font-weight: 500"
 GROUP = "border-radius: 20px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08)"
-CHIP = "max-width: 100%; min-height: 40px; box-sizing: border-box; display: flex; align-items: center; padding: 9px 16px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.14); color: #d5dcdb; font-size: 14px; line-height: 20px; text-decoration: none"
+CHIP = "max-width: 100%; min-height: 40px; box-sizing: border-box; display: flex; align-items: center; padding: 9px 16px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.14); color: #d5dcdb; font-size: 13px; line-height: 18px; text-decoration: none"
 
 RECENT = [
     ("City lights from 400 km up", "9:42 PM"),
@@ -85,8 +85,8 @@ def home_content():
     rows = "\n".join(
         f'''<a href="Transmission.dc.html" class="hw-row" style="display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 8px 10px 16px; box-sizing: border-box; text-decoration: none; color: #eceff0{'; border-top: 1px solid rgba(255, 255, 255, 0.07)' if i else ''}">
 <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
-<span class="hw-ellipsis" style="font-size: 16px; line-height: 22px">{t}</span>
-<span style="font-size: 13px; line-height: 18px; color: #8d9997">{w}</span>
+<span class="hw-ellipsis" style="font-size: 15px; line-height: 21px">{t}</span>
+<span style="font-size: 12px; line-height: 17px; color: #8d9997">{w}</span>
 </span>
 <span style="width: 40px; display: flex; justify-content: center; color: #6b7775">{icon('chevron', 20)}</span>
 </a>''' for i, (t, w) in enumerate(RECENT))
@@ -100,26 +100,26 @@ def home_content():
 <a href="Profile.dc.html" aria-label="Profile and settings" style="{ICONBTN}">{avatar(36, 15)}</a>
 </header>
 <div class="hw-noscroll" style="flex: 1; min-height: 0; overflow-y: auto">
-<h1 style="margin: 0; padding: 16px 24px 0; font-size: 30px; line-height: 36px; font-weight: 300; letter-spacing: -0.02em; color: #ffffff">{{{{greeting}}}}, {{{{name}}}}</h1>
+<h1 style="margin: 0; padding: 16px 24px 0; font-size: 26px; line-height: 32px; font-weight: 300; letter-spacing: -0.02em; color: #ffffff">{{{{greeting}}}}, {{{{name}}}}</h1>
 <section aria-label="Orbit 412" style="position: relative; margin: 20px 16px 0; display: flex; flex-direction: column; border-radius: 24px; overflow: hidden; background: #05080a; border: 1px solid rgba(255, 255, 255, 0.08)">
 <img src="{EARTH}" alt="" aria-hidden="true" style="position: absolute; left: 0; top: 0; margin-top: -30%; width: 100%; height: auto; display: block">
 <canvas ref="{{{{orbitRef}}}}" aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; pointer-events: none"></canvas>
 <div aria-hidden="true" style="flex: 1 0 120px"></div>
 <div style="position: relative; padding: 56px 20px 20px; background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0.8) 56px, rgba(0, 0, 0, 0.92) 100%)">
-<span style="display: flex; align-items: center; gap: 8px; font-size: 13px; line-height: 18px; color: #c5cdcb"><span class="hw-pulse" style="display: block; flex-shrink: 0; width: 6px; height: 6px; border-radius: 50%; background: #83ffe5"></span>Overhead now, 412 km up</span>
-<h2 style="margin: 6px 0 0; font-size: 24px; line-height: 30px; font-weight: 400; letter-spacing: -0.01em; color: #ffffff">Orbit 412</h2>
-<p style="margin: 4px 0 16px; font-size: 15px; line-height: 22px; color: #c5cdcb">Your Human Wonder satellite. Ask it what it sees tonight.</p>
+<span style="display: flex; align-items: center; gap: 8px; font-size: 12px; line-height: 17px; color: #c5cdcb"><span class="hw-pulse" style="display: block; flex-shrink: 0; width: 6px; height: 6px; border-radius: 50%; background: #83ffe5"></span>Overhead now, 412 km up</span>
+<h2 style="margin: 6px 0 0; font-size: 22px; line-height: 28px; font-weight: 400; letter-spacing: -0.01em; color: #ffffff">Orbit 412</h2>
+<p style="margin: 4px 0 16px; font-size: 14px; line-height: 21px; color: #c5cdcb">Your Human Wonder satellite. Ask it what it sees tonight.</p>
 <a href="Chat.dc.html" class="hw-cta" style="{CTA}">Talk to Orbit 412</a>
 </div>
 </section>
 <div style="display: flex; align-items: center; gap: 12px; padding: 28px 12px 8px 24px">
-<h2 style="flex: 1; min-width: 0; margin: 0; font-size: 17px; line-height: 22px; font-weight: 500; color: #ffffff">Recent transmissions</h2>
-<a href="Drawer.dc.html" style="flex-shrink: 0; min-height: 48px; display: flex; align-items: center; padding: 0 12px; font-size: 14px; line-height: 20px; font-weight: 500; color: #83ffe5; text-decoration: none; white-space: nowrap">See all</a>
+<h2 style="flex: 1; min-width: 0; margin: 0; font-size: 16px; line-height: 22px; font-weight: 500; color: #ffffff">Recent transmissions</h2>
+<a href="Drawer.dc.html" style="flex-shrink: 0; min-height: 48px; display: flex; align-items: center; padding: 0 12px; font-size: 13px; line-height: 18px; font-weight: 500; color: #83ffe5; text-decoration: none; white-space: nowrap">See all</a>
 </div>
 <div style="margin: 0 16px; {GROUP}; overflow: hidden">
 {rows}
 </div>
-<h2 style="margin: 0; padding: 28px 24px 12px; font-size: 17px; line-height: 22px; font-weight: 500; color: #ffffff">Try asking</h2>
+<h2 style="margin: 0; padding: 28px 24px 12px; font-size: 16px; line-height: 22px; font-weight: 500; color: #ffffff">Try asking</h2>
 <div style="display: flex; flex-wrap: wrap; gap: 8px; padding: 0 16px 32px">
 {chips}
 </div>
@@ -138,8 +138,8 @@ def chat_underlay():
 </header>
 <div style="flex: 1.1"></div>
 <div style="display: flex; flex-direction: column; align-items: center; padding: 0 28px; text-align: center">
-<h1 style="margin: 0; font-size: 42px; line-height: 46px; font-weight: 300; letter-spacing: -0.02em; color: #ffffff">Talk to the<br>infinite sky</h1>
-<p style="margin: 12px 0 0; max-width: 300px; font-size: 15px; line-height: 22px; color: #a7b2b0">Orbit 412 here, {{{{name}}}}, your Human Wonder satellite. I\u2019m passing over you right now. What should I look at?</p>
+<h1 style="margin: 0; font-size: 34px; line-height: 40px; font-weight: 300; letter-spacing: -0.02em; color: #ffffff">Talk to the<br>infinite sky</h1>
+<p style="margin: 12px 0 0; max-width: 300px; font-size: 14px; line-height: 21px; color: #a7b2b0">Orbit 412 here, {{{{name}}}}, your Human Wonder satellite. I\u2019m passing over you right now. What should I look at?</p>
 </div>
 <div style="flex: 1"></div>
 <div style="margin: 0 12px 20px; height: 120px; border-radius: 28px; background: linear-gradient(180deg, #15181b, #1b1d2b); border: 1px solid rgba(255, 255, 255, 0.10)"></div>
@@ -158,18 +158,18 @@ def drawer_sheet():
         for title, sel in convs:
             bg = "background: rgba(131, 255, 229, 0.12); color: #ffffff" if sel else "color: #d5dcdb"
             more = f'<span aria-label="More options" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: #a7b2b0">{icon("more", 20)}</span>' if sel else ""
-            items.append(f'<a href="Transmission.dc.html" class="hw-row" style="margin: 0 12px; min-height: 48px; display: flex; align-items: center; padding: 0 4px 0 16px; border-radius: 24px; text-decoration: none; {bg}"><span class="hw-ellipsis" style="flex: 1; min-width: 0; font-size: 15px; line-height: 20px">{title}</span>{more}</a>')
+            items.append(f'<a href="Transmission.dc.html" class="hw-row" style="margin: 0 12px; min-height: 48px; display: flex; align-items: center; padding: 0 4px 0 16px; border-radius: 24px; text-decoration: none; {bg}"><span class="hw-ellipsis" style="flex: 1; min-width: 0; font-size: 14px; line-height: 20px">{title}</span>{more}</a>')
     return f'''<div aria-hidden="true" style="{FILL}; background: rgba(0, 0, 0, 0.6)"></div>
 <nav aria-label="Transmissions" style="position: absolute; left: 0; top: 0; bottom: 0; width: 320px; display: flex; flex-direction: column; background: #0b0d12; border-radius: 0 24px 24px 0; border-right: 1px solid rgba(255, 255, 255, 0.06)">
 <div style="height: 64px; flex-shrink: 0; display: flex; align-items: center; padding: 0 20px">{lockup()}</div>
 <div style="display: flex; flex-direction: column; gap: 4px; padding: 4px 12px 8px">
-<a href="Welcome.dc.html" class="hw-row" style="min-height: 48px; display: flex; align-items: center; gap: 14px; padding: 0 16px; border-radius: 24px; color: #eceff0; text-decoration: none; font-size: 15px; line-height: 20px">{icon('home', 22, '#c5cdcb')}Home</a>
-<a href="Chat.dc.html" class="hw-row" style="min-height: 48px; display: flex; align-items: center; gap: 14px; padding: 0 16px; border-radius: 24px; color: #eceff0; text-decoration: none; font-size: 15px; line-height: 20px; background: rgba(255, 255, 255, 0.06)">{icon('add', 22, '#83ffe5')}New conversation</a>
+<a href="Welcome.dc.html" class="hw-row" style="min-height: 48px; display: flex; align-items: center; gap: 14px; padding: 0 16px; border-radius: 24px; color: #eceff0; text-decoration: none; font-size: 14px; line-height: 20px">{icon('home', 22, '#c5cdcb')}Home</a>
+<a href="Chat.dc.html" class="hw-row" style="min-height: 48px; display: flex; align-items: center; gap: 14px; padding: 0 16px; border-radius: 24px; color: #eceff0; text-decoration: none; font-size: 14px; line-height: 20px; background: rgba(255, 255, 255, 0.06)">{icon('add', 22, '#83ffe5')}New conversation</a>
 </div>
 <label class="hw-field" style="margin: 4px 12px 4px; min-height: 48px; display: flex; align-items: center; gap: 10px; padding: 0 16px; border-radius: 24px; background: rgba(255, 255, 255, 0.06)">
 <span style="color: #8d9997">{icon('search', 20)}</span>
 <span class="hw-sr">Search your transmissions</span>
-<input placeholder="Search your transmissions" style="flex: 1; min-width: 0; background: transparent; border: 0; outline: none; padding: 0; color: #ffffff; font-family: 'Geist', system-ui, sans-serif; font-size: 15px; line-height: 20px">
+<input placeholder="Search your transmissions" style="flex: 1; min-width: 0; background: transparent; border: 0; outline: none; padding: 0; color: #ffffff; font-family: 'Geist', system-ui, sans-serif; font-size: 14px; line-height: 20px">
 </label>
 <div class="hw-noscroll" style="flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; padding-bottom: 12px">
 {"".join(items)}
@@ -177,7 +177,7 @@ def drawer_sheet():
 <a href="Profile.dc.html" class="hw-row" style="flex-shrink: 0; display: flex; align-items: center; gap: 12px; min-height: 72px; padding: 0 16px 0 20px; border-top: 1px solid rgba(255, 255, 255, 0.08); text-decoration: none">
 {avatar(36, 15)}
 <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
-<span class="hw-ellipsis" style="font-size: 15px; line-height: 20px; font-weight: 500; color: #ffffff">{{{{name}}}}</span>
+<span class="hw-ellipsis" style="font-size: 14px; line-height: 20px; font-weight: 500; color: #ffffff">{{{{name}}}}</span>
 <span style="font-size: 12px; line-height: 16px; color: #a7b2b0">Profile &amp; settings</span>
 </span>
 <span style="color: #8d9997">{icon('chevron', 20)}</span>
@@ -238,26 +238,26 @@ print("drawer written")
 def field(label, hole, placeholder, kind="text", helper=None):
     help_html = f'<span style="font-size: 12px; line-height: 16px; color: #8d9997">{helper}</span>' if helper else ""
     return f'''<label class="hw-field" style="display: flex; flex-direction: column; gap: 4px; padding: 12px 16px 12px; min-height: 64px; box-sizing: border-box">
-<span style="font-size: 13px; line-height: 18px; color: #a7b2b0">{label}</span>
-<input type="{kind}" value="{{{{{hole}}}}}" onChange="{{{{on_{hole}}}}}" placeholder="{placeholder}" autocomplete="off" style="background: transparent; border: 0; outline: none; padding: 0; color: #ffffff; font-family: 'Geist', system-ui, sans-serif; font-size: 16px; line-height: 24px">
+<span style="font-size: 12px; line-height: 17px; color: #a7b2b0">{label}</span>
+<input type="{kind}" value="{{{{{hole}}}}}" onChange="{{{{on_{hole}}}}}" placeholder="{placeholder}" autocomplete="off" style="background: transparent; border: 0; outline: none; padding: 0; color: #ffffff; font-family: 'Geist', system-ui, sans-serif; font-size: 15px; line-height: 22px">
 {help_html}
 </label>'''
 
 def switch_row(label, sub, key):
     return f'''<button type="button" role="switch" aria-checked="{{{{{key}On}}}}" onClick="{{{{toggle_{key}}}}}" class="hw-row" style="width: 100%; display: flex; align-items: center; gap: 16px; min-height: 64px; padding: 10px 16px; border: 0; background: transparent; text-align: left; color: #eceff0">
 <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
-<span style="font-size: 16px; line-height: 22px">{label}</span>
-<span style="font-size: 13px; line-height: 18px; color: #8d9997">{sub}</span>
+<span style="font-size: 15px; line-height: 21px">{label}</span>
+<span style="font-size: 12px; line-height: 17px; color: #8d9997">{sub}</span>
 </span>
 <span class="hw-switch" style="background: {{{{{key}Track}}}}; border: 2px solid {{{{{key}Border}}}}"><span style="left: {{{{{key}Left}}}}; width: {{{{{key}Knob}}}}; height: {{{{{key}Knob}}}}; background: {{{{{key}Thumb}}}}"></span></span>
 </button>'''
 
 def nav_row(icon_name, label, color="#eceff0", sub=None, first=False):
-    sub_html = f'<span style="font-size: 13px; line-height: 18px; color: #8d9997">{sub}</span>' if sub else ""
+    sub_html = f'<span style="font-size: 12px; line-height: 17px; color: #8d9997">{sub}</span>' if sub else ""
     border = "" if first else "border-top: 1px solid rgba(255, 255, 255, 0.07); "
     return f'''<button type="button" class="hw-row" style="width: 100%; display: flex; align-items: center; gap: 14px; min-height: 56px; padding: 8px 16px; border: 0; {border}background: transparent; text-align: left; color: {color}">
 {icon(icon_name, 22, color if color != '#eceff0' else '#c5cdcb')}
-<span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 16px; line-height: 22px">{label}</span>{sub_html}</span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 15px; line-height: 21px">{label}</span>{sub_html}</span>
 <span style="color: #8d9997">{icon('chevron', 20)}</span>
 </button>'''
 
@@ -269,14 +269,14 @@ profile = f'''<div style="{ROOT}">
 <div style="{FILL}; display: flex; flex-direction: column">
 <header style="height: 64px; flex-shrink: 0; display: flex; align-items: center; padding: 0 4px">
 <a href="Chat.dc.html" aria-label="Back" style="{ICONBTN}">{icon('back', 22)}</a>
-<h1 style="flex: 1; margin: 0; text-align: center; font-size: 17px; line-height: 22px; font-weight: 500; color: #ffffff">Profile &amp; settings</h1>
+<h1 style="flex: 1; margin: 0; text-align: center; font-size: 16px; line-height: 22px; font-weight: 500; color: #ffffff">Profile &amp; settings</h1>
 <span style="width: 48px"></span>
 </header>
 <div class="hw-noscroll" style="flex: 1; min-height: 0; overflow-y: auto; padding: 8px 16px 32px; display: flex; flex-direction: column">
 <div style="display: flex; flex-direction: column; align-items: center; padding: 8px 0 24px">
-<span style="padding: 3px; border-radius: 50%; background: linear-gradient(135deg, #83ffe5, #7c5cff)"><span style="width: 84px; height: 84px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #0b0d12; color: #ffffff; font-size: 36px; line-height: 1; font-weight: 300">{{{{initial}}}}</span></span>
-<span style="margin-top: 14px; font-size: 22px; line-height: 28px; font-weight: 400; color: #ffffff">{{{{displayName}}}}</span>
-<span style="margin-top: 2px; font-size: 14px; line-height: 20px; color: #a7b2b0">{{{{emailLine}}}}</span>
+<span style="padding: 3px; border-radius: 50%; background: linear-gradient(135deg, #83ffe5, #7c5cff)"><span style="width: 84px; height: 84px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #0b0d12; color: #ffffff; font-size: 32px; line-height: 1; font-weight: 300">{{{{initial}}}}</span></span>
+<span style="margin-top: 14px; font-size: 20px; line-height: 26px; font-weight: 400; color: #ffffff">{{{{displayName}}}}</span>
+<span style="margin-top: 2px; font-size: 13px; line-height: 18px; color: #a7b2b0">{{{{emailLine}}}}</span>
 </div>
 <p style="{SECTION}; padding: 0 8px 8px">You</p>
 <div style="{GLASS}">
@@ -289,20 +289,20 @@ profile = f'''<div style="{ROOT}">
 <p style="{SECTION}; padding: 24px 8px 8px">Orbit 412</p>
 <div style="{GLASS}">
 <div style="padding: 14px 16px 16px">
-<span style="display: block; font-size: 16px; line-height: 22px; color: #eceff0">Point of view</span>
-<span style="display: block; font-size: 13px; line-height: 18px; color: #8d9997">How Orbit 412 describes things</span>
+<span style="display: block; font-size: 15px; line-height: 21px; color: #eceff0">Point of view</span>
+<span style="display: block; font-size: 12px; line-height: 17px; color: #8d9997">How Orbit 412 describes things</span>
 <span role="group" aria-label="Point of view" style="margin-top: 12px; display: flex; padding: 3px; border-radius: 999px; background: rgba(255, 255, 255, 0.07)">
-<button type="button" aria-pressed="{{{{orbitOn}}}}" onClick="{{{{pickOrbit}}}}" style="flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 999px; background: {{{{orbitBg}}}}; color: {{{{orbitText}}}}; font-size: 15px; line-height: 20px; font-weight: 500">{icon('sat', 18)}Orbit</button>
-<button type="button" aria-pressed="{{{{groundOn}}}}" onClick="{{{{pickGround}}}}" style="flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 999px; background: {{{{groundBg}}}}; color: {{{{groundText}}}}; font-size: 15px; line-height: 20px; font-weight: 500">{icon('location', 18)}Ground</button>
+<button type="button" aria-pressed="{{{{orbitOn}}}}" onClick="{{{{pickOrbit}}}}" style="flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 999px; background: {{{{orbitBg}}}}; color: {{{{orbitText}}}}; font-size: 14px; line-height: 20px; font-weight: 500">{icon('sat', 18)}Orbit</button>
+<button type="button" aria-pressed="{{{{groundOn}}}}" onClick="{{{{pickGround}}}}" style="flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 999px; background: {{{{groundBg}}}}; color: {{{{groundText}}}}; font-size: 14px; line-height: 20px; font-weight: 500">{icon('location', 18)}Ground</button>
 </span>
 </div>
 {DIV}
 <div style="padding: 14px 16px 16px">
-<span style="display: block; font-size: 16px; line-height: 22px; color: #eceff0">Tone</span>
-<span style="display: block; font-size: 13px; line-height: 18px; color: #8d9997">How Orbit 412 sounds</span>
+<span style="display: block; font-size: 15px; line-height: 21px; color: #eceff0">Tone</span>
+<span style="display: block; font-size: 12px; line-height: 17px; color: #8d9997">How Orbit 412 sounds</span>
 <div role="group" aria-label="Tone" style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px">
 <sc-for list="{{{{tones}}}}" as="t" hint-placeholder-count="4">
-<button type="button" aria-pressed="{{{{t.on}}}}" onClick="{{{{t.pick}}}}" style="min-height: 40px; display: flex; align-items: center; gap: 6px; padding: 0 14px; border-radius: 999px; border: 1px solid {{{{t.border}}}}; background: {{{{t.bg}}}}; color: {{{{t.color}}}}; font-size: 14px; line-height: 20px; font-weight: 500">{sparkle(14)}{{{{t.label}}}}</button>
+<button type="button" aria-pressed="{{{{t.on}}}}" onClick="{{{{t.pick}}}}" style="min-height: 40px; display: flex; align-items: center; gap: 6px; padding: 0 14px; border-radius: 999px; border: 1px solid {{{{t.border}}}}; background: {{{{t.bg}}}}; color: {{{{t.color}}}}; font-size: 13px; line-height: 18px; font-weight: 500">{sparkle(14)}{{{{t.label}}}}</button>
 </sc-for>
 </div>
 </div>
