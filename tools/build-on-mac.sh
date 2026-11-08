@@ -88,6 +88,7 @@ EOF
 if [ -f "$PROJECT/tools/.auto-continue" ]; then
   rm -f "$PROJECT/tools/.auto-continue"
   answer=y
+  AUTO=1
   echo "Continue? [y/N] y (started for you)"
 else
   read -r -p "Continue? [y/N] " answer
@@ -101,8 +102,13 @@ echo "Build started $(date)"
 
 mkdir -p "$TOOLS"
 free_gb=$(df -g "$HOME" | awk 'NR==2 {print $4}')
-if [ "${free_gb:-0}" -lt 8 ]; then
-  warn "Only ${free_gb} GB free on this disk; about 8 GB is recommended."
+# A first build needs about 8 GB; a rebuild (tools and libraries already here) needs about 2 GB.
+need_gb=8
+[ -d "$PROJECT/app/build" ] && need_gb=2
+if [ "${free_gb:-0}" -lt "$need_gb" ] && [ -n "${AUTO:-}" ]; then
+  warn "Only ${free_gb} GB free on this disk; about ${need_gb} GB is recommended. Trying anyway."
+elif [ "${free_gb:-0}" -lt "$need_gb" ]; then
+  warn "Only ${free_gb} GB free on this disk; about ${need_gb} GB is recommended."
   read -r -p "Try anyway? [y/N] " a2
   case "$a2" in y|Y) ;; *) exit 1 ;; esac
 fi
