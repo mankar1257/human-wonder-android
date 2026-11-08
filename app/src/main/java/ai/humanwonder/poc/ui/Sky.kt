@@ -173,12 +173,6 @@ fun nameScreenArc(size: Size): Offset {
     return Offset(0.17f * size.height + EARTH_ARC_Y * s, EARTH_ARC_DROP * s)
 }
 
-/** Home card: the photo is drawn at card width and raised by 30% of the width. */
-fun homeCardArc(size: Size): Offset {
-    val s = size.width / EARTH_W
-    return Offset(EARTH_ARC_Y * s - 0.30f * size.width, EARTH_ARC_DROP * s)
-}
-
 // --------------------------------------------------------------------------------- star trails
 
 /** The pre-drawn trails: one bitmap, rotated around the pole star every frame. */

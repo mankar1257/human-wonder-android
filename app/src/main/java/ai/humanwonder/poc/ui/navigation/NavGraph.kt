@@ -4,7 +4,6 @@ import ai.humanwonder.poc.AppViewModel
 import ai.humanwonder.poc.BuildConfig
 import ai.humanwonder.poc.ChatViewModel
 import ai.humanwonder.poc.ui.ChatScreen
-import ai.humanwonder.poc.ui.HomeScreen
 import ai.humanwonder.poc.ui.LandingScreen
 import ai.humanwonder.poc.ui.LicensesScreen
 import ai.humanwonder.poc.ui.NameScreen
@@ -14,6 +13,7 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.speech.RecognizerIntent
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.tween
@@ -56,7 +56,22 @@ fun NavGraph(
         popExitTransition = { fadeOut(tween(300)) },
     ) {
         composable(Routes.Landing.route) {
-            LandingScreen(onBegin = { navController.navigate(Routes.Name.route) { launchSingleTop = true } })
+            val profile by app.profile.collectAsStateWithLifecycle()
+            val returning = profile.onboardingComplete && profile.name.isNotBlank()
+            LandingScreen(
+                greetingName = if (returning) profile.name.trim() else null,
+                onContinue = {
+                    if (returning) {
+                        // Profile already set up: straight into a new chat; Back from there comes home.
+                        navController.navigate(Routes.Chat.to()) {
+                            popUpTo(Routes.Landing.route) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    } else {
+                        navController.navigate(Routes.Name.route) { launchSingleTop = true }
+                    }
+                },
+            )
         }
 
         composable(Routes.Name.route) {
@@ -67,15 +82,13 @@ fun NavGraph(
                 onBack = { navController.popBackStack() },
                 onEnter = { name ->
                     app.completeOnboarding(name)
-                    navController.navigate(Routes.Home.route) {
+                    navController.navigate(Routes.Chat.to()) {
                         popUpTo(Routes.Landing.route) { inclusive = true }
                         launchSingleTop = true
                     }
                 },
             )
         }
-
-        composable(Routes.Home.route) { HomeRoute(app, navController) }
 
         composable(
             Routes.Chat.route,
@@ -136,42 +149,6 @@ private fun SideMenu(
 }
 
 @Composable
-private fun HomeRoute(app: AppViewModel, nav: NavHostController) {
-    val profile by app.profile.collectAsStateWithLifecycle()
-    val sky by app.sky.collectAsStateWithLifecycle()
-    val conversations by app.conversations.collectAsStateWithLifecycle()
-    val drawerState = rememberDrawerState(DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
-    val openChat: (String?, String?) -> Unit = { id, question ->
-        nav.navigate(Routes.Chat.to(id, question)) { launchSingleTop = true }
-    }
-
-    SideMenu(
-        app = app,
-        drawerState = drawerState,
-        selectedId = null,
-        onHome = {},
-        onNewConversation = { openChat(null, null) },
-        onOpen = { id -> openChat(id, null) },
-        onDeleted = {},
-        onProfile = { nav.navigate(Routes.Profile.route) { launchSingleTop = true } },
-    ) {
-        HomeScreen(
-            name = profile.name,
-            sky = sky,
-            recent = conversations.take(3),
-            onMenu = { scope.launch { drawerState.open() } },
-            onProfile = { nav.navigate(Routes.Profile.route) { launchSingleTop = true } },
-            onTalk = { openChat(null, null) },
-            onOpen = { id -> openChat(id, null) },
-            onSeeAll = { scope.launch { drawerState.open() } },
-            onAsk = { q -> openChat(null, q) },
-            onRetry = app::retry,
-        )
-    }
-}
-
-@Composable
 private fun ChatRoute(app: AppViewModel, nav: NavHostController) {
     val vm: ChatViewModel = hiltViewModel()
     val state by vm.ui.collectAsStateWithLifecycle()
@@ -203,11 +180,15 @@ private fun ChatRoute(app: AppViewModel, nav: NavHostController) {
         onDispose { view.keepScreenOn = false }
     }
 
+    // Home is the desert sky: it becomes the only screen again, so Back there leaves the app.
     val goHome: () -> Unit = {
-        if (!nav.popBackStack(Routes.Home.route, inclusive = false)) {
-            nav.navigate(Routes.Home.route) { launchSingleTop = true }
+        nav.navigate(Routes.Landing.route) {
+            popUpTo(nav.graph.id) { inclusive = true }
+            launchSingleTop = true
         }
     }
+    // Back from the chat goes home to the sky (the side menu, when open, closes first).
+    BackHandler(enabled = drawerState.isClosed) { goHome() }
 
     SideMenu(
         app = app,

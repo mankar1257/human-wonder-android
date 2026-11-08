@@ -3,10 +3,13 @@ package ai.humanwonder.poc.ui
 import ai.humanwonder.poc.R
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
@@ -14,6 +17,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -36,32 +40,41 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.time.LocalTime
+import kotlinx.coroutines.launch
 
 /**
  * Full-bleed photograph from the Stitch design, at full colour, breathing with a slow zoom.
@@ -96,10 +109,50 @@ private fun Rising(content: @Composable () -> Unit) {
     ) { content() }
 }
 
-/** Welcome: the wanderer on the Liwa dunes, with Orbit 412 crossing the Milky Way above. */
+/**
+ * The opening screen on every launch: the Liwa dunes under the Milky Way with Orbit 412 passing
+ * over. No button: swipe up (or tap the teal arrow) to continue. The first time that leads to
+ * "What should Orbit 412 call you?"; once a profile exists it says good evening and goes straight
+ * into the chat. [greetingName] is the saved name when the profile is set up, otherwise null.
+ */
 @Composable
-fun LandingScreen(onBegin: () -> Unit) {
-    Box(Modifier.fillMaxSize()) {
+fun LandingScreen(greetingName: String?, onContinue: () -> Unit) {
+    val scope = rememberCoroutineScope()
+    val density = LocalDensity.current
+    val threshold = with(density) { 96.dp.toPx() }
+    val maxPull = with(density) { 160.dp.toPx() }
+    val pull = remember { Animatable(0f) }
+    // The drag handler is set up once, so it calls the latest onContinue through this.
+    // (No "already left" latch: navigation ignores a second trigger, and a latch could leave the
+    // screen stuck after a quick Back from Name.)
+    val continueNow by rememberUpdatedState(onContinue)
+    val go: () -> Unit = { continueNow() }
+    val label = if (greetingName != null) "Swipe up to talk to Orbit\u00A0412" else "Swipe up to begin"
+
+    Box(
+        Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                // The drag total lives here (not in the animated value, which updates a frame later).
+                var total = 0f
+                detectVerticalDragGestures(
+                    onDragStart = { total = 0f },
+                    onDragEnd = {
+                        if (-total > threshold) go()
+                        total = 0f
+                        scope.launch { pull.animateTo(0f, spring()) }
+                    },
+                    onDragCancel = {
+                        total = 0f
+                        scope.launch { pull.animateTo(0f, spring()) }
+                    },
+                ) { change, dragAmount ->
+                    change.consume()
+                    total = (total + dragAmount).coerceIn(-maxPull, 0f)
+                    scope.launch { pull.snapTo(total) }
+                }
+            },
+    ) {
         PhotoSky(
             R.drawable.bg_liwa_dunes,
             Brush.verticalGradient(
@@ -109,7 +162,16 @@ fun LandingScreen(onBegin: () -> Unit) {
         )
         SatelliteArc(Modifier.fillMaxSize(), arcFraction = 0.45f, dropFraction = 0.06f, startAt = 0.18f)
 
-        Column(Modifier.fillMaxSize().safeDrawingPadding()) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .safeDrawingPadding()
+                // The words follow the finger a little, so the swipe feels physical.
+                .graphicsLayer {
+                    translationY = pull.value * 0.5f
+                    alpha = 1f - (-pull.value / maxPull) * 0.4f
+                },
+        ) {
             Box(Modifier.fillMaxWidth().height(64.dp), contentAlignment = Alignment.Center) {
                 BrandLockup()
             }
@@ -124,20 +186,67 @@ fun LandingScreen(onBegin: () -> Unit) {
                     )
                     Spacer(Modifier.height(14.dp))
                     Text(
-                        "Human Wonder gives the sky a voice: Orbit 412, a satellite passing over you tonight.",
-                        color = HW.Ink.copy(alpha = 0.85f), style = HWType.ChatSub, textAlign = TextAlign.Center,
+                        if (greetingName != null) {
+                            "${greetingFor()}, $greetingName. Orbit\u00A0412 is overhead now."
+                        } else {
+                            "Human Wonder gives the sky a voice: Orbit\u00A0412, a satellite passing over you tonight."
+                        },
+                        color = HW.Ink.copy(alpha = 0.85f),
+                        style = HWType.ChatSub.copy(lineBreak = LineBreak.Paragraph),
+                        textAlign = TextAlign.Center,
                         modifier = Modifier.widthIn(max = 310.dp),
                     )
                 }
             }
             Spacer(Modifier.weight(1f))
-            PrimaryButton(
-                "Begin your first look up",
-                modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 40.dp),
-                onClick = onBegin,
-            )
+            SwipeUpArrow(label, onClick = go)
         }
     }
+}
+
+/** The teal arrow that gently bobs upward, with its label; tapping it does what the swipe does. */
+@Composable
+private fun SwipeUpArrow(label: String, onClick: () -> Unit) {
+    val t = rememberInfiniteTransition(label = "bob")
+    val bob by t.animateFloat(
+        initialValue = 0f, targetValue = -6f,
+        animationSpec = infiniteRepeatable(tween(900, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+        label = "y",
+    )
+    Column(
+        Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, bottom = 36.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Box(
+            Modifier
+                .size(56.dp)
+                .shadow(12.dp, CircleShape)
+                .clip(CircleShape)
+                .background(HW.Primary)
+                .clickable(role = Role.Button, onClick = onClick)
+                .semantics { contentDescription = label },
+            contentAlignment = Alignment.Center,
+        ) {
+            HwIcon(
+                R.drawable.ic_keyboard_arrow_up, HW.OnAccent, 30.dp,
+                modifier = Modifier.graphicsLayer { translationY = bob.dp.toPx() },
+            )
+        }
+        // The arrow already carries this label for TalkBack; don't read it twice.
+        Text(
+            label, color = HW.Ink.copy(alpha = 0.88f), style = HWType.Chip, textAlign = TextAlign.Center,
+            modifier = Modifier.clearAndSetSemantics {},
+        )
+    }
+}
+
+/** "Good morning|afternoon|evening|night" for the local time. */
+fun greetingFor(time: LocalTime = LocalTime.now()): String = when (time.hour) {
+    in 5..11 -> "Good morning"
+    in 12..16 -> "Good afternoon"
+    in 17..21 -> "Good evening"
+    else -> "Good night"
 }
 
 /**

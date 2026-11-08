@@ -39,8 +39,8 @@ class MainActivity : ComponentActivity() {
             navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
         )
 
-        // First run: Landing → Name → Home. Later launches open at Home.
-        val start = if (app.onboarded) Routes.Home.route else Routes.Landing.route
+        // Every launch opens on the desert sky; swiping up goes to Name (first time) or the chat.
+        val start = Routes.Landing.route
 
         setContent {
             HumanWonderTheme {
