@@ -40,3 +40,7 @@ bundled in the APK as `assets/hw-core.gguf` (fetched + SHA-256 checked at build 
 - 2026-11-08: First v2 build succeeded on the Mac (BUILD SUCCESSFUL in 6m 36s once Java 21,
   SDK 37, NDK 29 and Gradle 9.8.2 were in place). APK 482 MB at human-wonder-v2/HumanWonder-POC.apk,
   model inside, no INTERNET permission. v2 lives on branch v2-offlinellm (not merged to main yet).
+- 2026-11-08: "Aman" on the owner's phone was v1's saved name copied by v2; v2 now starts fresh
+  once (name cleared, welcome shown). Owner: Android only for now (no iPhone). New flow: every
+  launch opens on the desert sky, swipe up -> Name (first time) or straight to the chat; Home hub
+  removed; the side menu's Home and Back from the chat return to the desert.

@@ -1,111 +1,111 @@
 {
- "v": 3,
- "createdOnFiles": {
-  "v": 1,
-  "at": "2026-11-06T17:40:19Z"
- },
- "title": "Human Wonder — App Preview",
- "launch": {
-  "view": "canvas"
- },
- "pages": [],
- "boards": {
-  "Main.dc.html": {
-   "x": 0,
-   "y": 0,
-   "w": 390,
-   "h": 844,
-   "title": "1 · Landing",
-   "is_interactive": true,
-   "radius": 36
+  "v": 3,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-06T17:40:19Z"
   },
-  "Name.dc.html": {
-   "x": 470,
-   "y": 0,
-   "w": 390,
-   "h": 844,
-   "title": "2 · What should the sky call you?",
-   "is_interactive": true,
-   "radius": 36
+  "title": "Human Wonder — App Preview",
+  "launch": {
+    "view": "canvas"
   },
-  "Chat.dc.html": {
-   "x": 940,
-   "y": 0,
-   "w": 390,
-   "h": 844,
-   "title": "3 · Talk to Orbit 412 (live)",
-   "is_interactive": true,
-   "radius": 36
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "1 · Welcome (first launch)",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "Name.dc.html": {
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "2 · Your name",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "Chat.dc.html": {
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "3 · Talk to Orbit 412 (live)",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "Transmission.dc.html": {
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "4 · Orbit 412 answering",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "Drawer.dc.html": {
+      "x": 470,
+      "y": 1224,
+      "w": 390,
+      "h": 844,
+      "title": "6 · Side menu with your transmissions",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "Profile.dc.html": {
+      "x": 940,
+      "y": 1224,
+      "w": 390,
+      "h": 844,
+      "title": "7 · Profile & settings",
+      "is_interactive": true,
+      "radius": 36
+    },
+    "Welcome.dc.html": {
+      "x": 0,
+      "y": 1224,
+      "w": 390,
+      "h": 844,
+      "title": "5 · Welcome back (profile already set up)",
+      "is_interactive": true,
+      "radius": 36
+    }
   },
-  "Transmission.dc.html": {
-   "x": 1410,
-   "y": 0,
-   "w": 390,
-   "h": 844,
-   "title": "4 · Orbit 412 answering",
-   "is_interactive": true,
-   "radius": 36
+  "order": [
+    "Main.dc.html",
+    "Name.dc.html",
+    "Chat.dc.html",
+    "Transmission.dc.html",
+    "Welcome.dc.html",
+    "Drawer.dc.html",
+    "Profile.dc.html"
+  ],
+  "notes": {
+    "title": {
+      "x": 0,
+      "y": -300,
+      "text": "Human Wonder · the app, before we build it",
+      "kind": "title1",
+      "maxW": 1800
+    },
+    "howto": {
+      "x": 1880,
+      "y": 0,
+      "w": 360,
+      "fill": "teal",
+      "size": "m",
+      "text": "Press Play on any screen to use it.\n\nEvery launch opens on the desert sky. Swipe up (or tap the arrow):\n• first time (1) → your name (2) → the chat (3)\n• profile already set up (5) → straight into the chat (3)\n\nIn the chat, the menu button opens the side menu (6): Home takes you back to the desert, plus all your conversations and your profile (7).\n\nThe send button never shrinks; on narrow phones or large text the tone label folds away first.\n\nOn this canvas Orbit 412 carries a few prepared answers; in the app it answers anything you ask."
+    },
+    "row2": {
+      "x": 0,
+      "y": 924,
+      "text": "Coming back: welcome back, history and you",
+      "kind": "title1",
+      "maxW": 1330
+    }
   },
-  "Home.dc.html": {
-   "x": 0,
-   "y": 1224,
-   "w": 390,
-   "h": 844,
-   "title": "5 · Home",
-   "is_interactive": true,
-   "radius": 36
-  },
-  "Drawer.dc.html": {
-   "x": 470,
-   "y": 1224,
-   "w": 390,
-   "h": 844,
-   "title": "6 · Side menu with your transmissions",
-   "is_interactive": true,
-   "radius": 36
-  },
-  "Profile.dc.html": {
-   "x": 940,
-   "y": 1224,
-   "w": 390,
-   "h": 844,
-   "title": "7 · Profile & settings",
-   "is_interactive": true,
-   "radius": 36
-  }
- },
- "order": [
-  "Main.dc.html",
-  "Name.dc.html",
-  "Chat.dc.html",
-  "Transmission.dc.html",
-  "Home.dc.html",
-  "Drawer.dc.html",
-  "Profile.dc.html"
- ],
- "notes": {
-  "title": {
-   "x": 0,
-   "y": -300,
-   "text": "Human Wonder · the app, before we build it",
-   "kind": "title1",
-   "maxW": 1800
-  },
-  "howto": {
-   "x": 1880,
-   "y": 0,
-   "w": 360,
-   "fill": "teal",
-   "size": "m",
-   "text": "Press Play on any screen to use it.\n\nOnboarding: 1 → 2. Then Home (5) is where you land: talk to Orbit 412, pick up a recent transmission, or open the side menu (6) for all your conversations and your profile (7).\n\nScreens 3 and 4 are the chat. The menu button opens the side menu. The send button never shrinks; on narrow phones or large text the tone label folds away first.\n\nOn this canvas Orbit 412 carries a few prepared answers; in the app it answers anything you ask."
-  },
-  "row2": {
-   "x": 0,
-   "y": 924,
-   "text": "After onboarding: home, history and you",
-   "kind": "title1",
-   "maxW": 1330
-  }
- },
- "designSystems": []
+  "designSystems": []
 }

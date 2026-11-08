@@ -16,8 +16,8 @@ W, H = 393, 852
 SCALE = 2
 NAME = "Vivek"
 # (screen, seconds on screen, action)
-PLAN = [("Main", 6, None), ("Name", 7, "type"), ("Home", 6, None), ("Drawer", 4, None),
-        ("Chat", 5, None), ("Transmission", 11, None), ("Profile", 5, None)]
+PLAN = [("Main", 6, None), ("Name", 7, "type"), ("Chat", 5, None), ("Transmission", 11, None),
+        ("Welcome", 5, None), ("Drawer", 4, None), ("Profile", 5, None)]
 
 
 def build_page():

@@ -43,7 +43,7 @@ BODY = f'''<div style="position: relative; width: 390px; height: 844px; overflow
 <span style="width: 48px"></span>
 </header>
 <div class="hw-rise" style="display: flex; flex-direction: column; align-items: center; padding: 28px 32px 0; text-align: center">
-<h1 class="hw-balance" style="margin: 0; font-size: 32px; line-height: 38px; font-weight: 300; letter-spacing: -0.02em; color: #ffffff">What should Orbit&nbsp;412 call you?</h1>
+<h1 class="hw-balance" style="margin: 0; font-size: 32px; line-height: 38px; font-weight: 300; letter-spacing: -0.02em; color: #ffffff">What should Orbit 412 call you?</h1>
 <p style="margin: 12px 0 0; max-width: 300px; font-size: 15px; line-height: 22px; color: #a7b2b0">It will greet you by name every time it passes over.</p>
 </div>
 <div style="flex: 1"></div>

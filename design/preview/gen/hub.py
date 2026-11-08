@@ -128,6 +128,24 @@ def home_content():
 
 SKY_LAYERS = ''
 
+def chat_underlay():
+    """The empty chat the side menu slides over (static: it sits under the scrim)."""
+    return f'''<div style="{FILL}; display: flex; flex-direction: column">
+<header style="height: 64px; flex-shrink: 0; display: flex; align-items: center; padding: 0 4px">
+<span style="{ICONBTN}">{icon('menu', 24)}</span>
+<div style="flex: 1; display: flex; justify-content: center">{lockup()}</div>
+<span style="{ICONBTN}">{icon('add', 22)}</span>
+</header>
+<div style="flex: 1.1"></div>
+<div style="display: flex; flex-direction: column; align-items: center; padding: 0 28px; text-align: center">
+<h1 style="margin: 0; font-size: 42px; line-height: 46px; font-weight: 300; letter-spacing: -0.02em; color: #ffffff">Talk to the<br>infinite sky</h1>
+<p style="margin: 12px 0 0; max-width: 300px; font-size: 15px; line-height: 22px; color: #a7b2b0">Orbit 412 here, {{{{name}}}}, your Human Wonder satellite. I\u2019m passing over you right now. What should I look at?</p>
+</div>
+<div style="flex: 1"></div>
+<div style="margin: 0 12px 20px; height: 120px; border-radius: 28px; background: linear-gradient(180deg, #15181b, #1b1d2b); border: 1px solid rgba(255, 255, 255, 0.10)"></div>
+</div>'''
+
+
 def drawer_sheet():
     groups = [
         ("Today", [("City lights from 400 km up", True), ("The Moon over Liwa", False)]),
@@ -145,7 +163,7 @@ def drawer_sheet():
 <nav aria-label="Transmissions" style="position: absolute; left: 0; top: 0; bottom: 0; width: 320px; display: flex; flex-direction: column; background: #0b0d12; border-radius: 0 24px 24px 0; border-right: 1px solid rgba(255, 255, 255, 0.06)">
 <div style="height: 64px; flex-shrink: 0; display: flex; align-items: center; padding: 0 20px">{lockup()}</div>
 <div style="display: flex; flex-direction: column; gap: 4px; padding: 4px 12px 8px">
-<a href="Home.dc.html" class="hw-row" style="min-height: 48px; display: flex; align-items: center; gap: 14px; padding: 0 16px; border-radius: 24px; color: #eceff0; text-decoration: none; font-size: 15px; line-height: 20px">{icon('home', 22, '#c5cdcb')}Home</a>
+<a href="Welcome.dc.html" class="hw-row" style="min-height: 48px; display: flex; align-items: center; gap: 14px; padding: 0 16px; border-radius: 24px; color: #eceff0; text-decoration: none; font-size: 15px; line-height: 20px">{icon('home', 22, '#c5cdcb')}Home</a>
 <a href="Chat.dc.html" class="hw-row" style="min-height: 48px; display: flex; align-items: center; gap: 14px; padding: 0 16px; border-radius: 24px; color: #eceff0; text-decoration: none; font-size: 15px; line-height: 20px; background: rgba(255, 255, 255, 0.06)">{icon('add', 22, '#83ffe5')}New conversation</a>
 </div>
 <label class="hw-field" style="margin: 4px 12px 4px; min-height: 48px; display: flex; align-items: center; gap: 10px; padding: 0 16px; border-radius: 24px; background: rgba(255, 255, 255, 0.06)">
@@ -204,11 +222,16 @@ def page(title, body, js, props='{"name":{"editor":"text","default":"Wanderer"},
 </html>
 """
 
-home = f'<div style="{ROOT}">\n{SKY_LAYERS}\n{home_content()}\n</div>'
-drawer = f'<div style="{ROOT}">\n{SKY_LAYERS}\n{home_content()}\n{drawer_sheet()}\n</div>'
-(PROJECT / "Home.dc.html").write_text(page("Human Wonder — Home", home, HOME_JS))
-(PROJECT / "Drawer.dc.html").write_text(page("Human Wonder — Side menu", drawer, HOME_JS))
-print("home + drawer written")
+# Home is now the desert welcome (gen/welcome.py); the side menu slides over the chat.
+DRAWER_JS = """class Component extends DCLogic {
+  renderVals() {
+    var name = (this.props.name || '').trim() || 'Wanderer';
+    return { name: name, initial: name.charAt(0).toUpperCase() };
+  }
+}"""
+drawer = f'<div style="{ROOT}">\n{chat_underlay()}\n{drawer_sheet()}\n</div>'
+(PROJECT / "Drawer.dc.html").write_text(page("Human Wonder — Side menu", drawer, DRAWER_JS))
+print("drawer written")
 
 # ----------------------------------------------------------------------------- profile
 
@@ -245,7 +268,7 @@ profile = f'''<div style="{ROOT}">
 <div aria-hidden="true" style="{FILL}; background: radial-gradient(ellipse 90% 36% at 50% 0%, rgba(124, 92, 255, 0.28), rgba(47, 230, 200, 0.08) 55%, rgba(0, 0, 0, 0) 100%)"></div>
 <div style="{FILL}; display: flex; flex-direction: column">
 <header style="height: 64px; flex-shrink: 0; display: flex; align-items: center; padding: 0 4px">
-<a href="Home.dc.html" aria-label="Back" style="{ICONBTN}">{icon('back', 22)}</a>
+<a href="Chat.dc.html" aria-label="Back" style="{ICONBTN}">{icon('back', 22)}</a>
 <h1 style="flex: 1; margin: 0; text-align: center; font-size: 17px; line-height: 22px; font-weight: 500; color: #ffffff">Profile &amp; settings</h1>
 <span style="width: 48px"></span>
 </header>

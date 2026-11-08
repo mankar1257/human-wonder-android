@@ -70,9 +70,12 @@ glowing "transmission" text, dot grid over photos, dotted arc lines, and (called
 childish") the swirling star-trail sky, the dune silhouette, the aurora behind Home, a glowing
 Orbit mark on every list row, sparkle icons on chips, rainbow-gradient avatars.
 
-- Landing: Liwa dunes photo at full colour, light scrims, slow zoom; lockup; "The sky has
-  something to tell you."; "Human Wonder gives the sky a voice: Orbit 412, a satellite passing
-  over you tonight."; teal "Begin your first look up".
+- Flow (owner, 2026-11-08): EVERY launch opens on Landing, the Liwa dunes photo at full colour
+  with Orbit 412 passing over. No button: a teal 56dp swipe-up arrow that bobs (tap works too).
+  First time: "Swipe up to begin" -> Name -> Chat. Profile set up: "Good evening, <name>. Orbit 412
+  is overhead now." + "Swipe up to talk to Orbit 412" -> straight into a new chat. In the chat,
+  Back and the side menu's Home return to Landing (it becomes the only screen; Back there exits).
+  There is no separate Home hub any more (the photo-card Home was removed).
 - Name: black sky; the Earth at night from orbit (`bg_earth_orbit`, the Gulf and Liwa) starts 17%
   down the screen (static); scrim black 0-17%, clear 33-58%, black by 92%. Orbit 412 glides
   just above the horizon, label above it (`SatelliteArc(place = ::nameScreenArc, labelAbove)`):
@@ -81,14 +84,6 @@ Orbit mark on every list row, sparkle icons on chips, rainbow-gradient avatars.
   "What should Orbit 412 call you?" (32/38 light, keep "Orbit 412" unbroken), plain field
   (56dp, radius 16, rgba(14,17,19,.82), white 16% border, no icon), teal "Meet Orbit 412",
   lock + "Your name stays on this phone." in #8D9997.
-- Home (v2): plain black, no shader. Header menu / lockup / solid avatar (#1F2629, white 12%
-  border). Greeting 30/36 light. Orbit 412 photo card (radius 24): Earth photo at card width,
-  shifted up 30% of the width, a 120dp clear band, then status / "Orbit 412" 24/30 / one line /
-  teal 56dp button on a dark band that grows with the text. Orbit 412 crosses the card's photo
-  above the horizon, no label (`place = ::homeCardArc`). Arc numbers: apex y=357, drop 40 px on
-  the 768x1376 photo (Sky.kt EARTH_ARC_*, preview gen/orbit_js.py). "Recent transmissions" + See all,
-  grouped list (radius 20, white 4% fill, 8% border), rows title + time + grey chevron.
-  "Try asking": outlined chips that wrap, no icons.
 - Chat (Gemini + Stitch home): aurora-valley shader + faint dot grid; `u_calm` sinks the aurora
   when talking. Answers Geist 16/25 #E8ECEC, no glow; newest ~18 chars fade in. User bubble
   #1D2225. Orbit mark + "Orbit 412" per answer, copy action. Composer: Orbit/Ground, tone chip,
