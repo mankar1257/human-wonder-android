@@ -37,3 +37,6 @@ bundled in the APK as `assets/hw-core.gguf` (fetched + SHA-256 checked at build 
   orbit photo on Name, plain black Home with one photo card, quiet list, plain chips, solid avatar.
 - 2026-11-07: Owner missed the moving orbit ("that was cool") -> Orbit 412 now glides along the
   Earth's horizon on Name and across the Home photo card (still on Welcome and the empty chat).
+- 2026-11-08: First v2 build succeeded on the Mac (BUILD SUCCESSFUL in 6m 36s once Java 21,
+  SDK 37, NDK 29 and Gradle 9.8.2 were in place). APK 482 MB at human-wonder-v2/HumanWonder-POC.apk,
+  model inside, no INTERNET permission. v2 lives on branch v2-offlinellm (not merged to main yet).
