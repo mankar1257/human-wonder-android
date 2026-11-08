@@ -70,7 +70,7 @@ ROOT = "position: relative; width: 390px; height: 844px; overflow: hidden; backg
 FILL = "position: absolute; left: 0; top: 0; width: 390px; height: 844px"
 ICONBTN = "width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: #c5cdcb; text-decoration: none"
 SECTION = "margin: 0; font-size: 12px; line-height: 17px; font-weight: 500; color: #8d9997"
-GLASS = "border-radius: 24px; background: rgba(20, 24, 30, 0.72); border: 1px solid rgba(255, 255, 255, 0.10)"
+GLASS = "border-radius: 24px; background: linear-gradient(140deg, rgba(14, 15, 20, 0.92) 0%, rgba(30, 32, 48, 0.88) 55%, rgba(70, 74, 128, 0.62) 100%); border: 1px solid rgba(255, 255, 255, 0.12)"  # the chat composer's glass
 CTA = "height: 56px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border-radius: 999px; background: #83ffe5; color: #00201a; text-decoration: none; font-size: 15px; line-height: 22px; font-weight: 500"
 GROUP = "border-radius: 20px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08)"
 CHIP = "max-width: 100%; min-height: 40px; box-sizing: border-box; display: flex; align-items: center; padding: 9px 16px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.14); color: #d5dcdb; font-size: 13px; line-height: 18px; text-decoration: none"
@@ -160,13 +160,13 @@ def drawer_sheet():
             more = f'<span aria-label="More options" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: #a7b2b0">{icon("more", 20)}</span>' if sel else ""
             items.append(f'<a href="Transmission.dc.html" class="hw-row" style="margin: 0 12px; min-height: 48px; display: flex; align-items: center; padding: 0 4px 0 16px; border-radius: 24px; text-decoration: none; {bg}"><span class="hw-ellipsis" style="flex: 1; min-width: 0; font-size: 14px; line-height: 20px">{title}</span>{more}</a>')
     return f'''<div aria-hidden="true" style="{FILL}; background: rgba(0, 0, 0, 0.6)"></div>
-<nav aria-label="Transmissions" style="position: absolute; left: 0; top: 0; bottom: 0; width: 320px; display: flex; flex-direction: column; background: #0b0d12; border-radius: 0 24px 24px 0; border-right: 1px solid rgba(255, 255, 255, 0.06)">
+<nav aria-label="Transmissions" style="position: absolute; left: 0; top: 0; bottom: 0; width: 320px; display: flex; flex-direction: column; background: linear-gradient(140deg, rgba(14, 15, 20, 0.92) 0%, rgba(30, 32, 48, 0.88) 55%, rgba(70, 74, 128, 0.62) 100%), #0b0d12; border-radius: 0 24px 24px 0; border-right: 1px solid rgba(255, 255, 255, 0.06)">
 <div style="height: 64px; flex-shrink: 0; display: flex; align-items: center; padding: 0 20px">{lockup()}</div>
 <div style="display: flex; flex-direction: column; gap: 4px; padding: 4px 12px 8px">
 <a href="Welcome.dc.html" class="hw-row" style="min-height: 48px; display: flex; align-items: center; gap: 14px; padding: 0 16px; border-radius: 24px; color: #eceff0; text-decoration: none; font-size: 14px; line-height: 20px">{icon('home', 22, '#c5cdcb')}Home</a>
-<a href="Chat.dc.html" class="hw-row" style="min-height: 48px; display: flex; align-items: center; gap: 14px; padding: 0 16px; border-radius: 24px; color: #eceff0; text-decoration: none; font-size: 14px; line-height: 20px; background: rgba(255, 255, 255, 0.06)">{icon('add', 22, '#83ffe5')}New conversation</a>
+<a href="Chat.dc.html" class="hw-row" style="min-height: 48px; display: flex; align-items: center; gap: 14px; padding: 0 16px; border-radius: 24px; color: #eceff0; text-decoration: none; font-size: 14px; line-height: 20px; background: rgba(255, 255, 255, 0.08)">{icon('add', 22, '#83ffe5')}New conversation</a>
 </div>
-<label class="hw-field" style="margin: 4px 12px 4px; min-height: 48px; display: flex; align-items: center; gap: 10px; padding: 0 16px; border-radius: 24px; background: rgba(255, 255, 255, 0.06)">
+<label class="hw-field" style="margin: 4px 12px 4px; min-height: 48px; display: flex; align-items: center; gap: 10px; padding: 0 16px; border-radius: 24px; background: rgba(255, 255, 255, 0.08)">
 <span style="color: #8d9997">{icon('search', 20)}</span>
 <span class="hw-sr">Search your transmissions</span>
 <input placeholder="Search your transmissions" style="flex: 1; min-width: 0; background: transparent; border: 0; outline: none; padding: 0; color: #ffffff; font-family: 'Geist', system-ui, sans-serif; font-size: 14px; line-height: 20px">
@@ -292,7 +292,7 @@ profile = f'''<div style="{ROOT}">
 <span style="display: block; font-size: 15px; line-height: 21px; color: #eceff0">Point of view</span>
 <span style="display: block; font-size: 12px; line-height: 17px; color: #8d9997">How Orbit 412 describes things</span>
 <span role="group" aria-label="Point of view" style="margin-top: 12px; display: flex; padding: 3px; border-radius: 999px; background: rgba(255, 255, 255, 0.07)">
-<button type="button" aria-pressed="{{{{orbitOn}}}}" onClick="{{{{pickOrbit}}}}" style="flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 999px; background: {{{{orbitBg}}}}; color: {{{{orbitText}}}}; font-size: 14px; line-height: 20px; font-weight: 500">{icon('sat', 18)}Orbit</button>
+<button type="button" aria-pressed="{{{{orbitOn}}}}" onClick="{{{{pickOrbit}}}}" style="flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 999px; background: {{{{orbitBg}}}}; color: {{{{orbitText}}}}; font-size: 14px; line-height: 20px; font-weight: 500"><span style="color: {{{{orbitIcon}}}}; display: flex">{icon('sat', 18)}</span>Orbit</button>
 <button type="button" aria-pressed="{{{{groundOn}}}}" onClick="{{{{pickGround}}}}" style="flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 999px; background: {{{{groundBg}}}}; color: {{{{groundText}}}}; font-size: 14px; line-height: 20px; font-weight: 500">{icon('location', 18)}Ground</button>
 </span>
 </div>
@@ -302,7 +302,7 @@ profile = f'''<div style="{ROOT}">
 <span style="display: block; font-size: 12px; line-height: 17px; color: #8d9997">How Orbit 412 sounds</span>
 <div role="group" aria-label="Tone" style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px">
 <sc-for list="{{{{tones}}}}" as="t" hint-placeholder-count="4">
-<button type="button" aria-pressed="{{{{t.on}}}}" onClick="{{{{t.pick}}}}" style="min-height: 40px; display: flex; align-items: center; gap: 6px; padding: 0 14px; border-radius: 999px; border: 1px solid {{{{t.border}}}}; background: {{{{t.bg}}}}; color: {{{{t.color}}}}; font-size: 13px; line-height: 18px; font-weight: 500">{sparkle(14)}{{{{t.label}}}}</button>
+<button type="button" aria-pressed="{{{{t.on}}}}" onClick="{{{{t.pick}}}}" style="min-height: 40px; display: flex; align-items: center; gap: 6px; padding: 0 14px; border-radius: 999px; border: 0; background: {{{{t.bg}}}}; color: {{{{t.color}}}}; font-size: 13px; line-height: 18px; font-weight: 500"><span style="color: {{{{t.icon}}}}; display: flex">{sparkle(14)}</span>{{{{t.label}}}}</button>
 </sc-for>
 </div>
 </div>
@@ -359,13 +359,14 @@ PROFILE_JS = """class Component extends DCLogic {
       groundBg: orbit ? 'transparent' : 'rgba(255, 255, 255, 0.14)',
       orbitText: orbit ? '#ffffff' : '#a7b2b0',
       groundText: orbit ? '#a7b2b0' : '#ffffff',
+      orbitIcon: orbit ? '#83ffe5' : '#a7b2b0',
       pickOrbit: () => this.setState({ view: 'orbit' }),
       pickGround: () => this.setState({ view: 'ground' }),
       tones: ['Balanced', 'Poetic', 'Scientific', 'Whisper'].map((label, i) => ({
         label: label, on: s.tone === i,
-        bg: s.tone === i ? 'rgba(131, 255, 229, 0.14)' : 'transparent',
-        border: s.tone === i ? 'rgba(131, 255, 229, 0.6)' : 'rgba(255, 255, 255, 0.16)',
-        color: s.tone === i ? '#ffffff' : '#c5cdcb',
+        bg: s.tone === i ? 'rgba(255, 255, 255, 0.14)' : 'rgba(255, 255, 255, 0.08)',
+        color: s.tone === i ? '#ffffff' : '#a7b2b0',
+        icon: s.tone === i ? '#83ffe5' : '#a7b2b0',
         pick: () => this.setState({ tone: i }),
       })),
       toggle_voice: () => this.setState((st) => ({ voice: !st.voice })),

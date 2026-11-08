@@ -80,7 +80,7 @@ input::placeholder { color: rgba(186, 202, 196, 0.45); }
 <span style="margin-top: 2px; font-size: 13px; line-height: 18px; color: #a7b2b0">{{emailLine}}</span>
 </div>
 <p style="margin: 0; font-size: 12px; line-height: 17px; font-weight: 500; color: #8d9997; padding: 0 8px 8px">You</p>
-<div style="border-radius: 24px; background: rgba(20, 24, 30, 0.72); border: 1px solid rgba(255, 255, 255, 0.10)">
+<div style="border-radius: 24px; background: linear-gradient(140deg, rgba(14, 15, 20, 0.92) 0%, rgba(30, 32, 48, 0.88) 55%, rgba(70, 74, 128, 0.62) 100%); border: 1px solid rgba(255, 255, 255, 0.12)">
 <label class="hw-field" style="display: flex; flex-direction: column; gap: 4px; padding: 12px 16px 12px; min-height: 64px; box-sizing: border-box">
 <span style="font-size: 12px; line-height: 17px; color: #a7b2b0">Name or callsign</span>
 <input type="text" value="{{name}}" onChange="{{on_name}}" placeholder="Your name or callsign" autocomplete="off" style="background: transparent; border: 0; outline: none; padding: 0; color: #ffffff; font-family: 'Geist', system-ui, sans-serif; font-size: 15px; line-height: 22px">
@@ -100,12 +100,12 @@ input::placeholder { color: rgba(186, 202, 196, 0.45); }
 </label>
 </div>
 <p style="margin: 0; font-size: 12px; line-height: 17px; font-weight: 500; color: #8d9997; padding: 24px 8px 8px">Orbit 412</p>
-<div style="border-radius: 24px; background: rgba(20, 24, 30, 0.72); border: 1px solid rgba(255, 255, 255, 0.10)">
+<div style="border-radius: 24px; background: linear-gradient(140deg, rgba(14, 15, 20, 0.92) 0%, rgba(30, 32, 48, 0.88) 55%, rgba(70, 74, 128, 0.62) 100%); border: 1px solid rgba(255, 255, 255, 0.12)">
 <div style="padding: 14px 16px 16px">
 <span style="display: block; font-size: 15px; line-height: 21px; color: #eceff0">Point of view</span>
 <span style="display: block; font-size: 12px; line-height: 17px; color: #8d9997">How Orbit 412 describes things</span>
 <span role="group" aria-label="Point of view" style="margin-top: 12px; display: flex; padding: 3px; border-radius: 999px; background: rgba(255, 255, 255, 0.07)">
-<button type="button" aria-pressed="{{orbitOn}}" onClick="{{pickOrbit}}" style="flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 999px; background: {{orbitBg}}; color: {{orbitText}}; font-size: 14px; line-height: 20px; font-weight: 500"><svg width="18" height="18" viewBox="0 -960 960 960" aria-hidden="true" style="display: block; flex-shrink: 0"><path d="M560-32v-80q117 0 198.5-81.5T840-392h80q0 75-28.5 140.5t-77 114q-48.5 48.5-114 77T560-32Zm0-160v-80q50 0 85-35t35-85h80q0 83-58.5 141.5T560-192ZM222-57q-15 0-30-6t-27-17L23-222q-11-12-17-27t-6-30q0-16 6-30.5T23-335l127-127q23-23 57-23.5t57 22.5l50 50 28-28-50-50q-23-23-23-56t23-56l57-57q23-23 56.5-23t56.5 23l50 50 28-28-50-50q-23-23-23-56.5t23-56.5l127-127q12-12 27-18t30-6q15 0 29.5 6t26.5 18l142 142q12 11 17.5 25.5T895-730q0 15-5.5 30T872-673L745-546q-23 23-56.5 23T632-546l-50-50-28 28 50 50q23 23 22.5 56.5T603-405l-56 56q-23 23-56.5 23T434-349l-50-50-28 28 50 50q23 23 22.5 57T405-207L278-80q-11 11-25.5 17T222-57Zm0-79 42-42-142-142-42 42 142 142Zm85-85 42-42-142-142-42 42 142 142Zm184-184 56-56-142-142-56 56 142 142Zm198-198 42-42-142-142-42 42 142 142Zm85-85 42-42-142-142-42 42 142 142ZM448-504Z" fill="currentColor"></path></svg>Orbit</button>
+<button type="button" aria-pressed="{{orbitOn}}" onClick="{{pickOrbit}}" style="flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 999px; background: {{orbitBg}}; color: {{orbitText}}; font-size: 14px; line-height: 20px; font-weight: 500"><span style="color: {{orbitIcon}}; display: flex"><svg width="18" height="18" viewBox="0 -960 960 960" aria-hidden="true" style="display: block; flex-shrink: 0"><path d="M560-32v-80q117 0 198.5-81.5T840-392h80q0 75-28.5 140.5t-77 114q-48.5 48.5-114 77T560-32Zm0-160v-80q50 0 85-35t35-85h80q0 83-58.5 141.5T560-192ZM222-57q-15 0-30-6t-27-17L23-222q-11-12-17-27t-6-30q0-16 6-30.5T23-335l127-127q23-23 57-23.5t57 22.5l50 50 28-28-50-50q-23-23-23-56t23-56l57-57q23-23 56.5-23t56.5 23l50 50 28-28-50-50q-23-23-23-56.5t23-56.5l127-127q12-12 27-18t30-6q15 0 29.5 6t26.5 18l142 142q12 11 17.5 25.5T895-730q0 15-5.5 30T872-673L745-546q-23 23-56.5 23T632-546l-50-50-28 28 50 50q23 23 22.5 56.5T603-405l-56 56q-23 23-56.5 23T434-349l-50-50-28 28 50 50q23 23 22.5 57T405-207L278-80q-11 11-25.5 17T222-57Zm0-79 42-42-142-142-42 42 142 142Zm85-85 42-42-142-142-42 42 142 142Zm184-184 56-56-142-142-56 56 142 142Zm198-198 42-42-142-142-42 42 142 142Zm85-85 42-42-142-142-42 42 142 142ZM448-504Z" fill="currentColor"></path></svg></span>Orbit</button>
 <button type="button" aria-pressed="{{groundOn}}" onClick="{{pickGround}}" style="flex: 1; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 999px; background: {{groundBg}}; color: {{groundText}}; font-size: 14px; line-height: 20px; font-weight: 500"><svg width="18" height="18" viewBox="0 -960 960 960" aria-hidden="true" style="display: block; flex-shrink: 0"><path d="M480-480q33 0 56.5-23.5T560-560q0-33-23.5-56.5T480-640q-33 0-56.5 23.5T400-560q0 33 23.5 56.5T480-480Zm0 294q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Zm0-480Z" fill="currentColor"></path></svg>Ground</button>
 </span>
 </div>
@@ -115,7 +115,7 @@ input::placeholder { color: rgba(186, 202, 196, 0.45); }
 <span style="display: block; font-size: 12px; line-height: 17px; color: #8d9997">How Orbit 412 sounds</span>
 <div role="group" aria-label="Tone" style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px">
 <sc-for list="{{tones}}" as="t" hint-placeholder-count="4">
-<button type="button" aria-pressed="{{t.on}}" onClick="{{t.pick}}" style="min-height: 40px; display: flex; align-items: center; gap: 6px; padding: 0 14px; border-radius: 999px; border: 1px solid {{t.border}}; background: {{t.bg}}; color: {{t.color}}; font-size: 13px; line-height: 18px; font-weight: 500"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="display: block; flex-shrink: 0"><path d="M11 4.5c.5 4 3.5 7 7.5 7.5-4 .5-7 3.5-7.5 7.5-.5-4-3.5-7-7.5-7.5 4-.5 7-3.5 7.5-7.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path><path d="M19 2.5v4M17 4.5h4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>{{t.label}}</button>
+<button type="button" aria-pressed="{{t.on}}" onClick="{{t.pick}}" style="min-height: 40px; display: flex; align-items: center; gap: 6px; padding: 0 14px; border-radius: 999px; border: 0; background: {{t.bg}}; color: {{t.color}}; font-size: 13px; line-height: 18px; font-weight: 500"><span style="color: {{t.icon}}; display: flex"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="display: block; flex-shrink: 0"><path d="M11 4.5c.5 4 3.5 7 7.5 7.5-4 .5-7 3.5-7.5 7.5-.5-4-3.5-7-7.5-7.5 4-.5 7-3.5 7.5-7.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path><path d="M19 2.5v4M17 4.5h4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg></span>{{t.label}}</button>
 </sc-for>
 </div>
 </div>
@@ -137,7 +137,7 @@ input::placeholder { color: rgba(186, 202, 196, 0.45); }
 </button>
 </div>
 <p style="margin: 0; font-size: 12px; line-height: 17px; font-weight: 500; color: #8d9997; padding: 24px 8px 8px">Your transmissions</p>
-<div style="border-radius: 24px; background: rgba(20, 24, 30, 0.72); border: 1px solid rgba(255, 255, 255, 0.10); overflow: hidden">
+<div style="border-radius: 24px; background: linear-gradient(140deg, rgba(14, 15, 20, 0.92) 0%, rgba(30, 32, 48, 0.88) 55%, rgba(70, 74, 128, 0.62) 100%); border: 1px solid rgba(255, 255, 255, 0.12); overflow: hidden">
 <button type="button" class="hw-row" style="width: 100%; display: flex; align-items: center; gap: 14px; min-height: 56px; padding: 8px 16px; border: 0; background: transparent; text-align: left; color: #eceff0">
 <svg width="22" height="22" viewBox="0 -960 960 960" aria-hidden="true" style="display: block; flex-shrink: 0"><path d="M440-320v-326L336-542l-56-58 200-200 200 200-56 58-104-104v326h-80ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z" fill="#c5cdcb"></path></svg>
 <span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 15px; line-height: 21px">Export transmissions</span><span style="font-size: 12px; line-height: 17px; color: #8d9997">Save all conversations as a file</span></span>
@@ -150,7 +150,7 @@ input::placeholder { color: rgba(186, 202, 196, 0.45); }
 </button>
 </div>
 <p style="margin: 0; font-size: 12px; line-height: 17px; font-weight: 500; color: #8d9997; padding: 24px 8px 8px">About</p>
-<div style="border-radius: 24px; background: rgba(20, 24, 30, 0.72); border: 1px solid rgba(255, 255, 255, 0.10); overflow: hidden">
+<div style="border-radius: 24px; background: linear-gradient(140deg, rgba(14, 15, 20, 0.92) 0%, rgba(30, 32, 48, 0.88) 55%, rgba(70, 74, 128, 0.62) 100%); border: 1px solid rgba(255, 255, 255, 0.12); overflow: hidden">
 <button type="button" class="hw-row" style="width: 100%; display: flex; align-items: center; gap: 14px; min-height: 56px; padding: 8px 16px; border: 0; background: transparent; text-align: left; color: #eceff0">
 <svg width="22" height="22" viewBox="0 -960 960 960" aria-hidden="true" style="display: block; flex-shrink: 0"><path d="M440-280h80v-240h-80v240Zm40-320q17 0 28.5-11.5T520-640q0-17-11.5-28.5T480-680q-17 0-28.5 11.5T440-640q0 17 11.5 28.5T480-600Zm0 520q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" fill="#c5cdcb"></path></svg>
 <span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span style="font-size: 15px; line-height: 21px">About Human Wonder</span><span style="font-size: 12px; line-height: 17px; color: #8d9997">Version 2.0</span></span>
@@ -201,13 +201,14 @@ class Component extends DCLogic {
       groundBg: orbit ? 'transparent' : 'rgba(255, 255, 255, 0.14)',
       orbitText: orbit ? '#ffffff' : '#a7b2b0',
       groundText: orbit ? '#a7b2b0' : '#ffffff',
+      orbitIcon: orbit ? '#83ffe5' : '#a7b2b0',
       pickOrbit: () => this.setState({ view: 'orbit' }),
       pickGround: () => this.setState({ view: 'ground' }),
       tones: ['Balanced', 'Poetic', 'Scientific', 'Whisper'].map((label, i) => ({
         label: label, on: s.tone === i,
-        bg: s.tone === i ? 'rgba(131, 255, 229, 0.14)' : 'transparent',
-        border: s.tone === i ? 'rgba(131, 255, 229, 0.6)' : 'rgba(255, 255, 255, 0.16)',
-        color: s.tone === i ? '#ffffff' : '#c5cdcb',
+        bg: s.tone === i ? 'rgba(255, 255, 255, 0.14)' : 'rgba(255, 255, 255, 0.08)',
+        color: s.tone === i ? '#ffffff' : '#a7b2b0',
+        icon: s.tone === i ? '#83ffe5' : '#a7b2b0',
         pick: () => this.setState({ tone: i }),
       })),
       toggle_voice: () => this.setState((st) => ({ voice: !st.voice })),

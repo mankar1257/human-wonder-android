@@ -2,7 +2,7 @@
 
 Run: python3 design/preview/gen/name.py  (rewrites design/preview/project/Name.dc.html in place,
 keeping its <helmet> CSS). The look: black sky, the Earth at night from orbit below the question,
-a plain field and the teal button, with Orbit 412 gliding along the horizon (the one motion).
+the same input bar and send button as the chat, with Orbit 412 gliding along the horizon.
 """
 import pathlib, sys
 
@@ -14,6 +14,7 @@ EARTH = "/_blob/8ee8bb7af970b49cfab3b586c5e1f849"
 
 FILL = "position: absolute; left: 0; top: 0; width: 390px; height: 844px"
 BACK = "m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"
+SEND = "M440-160v-487L216-423l-56-57 320-320 320 320-56 57-224-224v487h-80Z"  # the chat's send arrow
 LOCK = ("M240-80q-33 0-56.5-23.5T160-160v-400q0-33 23.5-56.5T240-640h40v-80q0-83 58.5-141.5T480-920q83 0 141.5 58.5T680-720v80h40q33 0 56.5 23.5T800-560v400q0 33-23.5 56.5T720-80H240Zm0-80h480v-400H240v400Zm240-120q33 0 56.5-23.5T560-360q0-33-23.5-56.5T480-440q-33 0-56.5 23.5T400-360q0 33 23.5 56.5T480-280ZM360-640h240v-80q0-50-35-85t-85-35q-50 0-85 35t-35 85v80ZM240-160v-400 400Z")
 
 
@@ -47,12 +48,12 @@ BODY = f'''<div style="position: relative; width: 390px; height: 844px; overflow
 <p class="hw-balance" style="margin: 12px 0 0; max-width: 300px; font-size: 14px; line-height: 21px; color: #a7b2b0">It will greet you by name every time it passes over.</p>
 </div>
 <div style="flex: 1"></div>
-<div style="display: flex; flex-direction: column; gap: 12px; padding: 0 20px 24px">
+<div style="display: flex; flex-direction: column; gap: 14px; padding: 0 20px 24px">
 <label for="hw-name" class="hw-sr">Your name</label>
-<div class="hw-field" style="height: 56px; box-sizing: border-box; display: flex; align-items: center; padding: 0 18px; border-radius: 16px; background: rgba(14, 17, 19, 0.82); border: 1px solid rgba(255, 255, 255, 0.16); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px)">
-<input id="hw-name" value="{{{{name}}}}" onChange="{{{{onName}}}}" maxlength="40" autocomplete="off" placeholder="Your name or callsign" style="flex: 1; min-width: 0; background: transparent; border: 0; outline: none; padding: 0; color: #ffffff; font-family: 'Geist', system-ui, sans-serif; font-size: 16px; line-height: 22px">
+<div class="hw-namebar" style="display: flex; align-items: center; padding: 8px 8px 8px 20px; border-radius: 28px; background: linear-gradient(140deg, rgba(14, 15, 20, 0.92) 0%, rgba(30, 32, 48, 0.88) 55%, rgba(70, 74, 128, 0.62) 100%); border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.9); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); transition: border-color 0.3s">
+<input id="hw-name" value="{{{{name}}}}" onChange="{{{{onName}}}}" maxlength="40" autocomplete="off" placeholder="Your name or callsign" style="flex: 1; min-width: 0; background: transparent; border: 0; outline: none; padding: 0; color: #ffffff; font-family: 'Geist', system-ui, sans-serif; font-size: 15px; line-height: 22px">
+<a href="Chat.dc.html" aria-label="Meet Orbit 412" class="hw-iconbtn" style="flex-shrink: 0; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; text-decoration: none"><span style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: {{{{sendBg}}}}; color: {{{{sendColor}}}}; transition: background 0.25s, color 0.25s">{svg(SEND, 20)}</span></a>
 </div>
-<a href="Chat.dc.html" class="hw-cta" style="height: 56px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border-radius: 999px; background: #83ffe5; color: #00201a; text-decoration: none; font-size: 15px; line-height: 22px; font-weight: 500">Meet Orbit 412</a>
 <div style="display: flex; align-items: center; justify-content: center; gap: 6px; padding-top: 2px; color: #8d9997">
 {svg(LOCK, 14)}
 <span style="font-size: 12px; line-height: 17px">Your name stays on this phone.</span>
@@ -75,6 +76,8 @@ JS = '''class Component extends DCLogic {
   renderVals() {
     return {
       name: this.state.name,
+      sendBg: this.state.name.trim() ? '#83ffe5' : 'transparent',
+      sendColor: this.state.name.trim() ? '#00201a' : '#6f7b79',
       orbitRef: this._orbitRef,
       onName: (e) => this.setState({ name: e.target.value.slice(0, 40) }),
     };
@@ -83,6 +86,9 @@ JS = '''class Component extends DCLogic {
 '''
 
 src = PATH.read_text()
+FOCUS_CSS = ".hw-namebar:focus-within { border-color: rgba(131, 255, 229, 0.45) !important; }"
+if FOCUS_CSS not in src:
+    src = src.replace("</style>\n</helmet>", FOCUS_CSS + "\n</style>\n</helmet>", 1)
 head, rest = src.split("</helmet>\n", 1)
 _, tail = rest.split("</x-dc>", 1)
 src = head + "</helmet>\n" + BODY + "</x-dc>" + tail

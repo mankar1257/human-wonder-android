@@ -70,6 +70,14 @@ glowing "transmission" text, dot grid over photos, dotted arc lines, and (called
 childish") the swirling star-trail sky, the dune silhouette, the aurora behind Home, a glowing
 Orbit mark on every list row, sparkle icons on chips, rainbow-gradient avatars.
 
+- ONE look everywhere (owner, 2026-11-08: "it can not be like a different app"). The chat is
+  the source of truth; every other screen reuses its parts, never look-alikes:
+  * surface = the composer glass (`GlassBrush`: near-black -> slate violet, white 12% edge,
+    `Modifier.glass`); radius 28 for input bars, 24 for cards/groups; the side menu is tinted too.
+  * primary action = the chat's `SendButton` (40dp circle in 48dp, teal + dark arrow when it can
+    go, grey when not). No big teal pill buttons anywhere (Name uses the send arrow).
+  * chips = white 8% pills; selected = white 14% (+ teal icon), like Orbit/Ground and the tone chip.
+  * type = the chat scale (inputs 15/22, labels 12/17).
 - Flow (owner, 2026-11-08): EVERY launch opens on Landing, the Liwa dunes photo at full colour
   with Orbit 412 passing over. No button: the "ascent" (three thin chevrons lighting up bottom to
   top, the top one teal with a soft glow, label with a slow light sweep; tap works too). The owner
@@ -84,9 +92,9 @@ Orbit mark on every list row, sparkle icons on chips, rainbow-gradient avatars.
   just above the horizon, label above it (`SatelliteArc(place = ::nameScreenArc, labelAbove)`):
   the owner loves seeing the orbit move, so keep a pass on every photo of the sky, but slow:
   one pass takes 90 s everywhere (`ORBIT_PASS_MS`; "not too fast please").
-  "What should Orbit 412 call you?" (32/38 light, keep "Orbit 412" unbroken), plain field
-  (56dp, radius 16, rgba(14,17,19,.82), white 16% border, no icon), teal "Meet Orbit 412",
-  lock + "Your name stays on this phone." in #8D9997.
+  "What should Orbit 412 call you?" (28/34 light, keep "Orbit 412" unbroken), then the chat's
+  input bar (glass, radius 28) with "Your name or callsign" and the chat's send arrow
+  ("Meet Orbit 412" for TalkBack), then lock + "Your name stays on this phone." in #8D9997.
 - Chat (Gemini + Stitch home): aurora-valley shader + faint dot grid; `u_calm` sinks the aurora
   when talking. Answers Geist 16/25 #E8ECEC, no glow; newest ~18 chars fade in. User bubble
   #1D2225. Orbit mark + "Orbit 412" per answer, copy action. Composer: Orbit/Ground, tone chip,
