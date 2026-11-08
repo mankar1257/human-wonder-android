@@ -47,6 +47,14 @@ java extension, not the package).
    1.0 / 1.3 / 1.5, in the preview (add test artboards) and in Compose reasoning. Primary actions
    (send, mic, CTA) never shrink; chips and labels collapse first; no row relies on everything
    fitting; very large headlines are capped. (A squeezed send button reached the phone once.)
+   - The whole app sits in `HumanWonderScale` (ui/Scale.kt): Font size grows text at most 1.15x,
+     and a big Display size can't make the layout narrower than 360dp. Never remove it.
+   - Headline + sub-line blocks above an input use `FitColumn`: when the keyboard is open they
+     drop the sub-line, then the headline; inputs never get squeezed or covered. Chat: tall
+     composer only when the safe area is >= 600dp, suggestions and footer only when >= 440dp.
+   - Proof, not reasoning: every Mac build ends with screenshots from the owner's phone plus
+     Robolectric screen checks (app/src/test/.../screens: 10 screens x 5 phone set-ups, including
+     keyboard-open) in `screens-check/`. Look at them before saying a screen is right.
 4. Never reveal how it works: no model or vendor names, and no "on-device", "offline", "AI",
    "model", "SLM", "engine", "download" or "app" in any screen, status, placeholder or error.
    Errors go through `lostSignalMessage()`, never `e.message`.

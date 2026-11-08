@@ -48,6 +48,17 @@ A phone's own Font size setting also scales everything: the app now follows it o
 (MainActivity caps LocalDensity.fontScale), after "the text takes too much space, I can't read
 anything" on the owner's phone.
 
+## 2026-11-08: "fix it properly, we need to make sure it works"
+Text crowding has three causes, fixed together: (1) the phone's Font size (capped at 1.15x),
+(2) Display size / Screen zoom, which shrinks the dp width (layout never narrower than 360dp;
+both in HumanWonderScale), (3) the keyboard: with it open the Name and empty-chat headlines had
+nowhere to go and drew over the input (FitColumn drops sub-line then headline; the chat's tall
+composer, suggestions and footer step aside on short space). "Make sure it works" means
+pictures: the Mac build now takes two screenshots on the phone (plus its font_scale and wm
+density) and draws every screen at 5 phone set-ups into screens-check/. The cloud sandbox and
+the Mac-side VM have no Maven/Google access, so the Mac's own build is the only compiler: get an
+independent compile review of main-code changes before asking the owner to build.
+
 ## Earlier lessons
 - Show the design in the preview before building (builds cost the owner 5-15 minutes).
 - Never reveal the model or how it works in any user-facing text, error, or status.
