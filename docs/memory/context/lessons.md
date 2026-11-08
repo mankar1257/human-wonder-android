@@ -44,7 +44,9 @@ The type scale was a step too large for a premium feel (display 40-42sp, body 16
 display 34/40, name question 28/34, answers 15/24, sub-lines 14/21, row/titles 15/21,
 menu/segments 14/20, chips 13/18, labels 12/17 (never below 12sp). Same steps in the preview
 (font-size/line-height pairs mapped in every .dc.html and generator). Premium = restrained type.
-A phone's own Font size setting also scales everything; mention it when text "looks big".
+A phone's own Font size setting also scales everything: the app now follows it only up to 1.15x
+(MainActivity caps LocalDensity.fontScale), after "the text takes too much space, I can't read
+anything" on the owner's phone.
 
 ## Earlier lessons
 - Show the design in the preview before building (builds cost the owner 5-15 minutes).
