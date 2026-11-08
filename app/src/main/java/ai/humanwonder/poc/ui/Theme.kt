@@ -138,63 +138,63 @@ object HWType {
     val LabelMd = TextStyle(
         fontFamily = HWFont.Mono, fontSize = 12.sp, lineHeight = 16.sp, letterSpacing = 0.06.em,
     )
-    // Chat type scale (Material 3 roles: body 16sp, labels never below 12sp).
+    // Chat type scale (2026-11-08: one step tighter for a premium feel; labels never below 12sp).
     val ChatHero = TextStyle(
         fontFamily = HWFont.Geist, fontWeight = FontWeight.Light,
-        fontSize = 42.sp, lineHeight = 46.sp, letterSpacing = (-0.02).em,
+        fontSize = 34.sp, lineHeight = 40.sp, letterSpacing = (-0.02).em,
     )
-    val ChatSub = TextStyle(fontFamily = HWFont.Geist, fontSize = 15.sp, lineHeight = 22.sp)
-    val ChatTitle = TextStyle(fontFamily = HWFont.Geist, fontWeight = FontWeight.Medium, fontSize = 16.sp, lineHeight = 22.sp)
-    val ChatBody = TextStyle(fontFamily = HWFont.Geist, fontSize = 16.sp, lineHeight = 25.sp)
-    val ChatInput = TextStyle(fontFamily = HWFont.Geist, fontSize = 16.sp, lineHeight = 24.sp)
-    val ChatLabel = TextStyle(fontFamily = HWFont.Geist, fontWeight = FontWeight.Medium, fontSize = 13.sp, lineHeight = 18.sp)
+    val ChatSub = TextStyle(fontFamily = HWFont.Geist, fontSize = 14.sp, lineHeight = 21.sp)
+    val ChatTitle = TextStyle(fontFamily = HWFont.Geist, fontWeight = FontWeight.Medium, fontSize = 15.sp, lineHeight = 21.sp)
+    val ChatBody = TextStyle(fontFamily = HWFont.Geist, fontSize = 15.sp, lineHeight = 24.sp)
+    val ChatInput = TextStyle(fontFamily = HWFont.Geist, fontSize = 15.sp, lineHeight = 22.sp)
+    val ChatLabel = TextStyle(fontFamily = HWFont.Geist, fontWeight = FontWeight.Medium, fontSize = 12.sp, lineHeight = 17.sp)
     val ChatMeta = TextStyle(fontFamily = HWFont.Geist, fontSize = 12.sp, lineHeight = 16.sp)
 
     // Onboarding display type: light, tight, and balanced across lines (no lone last word).
     val WelcomeHero = TextStyle(
         fontFamily = HWFont.Geist, fontWeight = FontWeight.Light,
-        fontSize = 40.sp, lineHeight = 44.sp, letterSpacing = (-0.02).em, lineBreak = LineBreak.Heading,
+        fontSize = 34.sp, lineHeight = 40.sp, letterSpacing = (-0.02).em, lineBreak = LineBreak.Heading,
     )
     val WelcomeTitle = TextStyle(
         fontFamily = HWFont.Geist, fontWeight = FontWeight.Light,
-        fontSize = 34.sp, lineHeight = 40.sp, letterSpacing = (-0.02).em, lineBreak = LineBreak.Heading,
-    )
-    /** Name screen question (32/38 light). */
-    val NameTitle = TextStyle(
-        fontFamily = HWFont.Geist, fontWeight = FontWeight.Light,
-        fontSize = 32.sp, lineHeight = 38.sp, letterSpacing = (-0.02).em, lineBreak = LineBreak.Heading,
-    )
-    /** Home greeting (30/36 light). */
-    val HomeGreeting = TextStyle(
-        fontFamily = HWFont.Geist, fontWeight = FontWeight.Light,
         fontSize = 30.sp, lineHeight = 36.sp, letterSpacing = (-0.02).em, lineBreak = LineBreak.Heading,
     )
-    /** "Orbit 412" on the Home photo card (24/30 regular). */
+    /** Name screen question (28/34 light). */
+    val NameTitle = TextStyle(
+        fontFamily = HWFont.Geist, fontWeight = FontWeight.Light,
+        fontSize = 28.sp, lineHeight = 34.sp, letterSpacing = (-0.02).em, lineBreak = LineBreak.Heading,
+    )
+    /** (Unused since the Home hub was removed.) */
+    val HomeGreeting = TextStyle(
+        fontFamily = HWFont.Geist, fontWeight = FontWeight.Light,
+        fontSize = 26.sp, lineHeight = 32.sp, letterSpacing = (-0.02).em, lineBreak = LineBreak.Heading,
+    )
+    /** (Unused since the Home hub was removed.) */
     val HeroTitle = TextStyle(
         fontFamily = HWFont.Geist, fontWeight = FontWeight.Normal,
-        fontSize = 24.sp, lineHeight = 30.sp, letterSpacing = (-0.01).em,
+        fontSize = 22.sp, lineHeight = 28.sp, letterSpacing = (-0.01).em,
     )
-    val ButtonLabel = TextStyle(fontFamily = HWFont.Geist, fontWeight = FontWeight.Medium, fontSize = 16.sp, lineHeight = 24.sp)
+    val ButtonLabel = TextStyle(fontFamily = HWFont.Geist, fontWeight = FontWeight.Medium, fontSize = 15.sp, lineHeight = 22.sp)
 
     // Home, side menu and Profile (values from design/preview/gen/hub.py).
-    /** Section headings and card titles: 17/22 medium. */
-    val HubTitle = TextStyle(fontFamily = HWFont.Geist, fontWeight = FontWeight.Medium, fontSize = 17.sp, lineHeight = 22.sp)
-    /** Row titles and switch labels: 16/22. */
-    val RowTitle = TextStyle(fontFamily = HWFont.Geist, fontSize = 16.sp, lineHeight = 22.sp)
-    /** Side menu items, conversation rows and the search field: 15/20. */
-    val MenuLabel = TextStyle(fontFamily = HWFont.Geist, fontSize = 15.sp, lineHeight = 20.sp)
-    /** Segmented control labels: 15/20 medium. */
-    val SegmentLabel = TextStyle(fontFamily = HWFont.Geist, fontWeight = FontWeight.Medium, fontSize = 15.sp, lineHeight = 20.sp)
-    /** Sub-lines, field labels and card status: 13/18. */
-    val Subline = TextStyle(fontFamily = HWFont.Geist, fontSize = 13.sp, lineHeight = 18.sp)
-    /** Chips on Home: 14/20. */
-    val Chip = TextStyle(fontFamily = HWFont.Geist, fontSize = 14.sp, lineHeight = 20.sp)
-    /** "See all", tone chips in Profile: 14/20 medium. */
-    val ChipStrong = TextStyle(fontFamily = HWFont.Geist, fontWeight = FontWeight.Medium, fontSize = 14.sp, lineHeight = 20.sp)
-    /** The name under the Profile avatar: 22/28. */
-    val ProfileName = TextStyle(fontFamily = HWFont.Geist, fontSize = 22.sp, lineHeight = 28.sp)
-    /** The initial in the Profile avatar: Geist Light 36. */
-    val AvatarInitial = TextStyle(fontFamily = HWFont.Geist, fontWeight = FontWeight.Light, fontSize = 36.sp, lineHeight = 36.sp)
+    /** Section headings and card titles: 16/22 medium. */
+    val HubTitle = TextStyle(fontFamily = HWFont.Geist, fontWeight = FontWeight.Medium, fontSize = 16.sp, lineHeight = 22.sp)
+    /** Row titles and switch labels: 15/21. */
+    val RowTitle = TextStyle(fontFamily = HWFont.Geist, fontSize = 15.sp, lineHeight = 21.sp)
+    /** Side menu items, conversation rows and the search field: 14/20. */
+    val MenuLabel = TextStyle(fontFamily = HWFont.Geist, fontSize = 14.sp, lineHeight = 20.sp)
+    /** Segmented control labels: 14/20 medium. */
+    val SegmentLabel = TextStyle(fontFamily = HWFont.Geist, fontWeight = FontWeight.Medium, fontSize = 14.sp, lineHeight = 20.sp)
+    /** Sub-lines, field labels and card status: 12/17. */
+    val Subline = TextStyle(fontFamily = HWFont.Geist, fontSize = 12.sp, lineHeight = 17.sp)
+    /** Chips: 13/18. */
+    val Chip = TextStyle(fontFamily = HWFont.Geist, fontSize = 13.sp, lineHeight = 18.sp)
+    /** Tone chips in Profile: 13/18 medium. */
+    val ChipStrong = TextStyle(fontFamily = HWFont.Geist, fontWeight = FontWeight.Medium, fontSize = 13.sp, lineHeight = 18.sp)
+    /** The name under the Profile avatar: 20/26. */
+    val ProfileName = TextStyle(fontFamily = HWFont.Geist, fontSize = 20.sp, lineHeight = 26.sp)
+    /** The initial in the Profile avatar: Geist Light 32. */
+    val AvatarInitial = TextStyle(fontFamily = HWFont.Geist, fontWeight = FontWeight.Light, fontSize = 32.sp, lineHeight = 32.sp)
 }
 
 private val colors = darkColorScheme(

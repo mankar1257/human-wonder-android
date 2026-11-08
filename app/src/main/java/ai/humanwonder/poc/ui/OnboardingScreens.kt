@@ -271,7 +271,7 @@ private fun Ascent(label: String, onClick: () -> Unit) {
         Text(
             label,
             color = Color.White,
-            style = HWType.ChipStrong.copy(fontSize = 15.sp, letterSpacing = 0.01.em),
+            style = HWType.ChipStrong.copy(fontSize = 14.sp, lineHeight = 20.sp, letterSpacing = 0.01.em),
             textAlign = TextAlign.Center, // wraps rather than clips at large text sizes
             modifier = Modifier
                 .clearAndSetSemantics {}
@@ -375,7 +375,8 @@ fun NameScreen(
                     Spacer(Modifier.height(12.dp))
                     Text(
                         "It will greet you by name every time it passes over.",
-                        color = HW.InkSecondary, style = HWType.ChatSub, textAlign = TextAlign.Center,
+                        color = HW.InkSecondary, style = HWType.ChatSub.copy(lineBreak = LineBreak.Paragraph),
+                        textAlign = TextAlign.Center,
                         modifier = Modifier.widthIn(max = 300.dp),
                     )
                 }
@@ -398,13 +399,13 @@ fun NameScreen(
                     contentAlignment = Alignment.CenterStart,
                 ) {
                     if (name.isEmpty()) {
-                        Text("Your name or callsign", color = HW.InkTertiary, style = HWType.ChatInput.copy(fontSize = 17.sp))
+                        Text("Your name or callsign", color = HW.InkTertiary, style = HWType.ChatInput.copy(fontSize = 16.sp))
                     }
                     BasicTextField(
                         value = name,
                         onValueChange = { value -> name = value.take(40) },
                         singleLine = true,
-                        textStyle = HWType.ChatInput.copy(color = Color.White, fontSize = 17.sp),
+                        textStyle = HWType.ChatInput.copy(color = Color.White, fontSize = 16.sp),
                         cursorBrush = SolidColor(HW.Primary),
                         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Go),
                         keyboardActions = KeyboardActions(onGo = { submit() }),
