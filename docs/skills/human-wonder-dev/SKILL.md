@@ -71,9 +71,12 @@ childish") the swirling star-trail sky, the dune silhouette, the aurora behind H
 Orbit mark on every list row, sparkle icons on chips, rainbow-gradient avatars.
 
 - Flow (owner, 2026-11-08): EVERY launch opens on Landing, the Liwa dunes photo at full colour
-  with Orbit 412 passing over. No button: a teal 56dp swipe-up arrow that bobs (tap works too).
-  First time: "Swipe up to begin" -> Name -> Chat. Profile set up: "Good evening, <name>. Orbit 412
-  is overhead now." + "Swipe up to talk to Orbit 412" -> straight into a new chat. In the chat,
+  with Orbit 412 passing over. No button: the "ascent" (three thin chevrons lighting up bottom to
+  top, the top one teal with a soft glow, label with a slow light sweep; tap works too). The owner
+  rejected a teal arrow-in-a-circle as "poor looking": we are a high-tech, rich, premium startup.
+  First time: "The sky has something to tell you." / "Swipe up to begin" -> Name -> Chat. Profile
+  set up: "Welcome back, <name>." / "Good evening. Orbit 412 is overhead now, and it remembers your
+  conversations." / "Swipe up to talk to Orbit 412" -> straight into a new chat. In the chat,
   Back and the side menu's Home return to Landing (it becomes the only screen; Back there exits).
   There is no separate Home hub any more (the photo-card Home was removed).
 - Name: black sky; the Earth at night from orbit (`bg_earth_orbit`, the Gulf and Liwa) starts 17%

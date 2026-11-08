@@ -58,12 +58,18 @@ input::placeholder { color: rgba(186, 202, 196, 0.45); }
 .hw-cta:active { transform: scale(0.98); }
 .hw-cta:focus-visible, .hw-field:focus-within { outline: 2px solid #83ffe5; outline-offset: 2px; }
 .hw-balance { text-wrap: balance; }
-@keyframes hw-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
-.hw-bob { animation: hw-bob 1.8s ease-in-out infinite; }
-.hw-swipe { transition: transform 0.15s ease; }
-.hw-swipe:active { transform: scale(0.96); }
-.hw-swipe:focus-visible { outline: 2px solid #83ffe5; outline-offset: 3px; }
-@media (prefers-reduced-motion: reduce) { .hw-bob { animation: none; } }
+/* hw-welcome:start */
+@keyframes hw-ascend { 0%, 100% { opacity: 0.16; transform: translateY(0); } 35% { opacity: 1; transform: translateY(-3px); } 70% { opacity: 0.16; transform: translateY(0); } }
+.hw-chev { display: block; color: #ffffff; animation: hw-ascend 2s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+.hw-chev.c2 { animation-delay: 0.2s; }
+.hw-chev.c3 { animation-delay: 0.4s; color: #83ffe5; filter: drop-shadow(0 0 6px rgba(131, 255, 229, 0.55)); }
+@keyframes hw-sweep { from { background-position: 160% 0; } to { background-position: -60% 0; } }
+.hw-sweep { background: linear-gradient(100deg, rgba(236, 239, 240, 0.62) 38%, #ffffff 50%, rgba(236, 239, 240, 0.62) 62%); background-size: 260% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: hw-sweep 3.2s linear infinite; }
+.hw-ascent { transition: transform 0.2s ease; }
+.hw-ascent:active { transform: translateY(-4px); }
+.hw-ascent:focus-visible { outline: 2px solid #83ffe5; outline-offset: 4px; border-radius: 16px; }
+@media (prefers-reduced-motion: reduce) { .hw-chev, .hw-sweep { animation: none; opacity: 1; color: rgba(236, 239, 240, 0.9); } }
+/* hw-welcome:end */
 </style>
 </helmet>
 <div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #000000; font-family: 'Geist', system-ui, sans-serif; color: #eceff0">
@@ -81,20 +87,22 @@ input::placeholder { color: rgba(186, 202, 196, 0.45); }
 </div>
 </header>
 <div class="hw-rise" style="display: flex; flex-direction: column; align-items: center; padding: 44px 28px 0; text-align: center">
-<h1 class="hw-balance" style="margin: 0; font-size: 40px; line-height: 44px; font-weight: 300; letter-spacing: -0.02em; color: #ffffff">The sky has something to tell you.</h1>
-<p class="hw-balance" style="margin: 14px 0 0; max-width: 310px; font-size: 15px; line-height: 22px; color: rgba(236, 239, 240, 0.85)">{{greeting}}, {{name}}. Orbit 412 is overhead now.</p>
+<h1 class="hw-balance" style="margin: 0; font-size: 40px; line-height: 44px; font-weight: 300; letter-spacing: -0.02em; color: #ffffff">Welcome back, {{name}}.</h1>
+<p class="hw-balance" style="margin: 14px 0 0; max-width: 310px; font-size: 15px; line-height: 22px; color: rgba(236, 239, 240, 0.85)">{{greeting}}. Orbit 412 is overhead now, and it remembers your conversations.</p>
 </div>
 <div style="flex: 1"></div>
-<div class="hw-swipe-zone" style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 0 20px 36px">
-<a href="Chat.dc.html" aria-label="Swipe up to talk to Orbit 412" class="hw-swipe" style="width: 56px; height: 56px; box-sizing: border-box; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #83ffe5; color: #00201a; text-decoration: none; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35)">
-<span class="hw-bob" style="display: flex"><svg width="30" height="30" viewBox="0 -960 960 960" aria-hidden="true" style="display: block"><path d="M480-528 296-344l-56-56 240-240 240 240-56 56-184-184Z" fill="currentColor"></path></svg></span>
+<a href="Chat.dc.html" aria-label="Swipe up to talk to Orbit 412" class="hw-ascent" style="align-self: center; display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 12px 28px 34px; text-decoration: none">
+<span aria-hidden="true" style="display: flex; flex-direction: column; align-items: center; gap: 2px">
+<svg class="hw-chev c3" width="30" height="13" viewBox="0 0 30 13" aria-hidden="true"><path d="M3 11.5 L15 2.5 L27 11.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<svg class="hw-chev c2" width="30" height="13" viewBox="0 0 30 13" aria-hidden="true"><path d="M3 11.5 L15 2.5 L27 11.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<svg class="hw-chev c1" width="30" height="13" viewBox="0 0 30 13" aria-hidden="true"><path d="M3 11.5 L15 2.5 L27 11.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</span>
+<span class="hw-sweep" aria-hidden="true" style="font-size: 15px; line-height: 20px; font-weight: 500; letter-spacing: 0.01em; white-space: nowrap">Swipe up to talk to Orbit 412</span>
 </a>
-<span style="font-size: 14px; line-height: 20px; color: rgba(236, 239, 240, 0.88)">Swipe up to talk to Orbit 412</span>
-</div>
 </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"name":{"editor":"text","default":"Wanderer"},"$preview":{"width":390,"height":844}}'>
+<script type="text/x-dc" data-dc-script data-props='{"name":{"editor":"text","default":"Vivek"},"$preview":{"width":390,"height":844}}'>
 class Component extends DCLogic {
   constructor(...args) {
     super(...args);
