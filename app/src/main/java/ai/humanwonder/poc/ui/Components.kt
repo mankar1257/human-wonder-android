@@ -1,6 +1,9 @@
 package ai.humanwonder.poc.ui
 
+import ai.humanwonder.poc.R
+
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -27,8 +30,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,8 +51,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import java.util.Locale
 import kotlin.math.cos
@@ -206,9 +209,59 @@ fun HwIconButton(
     ) { HwIcon(icon, tint, iconSize, contentDescription = description) }
 }
 
-/** Glass card or group: radius 24, rgba(20, 24, 30, 0.72), white 10% hairline. */
-fun Modifier.glass(shape: Shape = RoundedCornerShape(24.dp)): Modifier =
-    this.clip(shape).background(HW.Glass).border(1.dp, HW.GlassBorder, shape)
+/** The shared glass surface ([GlassBrush] with a white 12% edge); radius 24 for cards, 28 for input bars. */
+fun Modifier.glass(shape: Shape = RoundedCornerShape(24.dp), border: Color = HW.GlassBorder): Modifier =
+    this.clip(shape).background(GlassBrush).border(1.dp, border, shape)
+
+/**
+ * The one surface of Human Wonder: the chat composer's glass, near-black at the top-left lifting
+ * to slate violet. Every card, group, input bar and the side menu use it, so the app reads as one.
+ */
+val GlassBrush = Brush.linearGradient(
+    0f to Color(0xEB0E0F14), 0.55f to Color(0xE01E2030), 1f to Color(0x9E464A80),
+)
+
+/**
+ * The one primary action: a 40dp circle in a 48dp target. Teal with a dark arrow when it can go,
+ * grey outline-free when it can't, a stop square while Orbit 412 is answering. Used by the chat
+ * composer ("Send") and the name bar ("Meet Orbit 412").
+ */
+@Composable
+fun SendButton(
+    generating: Boolean,
+    canSend: Boolean,
+    onClick: () -> Unit,
+    description: String = "Send",
+) {
+    val bg by animateColorAsState(
+        when {
+            generating -> Color.White.copy(alpha = 0.14f)
+            canSend -> HW.Primary
+            else -> Color.Transparent
+        },
+        label = "send-bg",
+    )
+    val fg = when {
+        generating -> HW.Ink
+        canSend -> HW.OnAccent
+        else -> HW.InkDisabled
+    }
+    Box(
+        Modifier
+            .size(48.dp)
+            .clip(CircleShape)
+            .clickable(enabled = generating || canSend, role = Role.Button, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(Modifier.size(40.dp).clip(CircleShape).background(bg), contentAlignment = Alignment.Center) {
+            HwIcon(
+                if (generating) R.drawable.ic_stop else R.drawable.ic_arrow_upward, fg,
+                if (generating) 18.dp else 20.dp,
+                contentDescription = if (generating) "Stop answer" else description,
+            )
+        }
+    }
+}
 
 /** A 1dp white 7% divider inside glass groups. */
 @Composable

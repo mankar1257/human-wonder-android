@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -27,6 +29,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DrawerDefaults
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -58,15 +61,15 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import kotlinx.coroutines.launch
 
 /** Sheet colour, scrim and hairline from the preview's side menu. */
 private val SheetEdge = Color(0x0FFFFFFF) // white 6%
 private val SheetScrim = Color(0x99000000) // black 60%
-private val ItemFill = Color(0x0FFFFFFF) // white 6%
+private val ItemFill = Color(0x14FFFFFF) // white 8%, the chat's chip fill
 private val SelectedFill = Color(0x1F83FFE5) // teal 12%
 private val ProfileEdge = Color(0x14FFFFFF) // white 8%
 
@@ -168,8 +171,12 @@ private fun DrawerSheet(
         drawerShape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp),
         drawerContainerColor = HW.Sheet,
         drawerContentColor = HW.Ink,
+        // The glass tint runs edge to edge (under the status and navigation bars); the content
+        // keeps the usual insets itself.
+        windowInsets = WindowInsets(0, 0, 0, 0),
     ) {
-        Column(Modifier.fillMaxSize()) {
+        // The shared glass tint over the opaque sheet, so the menu belongs to the same app.
+        Column(Modifier.fillMaxSize().background(GlassBrush).windowInsetsPadding(DrawerDefaults.windowInsets)) {
             Box(
                 Modifier.fillMaxWidth().height(64.dp).padding(horizontal = 20.dp),
                 contentAlignment = Alignment.CenterStart,

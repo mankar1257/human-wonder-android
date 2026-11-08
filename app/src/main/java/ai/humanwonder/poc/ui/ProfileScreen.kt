@@ -66,9 +66,7 @@ import androidx.compose.ui.unit.dp
 
 private val SegmentTrack = Color(0x12FFFFFF) // white 7%
 private val SegmentOn = Color(0x24FFFFFF) // white 14%
-private val ToneOnFill = Color(0x2483FFE5) // teal 14%
-private val ToneOnBorder = Color(0x9983FFE5) // teal 60%
-private val ToneOffBorder = Color(0x29FFFFFF) // white 16%
+private val ChipFill = Color(0x14FFFFFF) // white 8%, the chat's tone chip
 
 /**
  * Profile & settings. Everything is kept on the phone and saved as it changes; a new name reaches
@@ -386,7 +384,11 @@ private fun PointOfView(selected: Perspective, onSelect: (Perspective) -> Unit) 
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
             ) {
-                HwIcon(if (p == Perspective.Orbit) R.drawable.ic_satellite else R.drawable.ic_location, color, 18.dp)
+                // As in the chat composer: the active Orbit icon is teal.
+                HwIcon(
+                    if (p == Perspective.Orbit) R.drawable.ic_satellite else R.drawable.ic_location,
+                    if (on && p == Perspective.Orbit) HW.Primary else color, 18.dp,
+                )
                 Spacer(Modifier.width(8.dp))
                 Text(p.label, color = color, style = HWType.SegmentLabel, maxLines = 1)
             }
@@ -394,7 +396,7 @@ private fun PointOfView(selected: Perspective, onSelect: (Perspective) -> Unit) 
     }
 }
 
-/** Four wrapping 40dp chips; the active one has a teal 60% border on teal 14%. */
+/** Four wrapping 40dp chips in the chat's chip style: white 8%, the active one white 14% with a teal sparkle. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ToneChips(selected: Tone, onSelect: (Tone) -> Unit) {
@@ -404,18 +406,17 @@ private fun ToneChips(selected: Tone, onSelect: (Tone) -> Unit) {
     ) {
         Tone.entries.forEach { t ->
             val on = t == selected
-            val color = if (on) Color.White else HW.IconMuted
+            val color = if (on) Color.White else HW.InkSecondary
             Row(
                 Modifier
                     .heightIn(min = 40.dp)
                     .clip(CircleShape)
-                    .background(if (on) ToneOnFill else Color.Transparent)
-                    .border(1.dp, if (on) ToneOnBorder else ToneOffBorder, CircleShape)
+                    .background(if (on) SegmentOn else ChipFill)
                     .selectable(selected = on, role = Role.RadioButton) { onSelect(t) }
                     .padding(horizontal = 14.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                HwIcon(R.drawable.ic_sparkle, color, 14.dp)
+                HwIcon(R.drawable.ic_sparkle, if (on) HW.Primary else color, 14.dp)
                 Spacer(Modifier.width(6.dp))
                 Text(t.label, color = color, style = HWType.ChipStrong, maxLines = 1)
             }

@@ -64,7 +64,7 @@ object HW {
     // Home, side menu and Profile (design/preview/gen/hub.py).
     /** Glass cards and groups: rgba(20, 24, 30, 0.72) with a white 10% hairline. */
     val Glass = Color(0xB814181E)
-    val GlassBorder = Color(0x1AFFFFFF)
+    val GlassBorder = Color(0x1FFFFFFF) // white 12%, the chat composer's edge
     /** Dividers inside glass groups and lists (white 7%). */
     val Divider = Color(0x12FFFFFF)
     /** The side menu sheet and the avatar's inner disc. */

@@ -3,6 +3,7 @@ package ai.humanwonder.poc.ui
 import ai.humanwonder.poc.R
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
@@ -41,7 +42,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -303,8 +303,8 @@ fun greetingFor(time: LocalTime = LocalTime.now()): String = when (time.hour) {
 
 /**
  * Name: black sky over the Earth at night seen from orbit (the Gulf and Liwa, the view Orbit 412
- * has of you), a plain field and the teal button, with Orbit 412 gliding along the horizon (the
- * screen's one motion). Matches the preview's Name artboard: the photo starts 17% down the screen.
+ * has of you), then the chat's own input bar and send arrow ("Meet Orbit 412"), with Orbit 412
+ * gliding along the horizon. Matches the preview's Name artboard: the photo starts 17% down.
  */
 @Composable
 fun NameScreen(
@@ -315,7 +315,8 @@ fun NameScreen(
 ) {
     var name by rememberSaveable { mutableStateOf(initialName) }
     var focused by remember { mutableStateOf(false) }
-    val submit = { if (!entering) onEnter(name.ifBlank { "Wanderer" }) }
+    val canMeet = name.isNotBlank() && !entering
+    val submit = { if (canMeet) onEnter(name.trim()) }
 
     BoxWithConstraints(Modifier.fillMaxSize().background(HW.Space)) {
         val h = maxHeight
@@ -384,47 +385,42 @@ fun NameScreen(
             Spacer(Modifier.weight(1f))
             Column(
                 Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, bottom = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                val shape = RoundedCornerShape(16.dp)
-                Box(
+                // The same bar as the chat composer: shared glass, chat type, and the chat's send
+                // button (teal arrow once there is a name) instead of a separate big button.
+                val shape = RoundedCornerShape(28.dp)
+                val border by animateColorAsState(
+                    if (focused) HW.Primary.copy(alpha = 0.45f) else HW.GlassBorder, label = "name-border",
+                )
+                Row(
                     Modifier
                         .fillMaxWidth()
-                        .height(56.dp)
-                        .clip(shape)
-                        .background(HW.NameField)
-                        .border(1.dp, if (focused) HW.Primary.copy(alpha = 0.6f) else Color.White.copy(alpha = 0.16f), shape)
-                        .padding(horizontal = 18.dp),
-                    contentAlignment = Alignment.CenterStart,
+                        .glass(shape, border)
+                        .padding(start = 20.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    if (name.isEmpty()) {
-                        Text("Your name or callsign", color = HW.InkTertiary, style = HWType.ChatInput.copy(fontSize = 16.sp))
+                    Box(Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
+                        if (name.isEmpty()) {
+                            Text("Your name or callsign", color = HW.InkTertiary, style = HWType.ChatInput)
+                        }
+                        BasicTextField(
+                            value = name,
+                            onValueChange = { value -> name = value.take(40) },
+                            singleLine = true,
+                            textStyle = HWType.ChatInput.copy(color = Color.White),
+                            cursorBrush = SolidColor(HW.Primary),
+                            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Go),
+                            keyboardActions = KeyboardActions(onGo = { submit() }),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .onFocusChanged { focused = it.isFocused }
+                                .semantics { contentDescription = "Your name" },
+                        )
                     }
-                    BasicTextField(
-                        value = name,
-                        onValueChange = { value -> name = value.take(40) },
-                        singleLine = true,
-                        textStyle = HWType.ChatInput.copy(color = Color.White, fontSize = 16.sp),
-                        cursorBrush = SolidColor(HW.Primary),
-                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Go),
-                        keyboardActions = KeyboardActions(onGo = { submit() }),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .onFocusChanged { focused = it.isFocused }
-                            .semantics { contentDescription = "Your name" },
-                    )
+                    SendButton(generating = false, canSend = canMeet, onClick = submit, description = "Meet Orbit 412")
                 }
-                val spinner: (@Composable () -> Unit)? = if (entering) {
-                    { CircularProgressIndicator(color = HW.OnAccent, strokeWidth = 2.dp, modifier = Modifier.size(18.dp)) }
-                } else {
-                    null
-                }
-                PrimaryButton(
-                    text = if (entering) "Finding Orbit 412…" else "Meet Orbit 412",
-                    trailing = spinner,
-                    onClick = submit,
-                )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     HwIcon(R.drawable.ic_lock, HW.InkTertiary, 14.dp)
                     Spacer(Modifier.width(6.dp))

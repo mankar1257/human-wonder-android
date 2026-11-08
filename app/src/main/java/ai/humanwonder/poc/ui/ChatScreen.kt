@@ -482,14 +482,8 @@ private fun Composer(
         Column(
             Modifier
                 .fillMaxWidth()
-                .clip(shape)
-                // The Stitch prompt box: near-black at the top-left, lifting to slate violet.
-                .background(
-                    Brush.linearGradient(
-                        0f to Color(0xEB0E0F14), 0.55f to Color(0xE01E2030), 1f to Color(0x9E464A80),
-                    ),
-                )
-                .border(1.dp, border, shape)
+                // The Stitch prompt box (GlassBrush), the surface every screen shares.
+                .glass(shape, border)
                 .padding(start = 12.dp, end = 8.dp, top = 14.dp, bottom = 8.dp),
         ) {
             Box(Modifier.fillMaxWidth().heightIn(min = minHeight).padding(horizontal = 4.dp)) {
@@ -645,39 +639,6 @@ private fun ToneChip(tone: Tone, compact: Boolean, onClick: () -> Unit) {
         }
         Spacer(Modifier.width(6.dp))
         HwIcon(R.drawable.ic_expand_more, HW.InkSecondary, 16.dp)
-    }
-}
-
-@Composable
-private fun SendButton(generating: Boolean, canSend: Boolean, onClick: () -> Unit) {
-    val bg by animateColorAsState(
-        when {
-            generating -> Color.White.copy(alpha = 0.14f)
-            canSend -> HW.Primary
-            else -> Color.Transparent
-        },
-        label = "send-bg",
-    )
-    val fg = when {
-        generating -> HW.Ink
-        canSend -> HW.OnAccent
-        else -> HW.InkDisabled
-    }
-    // A 48dp touch target around the 40dp visual circle.
-    Box(
-        Modifier
-            .size(48.dp)
-            .clip(CircleShape)
-            .clickable(enabled = generating || canSend, role = Role.Button, onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        Box(Modifier.size(40.dp).clip(CircleShape).background(bg), contentAlignment = Alignment.Center) {
-            HwIcon(
-                if (generating) R.drawable.ic_stop else R.drawable.ic_arrow_upward, fg,
-                if (generating) 18.dp else 20.dp,
-                contentDescription = if (generating) "Stop answer" else "Send",
-            )
-        }
     }
 }
 
