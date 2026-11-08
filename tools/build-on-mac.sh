@@ -276,5 +276,50 @@ else
   echo "  - connect the phone with USB debugging on and run: \"$ADB\" install -r \"$APK_OUT\""
   echo "  - or send $APK_OUT to the phone (AirDrop won't work; use Google Drive, WhatsApp, or a cable) and open it there."
 fi
+
+# 6. Look at the app on the phone ----------------------------------------------------------------
+# Two screenshots (the opening screen, then after one swipe up) and the phone's own Font size and
+# Display size settings, so the screens can be checked exactly as they look on this phone.
+CHECK="$PROJECT/screens-check"
+mkdir -p "$CHECK"
+date > "$CHECK/run.txt"
+phone=$(printf '%s\n' "$devices" | head -n 1)
+if [ -n "$phone" ]; then
+  say "Taking two screenshots of the app on your phone"
+  out="$CHECK/0-your-phone"
+  mkdir -p "$out"
+  {
+    echo "model: $("$ADB" -s "$phone" shell getprop ro.product.model 2>/dev/null | tr -d '\r' || true)"
+    echo "android: $("$ADB" -s "$phone" shell getprop ro.build.version.release 2>/dev/null | tr -d '\r' || true)"
+    echo "font_scale: $("$ADB" -s "$phone" shell settings get system font_scale 2>/dev/null | tr -d '\r' || true)"
+    "$ADB" -s "$phone" shell wm size 2>/dev/null | tr -d '\r' || true
+    "$ADB" -s "$phone" shell wm density 2>/dev/null | tr -d '\r' || true
+  } > "$out/settings.txt"
+  sleep 8 # the opening words rise in
+  "$ADB" -s "$phone" exec-out screencap -p > "$out/1-opening-screen.png" 2>/dev/null || true
+  size=$("$ADB" -s "$phone" shell wm size 2>/dev/null | tr -d '\r' | awk -F': ' '/size/ {s=$2} END {print s}' || true)
+  w="${size%x*}"
+  h="${size#*x}"
+  if [[ "$w" =~ ^[0-9]+$ && "$h" =~ ^[0-9]+$ ]]; then
+    "$ADB" -s "$phone" shell input swipe $((w / 2)) $((h * 3 / 4)) $((w / 2)) $((h / 3)) 400 >/dev/null 2>&1 || true
+    sleep 5
+    "$ADB" -s "$phone" exec-out screencap -p > "$out/2-after-swipe-up.png" 2>/dev/null || true
+  fi
+  echo "    saved in $out"
+fi
+
+# 7. Check every screen on other phones ----------------------------------------------------------
+# Draws every screen at several phone sizes, Font sizes and Display sizes (app/src/test/.../screens)
+# and saves the pictures in screens-check/. The app above is already built and installed, so a
+# problem here never affects it.
+say "Checking every screen on other phone and text sizes (a few minutes; the app is already done)"
+if ( cd "$PROJECT" && ./gradlew :app:testDebugUnitTest --tests 'ai.humanwonder.poc.screens.*' --no-daemon --console=plain ) \
+    > "$PROJECT/tools/screens-check.log" 2>&1; then
+  echo "    all screens drawn"
+else
+  warn "The screen check didn't finish (the app itself is fine). Details: tools/screens-check.log"
+fi
+cp -R "$PROJECT/app/build/screens-check/." "$CHECK/" 2>/dev/null || true
+say "Screen pictures: $CHECK"
 exit 0
 }

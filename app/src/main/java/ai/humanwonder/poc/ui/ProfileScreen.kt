@@ -268,20 +268,20 @@ fun ProfileScreen(
             containerColor = HW.Sheet,
             titleContentColor = Color.White,
             textContentColor = HW.InkSecondary,
-            title = { Text("Clear all transmissions?", style = HWType.HubTitle) },
-            text = {
+            title = scaled { Text("Clear all transmissions?", style = HWType.HubTitle) },
+            text = scaled {
                 Text(
                     "Every conversation with Orbit 412 will be deleted from this phone. This can’t be undone.",
                     style = HWType.ChatSub,
                 )
             },
-            confirmButton = {
+            confirmButton = scaled {
                 TextButton(onClick = {
                     confirmClear = false
                     onClearAll()
                 }) { Text("Clear all", color = HW.Error, style = HWType.ButtonLabel) }
             },
-            dismissButton = {
+            dismissButton = scaled {
                 TextButton(onClick = { confirmClear = false }) { Text("Cancel", color = HW.Ink, style = HWType.ButtonLabel) }
             },
         )
@@ -292,15 +292,15 @@ fun ProfileScreen(
             containerColor = HW.Sheet,
             titleContentColor = Color.White,
             textContentColor = HW.InkSecondary,
-            title = { Text("Human Wonder", style = HWType.HubTitle) },
-            text = {
+            title = scaled { Text("Human Wonder", style = HWType.HubTitle) },
+            text = scaled {
                 Text(
                     "Version $version. Human Wonder gives the sky a voice: Orbit 412, a satellite passing over you tonight. " +
                         "Your profile and conversations stay on this phone.",
                     style = HWType.ChatSub,
                 )
             },
-            confirmButton = {
+            confirmButton = scaled {
                 TextButton(onClick = { showAbout = false }) { Text("Close", color = HW.Primary, style = HWType.ButtonLabel) }
             },
         )

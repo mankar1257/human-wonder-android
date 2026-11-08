@@ -186,30 +186,32 @@ fun LandingScreen(greetingName: String?, onContinue: () -> Unit) {
             Box(Modifier.fillMaxWidth().height(64.dp), contentAlignment = Alignment.Center) {
                 BrandLockup()
             }
-            Rising {
-                Column(
-                    Modifier.fillMaxWidth().padding(start = 28.dp, end = 28.dp, top = 44.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Text(
-                        if (greetingName != null) "Welcome back, $greetingName." else "The sky has something to tell you.",
-                        color = Color.White, style = HWType.WelcomeHero.capScale(), textAlign = TextAlign.Center,
-                    )
-                    Spacer(Modifier.height(14.dp))
-                    Text(
-                        if (greetingName != null) {
-                            "${greetingFor()}. Orbit\u00A0412 is overhead now, and it remembers your conversations."
-                        } else {
-                            "Human Wonder gives the sky a voice: Orbit\u00A0412, a satellite passing over you tonight."
-                        },
-                        color = HW.Ink.copy(alpha = 0.85f),
-                        style = HWType.ChatSub.copy(lineBreak = LineBreak.Paragraph),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.widthIn(max = 310.dp),
-                    )
+            // The words take the space above the swipe hint; on a short screen they give up the
+            // sub-line rather than run into it.
+            Box(Modifier.weight(1f).fillMaxWidth()) {
+                Rising {
+                    FitColumn(
+                        Modifier.fillMaxWidth().padding(start = 28.dp, end = 28.dp, top = 44.dp),
+                        gap = 14.dp,
+                    ) {
+                        Text(
+                            if (greetingName != null) "Welcome back, $greetingName." else "The sky has something to tell you.",
+                            color = Color.White, style = HWType.WelcomeHero.capScale(), textAlign = TextAlign.Center,
+                        )
+                        Text(
+                            if (greetingName != null) {
+                                "${greetingFor()}. Orbit\u00A0412 is overhead now, and it remembers your conversations."
+                            } else {
+                                "Human Wonder gives the sky a voice: Orbit\u00A0412, a satellite passing over you tonight."
+                            },
+                            color = HW.Ink.copy(alpha = 0.85f),
+                            style = HWType.ChatSub.copy(lineBreak = LineBreak.Paragraph),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.widthIn(max = 310.dp),
+                        )
+                    }
                 }
             }
-            Spacer(Modifier.weight(1f))
             Ascent(label, onClick = go)
         }
     }
@@ -364,25 +366,27 @@ fun NameScreen(
                 Box(Modifier.weight(1f), contentAlignment = Alignment.Center) { BrandLockup() }
                 Spacer(Modifier.width(48.dp))
             }
-            Rising {
-                Column(
-                    Modifier.fillMaxWidth().padding(start = 32.dp, end = 32.dp, top = 28.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Text(
-                        "What should Orbit\u00A0412 call you?",
-                        color = Color.White, style = HWType.NameTitle.capScale(), textAlign = TextAlign.Center,
-                    )
-                    Spacer(Modifier.height(12.dp))
-                    Text(
-                        "It will greet you by name every time it passes over.",
-                        color = HW.InkSecondary, style = HWType.ChatSub.copy(lineBreak = LineBreak.Paragraph),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.widthIn(max = 300.dp),
-                    )
+            // With the keyboard open the question keeps what room is left (losing its sub-line
+            // first) and the name bar below always stays whole and above the keyboard.
+            Box(Modifier.weight(1f).fillMaxWidth()) {
+                Rising {
+                    FitColumn(
+                        Modifier.fillMaxWidth().padding(start = 32.dp, end = 32.dp, top = 28.dp),
+                        gap = 12.dp,
+                    ) {
+                        Text(
+                            "What should Orbit\u00A0412 call you?",
+                            color = Color.White, style = HWType.NameTitle.capScale(), textAlign = TextAlign.Center,
+                        )
+                        Text(
+                            "It will greet you by name every time it passes over.",
+                            color = HW.InkSecondary, style = HWType.ChatSub.copy(lineBreak = LineBreak.Paragraph),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.widthIn(max = 300.dp),
+                        )
+                    }
                 }
             }
-            Spacer(Modifier.weight(1f))
             Column(
                 Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, bottom = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp),

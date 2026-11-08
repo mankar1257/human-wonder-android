@@ -244,15 +244,15 @@ private fun DrawerSheet(
             containerColor = HW.Sheet,
             titleContentColor = Color.White,
             textContentColor = HW.InkSecondary,
-            title = { Text("Delete this transmission?", style = HWType.HubTitle) },
-            text = { Text("“${c.title}” will be removed from this phone.", style = HWType.ChatSub) },
-            confirmButton = {
+            title = scaled { Text("Delete this transmission?", style = HWType.HubTitle) },
+            text = scaled { Text("“${c.title}” will be removed from this phone.", style = HWType.ChatSub) },
+            confirmButton = scaled {
                 TextButton(onClick = {
                     onDelete(c.id)
                     deleting = null
                 }) { Text("Delete", color = HW.Error, style = HWType.ButtonLabel) }
             },
-            dismissButton = {
+            dismissButton = scaled {
                 TextButton(onClick = { deleting = null }) { Text("Cancel", color = HW.Ink, style = HWType.ButtonLabel) }
             },
         )
@@ -362,14 +362,14 @@ private fun ConversationRow(
         }
         DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
             DropdownMenuItem(
-                text = { Text("Rename", style = HWType.MenuLabel) },
+                text = scaled { Text("Rename", style = HWType.MenuLabel) },
                 onClick = {
                     menu = false
                     onRename()
                 },
             )
             DropdownMenuItem(
-                text = { Text("Delete", color = HW.Error, style = HWType.MenuLabel) },
+                text = scaled { Text("Delete", color = HW.Error, style = HWType.MenuLabel) },
                 onClick = {
                     menu = false
                     onDelete()
@@ -410,8 +410,8 @@ private fun RenameDialog(initial: String, onDismiss: () -> Unit, onSave: (String
         containerColor = HW.Sheet,
         titleContentColor = Color.White,
         textContentColor = HW.Ink,
-        title = { Text("Rename transmission", style = HWType.HubTitle) },
-        text = {
+        title = scaled { Text("Rename transmission", style = HWType.HubTitle) },
+        text = scaled {
             Box(
                 Modifier
                     .fillMaxWidth()
@@ -433,12 +433,12 @@ private fun RenameDialog(initial: String, onDismiss: () -> Unit, onSave: (String
                 )
             }
         },
-        confirmButton = {
+        confirmButton = scaled {
             TextButton(onClick = { onSave(title) }, enabled = title.isNotBlank()) {
                 Text("Save", color = if (title.isNotBlank()) HW.Primary else HW.InkDisabled, style = HWType.ButtonLabel)
             }
         },
-        dismissButton = {
+        dismissButton = scaled {
             TextButton(onClick = onDismiss) { Text("Cancel", color = HW.Ink, style = HWType.ButtonLabel) }
         },
     )

@@ -2,6 +2,7 @@ package ai.humanwonder.poc
 
 import ai.humanwonder.poc.ui.GalaxyLifecycle
 import ai.humanwonder.poc.ui.HW
+import ai.humanwonder.poc.ui.HumanWonderScale
 import ai.humanwonder.poc.ui.HumanWonderTheme
 import ai.humanwonder.poc.ui.navigation.NavGraph
 import ai.humanwonder.poc.ui.navigation.Routes
@@ -15,16 +16,12 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Density
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
-import kotlin.math.min
 
 /**
  * The single activity (OfflineLLM's pattern: Hilt entry point + Navigation Compose). Tamper
@@ -47,13 +44,9 @@ class MainActivity : ComponentActivity() {
         val start = Routes.Landing.route
 
         setContent {
-            // Human Wonder is laid out for the phone's normal text size. A larger system "Font size"
-            // still makes text bigger, but at most 15%, so screens keep their designed proportions
-            // instead of words crowding everything else off the screen.
-            val base = LocalDensity.current
-            CompositionLocalProvider(
-                LocalDensity provides Density(base.density, min(base.fontScale, MAX_FONT_SCALE)),
-            ) {
+            // The phone's Font size and Display size settings can enlarge the app only a little, so
+            // every screen keeps its designed proportions (see HumanWonderScale).
+            HumanWonderScale {
             HumanWonderTheme {
                 val sky by app.sky.collectAsStateWithLifecycle()
 
@@ -86,6 +79,3 @@ class MainActivity : ComponentActivity() {
         GalaxyLifecycle.onResume()
     }
 }
-
-/** The largest text scale the app follows from the phone's Font size setting. */
-private const val MAX_FONT_SCALE = 1.15f

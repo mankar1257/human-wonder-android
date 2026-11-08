@@ -7,7 +7,12 @@ import android.opengl.GLSurfaceView
 import android.os.SystemClock
 import android.util.Log
 import android.view.Choreographer
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import java.lang.ref.WeakReference
@@ -17,6 +22,9 @@ import java.nio.FloatBuffer
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 import kotlin.math.max
+
+/** False only in the screen checks (Robolectric can't run OpenGL); the sky is then drawn still. */
+val LocalLiveSky = staticCompositionLocalOf { true }
 
 /**
  * The live aurora sky behind the chat (after the Stitch home screen), drawn with OpenGL ES 2.0
@@ -32,6 +40,18 @@ fun GalaxyBackground(
     /** Change this value to send an "uplink" pulse rising from the bottom of the screen. */
     pulseKey: Int = 0,
 ) {
+    if (!LocalLiveSky.current) {
+        // A still stand-in for the screen checks, which have no OpenGL: dark sky, low teal glow.
+        Box(
+            modifier.background(
+                Brush.verticalGradient(
+                    0f to Color.Black, 0.55f to Color.Black,
+                    1f to Color(0xFF0E3D37).copy(alpha = 1f - 0.5f * calm),
+                ),
+            ),
+        )
+        return
+    }
     AndroidView(
         factory = { GalaxyView(it) },
         modifier = modifier,

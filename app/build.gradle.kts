@@ -140,7 +140,9 @@ android {
     }
 
     sourceSets {
-        getByName("main") {
+        // Release only (the APK that is installed): the debug variant, used just for the screen
+        // checks, then doesn't copy the 430 MB model into every test build.
+        getByName("release") {
             // A File, not a Provider: AGP 9 refuses Providers in the sourceSets DSL
             // (android.sourceset.disallowProvider). Ordering comes from preBuild -> fetchModel.
             assets.srcDir(modelAssetsDir.get().asFile)
@@ -150,6 +152,24 @@ android {
     androidResources {
         // Stored uncompressed so the app can stream it straight out of the APK.
         noCompress += listOf("gguf")
+    }
+}
+
+// Screen checks (app/src/test/.../screens): Robolectric draws every screen at several phone sizes
+// and text sizes into app/build/screens-check; tools/build-on-mac.sh runs them after the APK.
+// Set up with dynamic calls so a future AGP DSL change can never break the APK build itself.
+runCatching {
+    android.withGroovyBuilder {
+        "testOptions" { "unitTests" { setProperty("includeAndroidResources", true) } }
+    }
+}.onFailure { logger.warn("Screen checks: couldn't enable Android resources in unit tests: ${it.message}") }
+
+tasks.withType<Test>().configureEach {
+    maxHeapSize = "2g"
+    systemProperty("hw.screens.dir", layout.buildDirectory.dir("screens-check").get().asFile.absolutePath)
+    testLogging {
+        events("passed", "failed")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
     }
 }
 
@@ -201,4 +221,11 @@ dependencies {
 
     // Serialization (conversation export)
     implementation(libs.serialization.json)
+
+    // Screen checks only (never in the APK): Robolectric + Compose's test rule.
+    testImplementation(platform(libs.compose.bom))
+    testImplementation("androidx.compose.ui:ui-test-junit4")
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.robolectric:robolectric:4.16.1")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }

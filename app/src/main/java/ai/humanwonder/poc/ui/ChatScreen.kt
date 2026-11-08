@@ -32,6 +32,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -177,34 +178,45 @@ fun ChatScreen(
                 .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.45f)))),
         )
 
-        Column(Modifier.fillMaxSize().safeDrawingPadding()) {
-            ChatHeader(state, onMenu, onNewConversation)
-            val failed = state.sky as? SkyState.Failed
-            if (failed != null) {
-                LostSignal(failed.message, onRetry, Modifier.weight(1f))
-            } else {
-                Box(Modifier.weight(1f).fillMaxWidth()) {
-                    AnimatedContent(
-                        targetState = empty,
-                        transitionSpec = { fadeIn(tween(500, delayMillis = 150)) togetherWith fadeOut(tween(250)) },
-                        label = "chat-mode",
-                    ) { isEmpty ->
-                        if (isEmpty) Hero(state.name) else Conversation(state)
+        // The safe area (everything above the keyboard when it is open) decides what fits. The
+        // input bar always stays whole; around it the tall empty-sky composer shrinks first, then
+        // the suggestions and the note step aside, and the headline gives up its sub-line (Hero).
+        BoxWithConstraints(Modifier.fillMaxSize().safeDrawingPadding()) {
+            val roomy = maxHeight >= 600.dp
+            val tight = maxHeight < 440.dp
+            Column(Modifier.fillMaxSize()) {
+                ChatHeader(state, onMenu, onNewConversation)
+                val failed = state.sky as? SkyState.Failed
+                if (failed != null) {
+                    LostSignal(failed.message, onRetry, Modifier.weight(1f))
+                } else {
+                    Box(Modifier.weight(1f).fillMaxWidth()) {
+                        AnimatedContent(
+                            targetState = empty,
+                            transitionSpec = { fadeIn(tween(500, delayMillis = 150)) togetherWith fadeOut(tween(250)) },
+                            label = "chat-mode",
+                        ) { isEmpty ->
+                            if (isEmpty) Hero(state.name) else Conversation(state)
+                        }
+                    }
+                    Composer(state, input, onInput, send, onStop, onPerspective, onCycleTone, onMic, large = empty && roomy)
+                    if (empty && !tight) {
+                        Suggestions(enabled = ready, onPick = send)
+                        Spacer(Modifier.weight(0.45f))
                     }
                 }
-                Composer(state, input, onInput, send, onStop, onPerspective, onCycleTone, onMic, large = empty)
-                if (empty) {
-                    Suggestions(enabled = ready, onPick = send)
-                    Spacer(Modifier.weight(0.45f))
+                if (!tight) {
+                    Text(
+                        "Human Wonder’s Orbit 412 sees far, but it can still be wrong.",
+                        color = HW.InkTertiary,
+                        style = HWType.ChatMeta,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = 10.dp, bottom = 14.dp),
+                    )
+                } else {
+                    Spacer(Modifier.height(10.dp))
                 }
             }
-            Text(
-                "Human Wonder’s Orbit 412 sees far, but it can still be wrong.",
-                color = HW.InkTertiary,
-                style = HWType.ChatMeta,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = 10.dp, bottom = 14.dp),
-            )
         }
     }
 }
@@ -246,13 +258,10 @@ private fun ChatHeader(state: UiState, onMenu: () -> Unit, onNew: () -> Unit) {
 
 @Composable
 private fun Hero(name: String) {
-    Column(
-        Modifier.fillMaxSize().padding(horizontal = 28.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
+    // Centred above the composer. With little room (keyboard open) it drops its sub-line, then
+    // itself, instead of drawing over the header or the input.
+    FitColumn(Modifier.fillMaxSize().padding(horizontal = 28.dp), gap = 12.dp, centered = true) {
         Text("Talk to the\ninfinite sky", color = Color.White, style = HWType.ChatHero.capScale(), textAlign = TextAlign.Center)
-        Spacer(Modifier.height(12.dp))
         Text(
             "Orbit 412 here, ${name.ifBlank { "Wanderer" }}, your Human Wonder satellite. I'm passing over you right now. What should I look at?",
             color = HW.InkSecondary,

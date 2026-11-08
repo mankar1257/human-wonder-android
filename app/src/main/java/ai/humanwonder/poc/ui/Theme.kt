@@ -89,7 +89,7 @@ object HW {
  */
 @Composable
 @ReadOnlyComposable
-fun TextStyle.capScale(max: Float = 1.15f): TextStyle {
+fun TextStyle.capScale(max: Float = MAX_FONT_SCALE): TextStyle {
     val scale = LocalDensity.current.fontScale
     if (scale <= max) return this
     val k = max / scale
