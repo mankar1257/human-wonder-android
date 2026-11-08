@@ -30,8 +30,9 @@ data class Profile(
  * Settings storage, ported from OfflineLLM's SettingsRepository (encrypted SharedPreferences).
  *
  * Human Wonder changes: only the profile is stored (no sampling, GPU, theme, font, lock or
- * translator settings), it is exposed as a [StateFlow] so the persona follows a name change, and
- * v1's plain "human_wonder" preferences (name, onboarded) are carried over on first run.
+ * translator settings), and it is exposed as a [StateFlow] so the persona follows a name change.
+ * Nothing is carried over from v1: the name someone typed into the old app is not reused, and the
+ * first launch of v2 always starts at the welcome screen.
  */
 @Singleton
 class SettingsRepository @Inject constructor(
@@ -39,7 +40,7 @@ class SettingsRepository @Inject constructor(
 ) {
     private val prefs: SharedPreferences = openPrefs()
 
-    private val _profile = MutableStateFlow(migrateV1(read()))
+    private val _profile = MutableStateFlow(freshStartOnce(read()))
     val profile: StateFlow<Profile> = _profile.asStateFlow()
 
     /** Applies [transform] to the profile and saves it at once (auto-save). */
@@ -92,23 +93,22 @@ class SettingsRepository @Inject constructor(
             .apply()
     }
 
-    /** v1 kept the name and the onboarded flag in plain preferences; bring them over once. */
-    private fun migrateV1(current: Profile): Profile {
-        if (prefs.getBoolean(KEY_MIGRATED_V1, false)) return current
-        val v1 = context.getSharedPreferences(V1_PREFS, Context.MODE_PRIVATE)
-        val migrated = current.copy(
-            name = current.name.ifBlank { v1.getString("name", "").orEmpty() },
-            onboardingComplete = current.onboardingComplete || v1.getBoolean("onboarded", false),
-        )
-        write(migrated)
-        prefs.edit().putBoolean(KEY_MIGRATED_V1, true).apply()
-        return migrated
+    /**
+     * The first launch of this version starts clean: an early v2 build copied v1's saved name
+     * (which is how a phone ended up greeting someone else's name and skipping the welcome).
+     * Clears the name and shows Welcome and Name once; chats and other settings are kept.
+     */
+    private fun freshStartOnce(current: Profile): Profile {
+        if (prefs.getBoolean(KEY_FRESH_START, false)) return current
+        val fresh = current.copy(name = "", onboardingComplete = false)
+        write(fresh)
+        prefs.edit().putBoolean(KEY_FRESH_START, true).apply()
+        return fresh
     }
 
     companion object {
         private const val SECURE_PREFS = "humanwonder_secure_prefs"
         private const val FALLBACK_PREFS = "humanwonder_settings"
-        private const val V1_PREFS = "human_wonder"
         private const val MASTER_KEY_ALIAS = "humanwonder_secure_prefs_master_key"
 
         const val KEY_NAME = "name"
@@ -119,6 +119,6 @@ class SettingsRepository @Inject constructor(
         const val KEY_READ_ALOUD = "read_aloud"
         const val KEY_HAPTICS = "haptics"
         const val KEY_ONBOARDING_COMPLETE = "onboarding_complete"
-        private const val KEY_MIGRATED_V1 = "migrated_v1"
+        private const val KEY_FRESH_START = "fresh_start_v2"
     }
 }
