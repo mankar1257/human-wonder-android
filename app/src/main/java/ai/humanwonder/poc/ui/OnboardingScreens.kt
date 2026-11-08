@@ -5,6 +5,7 @@ import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -13,6 +14,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,6 +35,7 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -46,18 +49,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -72,6 +81,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import java.time.LocalTime
 import kotlinx.coroutines.launch
@@ -111,9 +121,10 @@ private fun Rising(content: @Composable () -> Unit) {
 
 /**
  * The opening screen on every launch: the Liwa dunes under the Milky Way with Orbit 412 passing
- * over. No button: swipe up (or tap the teal arrow) to continue. The first time that leads to
- * "What should Orbit 412 call you?"; once a profile exists it says good evening and goes straight
- * into the chat. [greetingName] is the saved name when the profile is set up, otherwise null.
+ * over. No button: swipe up (or tap the chevron ascent) to continue. The first time that leads to
+ * "What should Orbit 412 call you?"; once a profile exists the headline is "Welcome back, <name>."
+ * and the swipe goes straight into the chat. [greetingName] is the saved name when the profile is
+ * set up, otherwise null.
  */
 @Composable
 fun LandingScreen(greetingName: String?, onContinue: () -> Unit) {
@@ -181,13 +192,13 @@ fun LandingScreen(greetingName: String?, onContinue: () -> Unit) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
-                        "The sky has something to tell you.",
+                        if (greetingName != null) "Welcome back, $greetingName." else "The sky has something to tell you.",
                         color = Color.White, style = HWType.WelcomeHero.capScale(), textAlign = TextAlign.Center,
                     )
                     Spacer(Modifier.height(14.dp))
                     Text(
                         if (greetingName != null) {
-                            "${greetingFor()}, $greetingName. Orbit\u00A0412 is overhead now."
+                            "${greetingFor()}. Orbit\u00A0412 is overhead now, and it remembers your conversations."
                         } else {
                             "Human Wonder gives the sky a voice: Orbit\u00A0412, a satellite passing over you tonight."
                         },
@@ -199,44 +210,85 @@ fun LandingScreen(greetingName: String?, onContinue: () -> Unit) {
                 }
             }
             Spacer(Modifier.weight(1f))
-            SwipeUpArrow(label, onClick = go)
+            Ascent(label, onClick = go)
         }
     }
 }
 
-/** The teal arrow that gently bobs upward, with its label; tapping it does what the swipe does. */
+/**
+ * The swipe hint ("ascent"): three thin chevrons that light up one after another from the bottom,
+ * the top one in teal with a soft glow, over a label with a slow light sweep. No visible button.
+ * Tapping it does what the swipe does. Same timing as the preview (2 s wave, 3.2 s sweep).
+ */
 @Composable
-private fun SwipeUpArrow(label: String, onClick: () -> Unit) {
-    val t = rememberInfiniteTransition(label = "bob")
-    val bob by t.animateFloat(
-        initialValue = 0f, targetValue = -6f,
-        animationSpec = infiniteRepeatable(tween(900, easing = FastOutSlowInEasing), RepeatMode.Reverse),
-        label = "y",
+private fun Ascent(label: String, onClick: () -> Unit) {
+    val t = rememberInfiniteTransition(label = "ascent")
+    val phase by t.animateFloat(
+        initialValue = 0f, targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(2000, easing = LinearEasing)), label = "wave",
     )
+    val sweep by t.animateFloat(
+        // Left to right, like the preview's light sweep.
+        initialValue = -0.6f, targetValue = 1.6f,
+        animationSpec = infiniteRepeatable(tween(3200, easing = LinearEasing)), label = "sweep",
+    )
+    val dim = HW.Ink.copy(alpha = 0.62f)
     Column(
-        Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, bottom = 36.dp),
+        Modifier
+            .padding(bottom = 34.dp)
+            .fillMaxWidth()
+            .wrapContentWidth(Alignment.CenterHorizontally)
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = label }
+            .padding(start = 28.dp, end = 28.dp, top = 12.dp, bottom = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Box(
-            Modifier
-                .size(56.dp)
-                .shadow(12.dp, CircleShape)
-                .clip(CircleShape)
-                .background(HW.Primary)
-                .clickable(role = Role.Button, onClick = onClick)
-                .semantics { contentDescription = label },
-            contentAlignment = Alignment.Center,
-        ) {
-            HwIcon(
-                R.drawable.ic_keyboard_arrow_up, HW.OnAccent, 30.dp,
-                modifier = Modifier.graphicsLayer { translationY = bob.dp.toPx() },
-            )
+        Canvas(Modifier.size(width = 30.dp, height = 43.dp)) {
+            val u = size.width / 30f // the chevron is drawn on a 30 x 13 grid
+            for (i in 0..2) { // 0 = bottom
+                val local = ((phase - i * 0.1f) % 1f + 1f) % 1f
+                val lit = when {
+                    local < 0.35f -> FastOutSlowInEasing.transform(local / 0.35f)
+                    local < 0.70f -> 1f - FastOutSlowInEasing.transform((local - 0.35f) / 0.35f)
+                    else -> 0f
+                }
+                val top = (2 - i) * 15f * u - 3.dp.toPx() * lit
+                val path = Path().apply {
+                    moveTo(3f * u, top + 11.5f * u)
+                    lineTo(15f * u, top + 2.5f * u)
+                    lineTo(27f * u, top + 11.5f * u)
+                }
+                val color = if (i == 2) HW.Primary else Color.White
+                val alpha = 0.16f + 0.84f * lit
+                if (i == 2) {
+                    drawPath(path, color.copy(alpha = 0.22f * alpha), style = Stroke(7.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round))
+                }
+                drawPath(path, color.copy(alpha = alpha), style = Stroke(2.2f * u, cap = StrokeCap.Round, join = StrokeJoin.Round))
+            }
         }
-        // The arrow already carries this label for TalkBack; don't read it twice.
         Text(
-            label, color = HW.Ink.copy(alpha = 0.88f), style = HWType.Chip, textAlign = TextAlign.Center,
-            modifier = Modifier.clearAndSetSemantics {},
+            label,
+            color = Color.White,
+            style = HWType.ChipStrong.copy(fontSize = 15.sp, letterSpacing = 0.01.em),
+            textAlign = TextAlign.Center, // wraps rather than clips at large text sizes
+            modifier = Modifier
+                .clearAndSetSemantics {}
+                // Paint the words with a light band that sweeps across them.
+                .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                .drawWithContent {
+                    drawContent()
+                    val cx = size.width * sweep
+                    val band = size.width * 0.32f
+                    drawRect(
+                        Brush.horizontalGradient(
+                            0f to dim, 0.5f to Color.White, 1f to dim,
+                            startX = cx - band, endX = cx + band,
+                        ),
+                        blendMode = BlendMode.SrcIn,
+                    )
+                },
         )
     }
 }
