@@ -15,7 +15,7 @@ struct NameView: View {
                 let h = geo.size.height
                 ZStack(alignment: .top) {
                     HW.space
-                    Image("bg_earth_orbit")
+                    Image(uiImage: HWImages.photo("bg_earth_orbit"))
                         .resizable()
                         .scaledToFill()
                         .frame(width: geo.size.width, height: h * 0.83, alignment: .top)

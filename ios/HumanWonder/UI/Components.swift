@@ -1,13 +1,22 @@
 import SwiftUI
+import UIKit
 
-/// A Material Symbol / Human Wonder icon from the asset catalog (24 x 24 box), tinted.
+/// Images bundled with the app as plain files (no asset catalog, see tools/prepare_assets.py).
+enum HWImages {
+    /// A 24 pt icon (Resources/Icons/<name>@3x.png).
+    static func icon(_ name: String) -> UIImage { UIImage(named: name) ?? UIImage() }
+    /// A full-screen photograph (Resources/Photos/<name>.jpg).
+    static func photo(_ name: String) -> UIImage { UIImage(named: "\(name).jpg") ?? UIImage() }
+}
+
+/// A Material Symbol / Human Wonder icon (24 x 24 box), tinted.
 struct HWIcon: View {
     let name: String
     var color: Color = HW.iconMuted
     var size: CGFloat = 24
 
     var body: some View {
-        Image(name)
+        Image(uiImage: HWImages.icon(name))
             .resizable()
             .renderingMode(.template)
             .interpolation(.high)

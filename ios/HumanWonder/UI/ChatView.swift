@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// The three suggestions from the Stitch "Talk to Space" screen.
 private let suggestions = [

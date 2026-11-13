@@ -1,5 +1,8 @@
-# Human Wonder for iPhone. Generate the Xcode project with XcodeGen (`xcodegen generate` in ios/);
-# the GitHub workflow .github/workflows/ios.yml builds it on a Mac and makes the .ipa.
+# Human Wonder for iPhone. Generate the Xcode project with XcodeGen (`xcodegen generate` in ios/).
+# Built on the Mac by tools/build-ios-on-mac.sh ("Build Human Wonder for iPhone.command"), or by the
+# GitHub workflow .github/workflows/ios.yml. No asset catalog on purpose: compiling one makes Xcode
+# require an 8 GB simulator download. Without Xcode's Metal toolchain the build script swaps the
+# "UI/Aurora.metal.excluded" pattern for the shader and HW_METAL for HW_NO_METAL.
 name: HumanWonder
 options:
   bundleIdPrefix: ai.humanwonder
@@ -15,7 +18,6 @@ settings:
     CODE_SIGN_STYLE: Manual
     CODE_SIGN_IDENTITY: ""
     DEVELOPMENT_TEAM: ""
-    ENABLE_USER_SCRIPT_SANDBOXING: YES
 targets:
   HumanWonder:
     type: application
@@ -28,6 +30,7 @@ targets:
           - "Model"
           - "Model/**"
           - "Info.plist"
+          - "UI/Aurora.metal.excluded"
       - path: HumanWonder/Resources/licenses
         type: folder
         buildPhase: resources
@@ -47,8 +50,10 @@ targets:
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSRequiresIPhoneOS: true
         ITSAppUsesNonExemptEncryption: false
-        UILaunchScreen:
-          UIColorName: LaunchBackground
+        UILaunchScreen: {}
+        CFBundleIcons:
+          CFBundlePrimaryIcon:
+            CFBundleIconFiles: [AppIcon60x60]
         UIRequiresFullScreen: true
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         UIStatusBarStyle: UIStatusBarStyleLightContent
@@ -68,6 +73,6 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: ai.humanwonder.orbit
         PRODUCT_NAME: HumanWonder
         TARGETED_DEVICE_FAMILY: "1"
-        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: ["$(inherited)", HW_METAL]
         ENABLE_PREVIEWS: NO
         LD_RUNPATH_SEARCH_PATHS: ["$(inherited)", "@executable_path/Frameworks"]

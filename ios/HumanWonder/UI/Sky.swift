@@ -102,7 +102,7 @@ struct PhotoSky: View {
 
     var body: some View {
         GeometryReader { geo in
-            Image(image)
+            Image(uiImage: HWImages.photo(image))
                 .resizable()
                 .scaledToFill()
                 .frame(width: geo.size.width, height: geo.size.height)

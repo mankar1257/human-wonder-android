@@ -4,11 +4,11 @@
 
 - Fonts: the variable Geist / Newsreader / JetBrains Mono files become static weights with their own
   PostScript names (HWGeist-Light ...), which iOS loads reliably by name.
-- Icons: every Android vector drawable becomes a template PDF in the asset catalog, so the iPhone app
-  draws exactly the same Material Symbols and Human Wonder marks.
+- Icons: every Android vector drawable becomes a 72 px PNG (24 pt at 3x), tinted in code, so the
+  iPhone app draws exactly the same Material Symbols and Human Wonder marks.
 - Photos, the app icon (the Android launcher mark on its background colour) and the licence texts.
+No asset catalog: compiling one makes Xcode demand an 8 GB simulator download.
 """
-import json
 import re
 import shutil
 import subprocess
@@ -21,7 +21,7 @@ from fontTools.varLib import instancer
 ROOT = Path(__file__).resolve().parents[2]
 RES = ROOT / "app/src/main/res"
 APP = ROOT / "ios/HumanWonder"
-ASSETS = APP / "Assets.xcassets"
+RESOURCES = APP / "Resources"
 A = "{http://schemas.android.com/apk/res/android}"
 
 FONTS = [
@@ -108,42 +108,27 @@ def vector_to_svg(xml_path: Path) -> str:
     )
 
 
-def imageset(name: str, files: list, template: bool = False, vector: bool = False):
-    folder = ASSETS / f"{name}.imageset"
-    folder.mkdir(parents=True, exist_ok=True)
-    images = [{"idiom": "universal", "filename": f.name} for f in files]
-    for f in files:
-        shutil.copyfile(f, folder / f.name) if f.parent != folder else None
-    contents = {"images": images, "info": {"author": "xcode", "version": 1}}
-    props = {}
-    if template:
-        props["template-rendering-intent"] = "template"
-    if vector:
-        props["preserves-vector-representation"] = True
-    if props:
-        contents["properties"] = props
-    (folder / "Contents.json").write_text(json.dumps(contents, indent=2))
-
-
 def icons():
     tmp = ROOT / "ios/build-tmp"
     tmp.mkdir(exist_ok=True)
+    out = RESOURCES / "Icons"
+    out.mkdir(parents=True, exist_ok=True)
     count = 0
     for xml in sorted((RES / "drawable").glob("ic_*.xml")):
         if xml.stem == "ic_launcher_foreground":
             continue
         svg = tmp / f"{xml.stem}.svg"
         svg.write_text(vector_to_svg(xml))
-        pdf = tmp / f"{xml.stem}.pdf"
-        subprocess.run(["rsvg-convert", "-f", "pdf", "-w", "24", "-h", "24", "-o", str(pdf), str(svg)], check=True)
-        imageset(xml.stem, [pdf], template=True, vector=True)
+        subprocess.run(["rsvg-convert", "-w", "72", "-h", "72", "-o", str(out / f"{xml.stem}@3x.png"), str(svg)], check=True)
         count += 1
     return count
 
 
 def photos():
+    out = RESOURCES / "Photos"
+    out.mkdir(parents=True, exist_ok=True)
     for name in ("bg_liwa_dunes", "bg_earth_orbit"):
-        imageset(name, [RES / "drawable-nodpi" / f"{name}.jpg"])
+        shutil.copyfile(RES / "drawable-nodpi" / f"{name}.jpg", out / f"{name}.jpg")
 
 
 def app_icon():
@@ -154,13 +139,10 @@ def app_icon():
     inner = fg.replace('width="24" height="24" viewBox="0 0 108 108"', 'width="1024" height="1024" viewBox="18 18 72 72"')
     svg = inner.replace(">", f'><rect x="0" y="0" width="108" height="108" fill="#{bg}"/>', 1)
     (tmp / "icon.svg").write_text(svg)
-    folder = ASSETS / "AppIcon.appiconset"
-    folder.mkdir(parents=True, exist_ok=True)
-    subprocess.run(["rsvg-convert", "-w", "1024", "-h", "1024", "-o", str(folder / "icon-1024.png"), str(tmp / "icon.svg")], check=True)
-    (folder / "Contents.json").write_text(json.dumps({
-        "images": [{"filename": "icon-1024.png", "idiom": "universal", "platform": "ios", "size": "1024x1024"}],
-        "info": {"author": "xcode", "version": 1},
-    }, indent=2))
+    out = RESOURCES / "AppIcon"
+    out.mkdir(parents=True, exist_ok=True)
+    for name, px in (("AppIcon60x60@2x.png", 120), ("AppIcon60x60@3x.png", 180)):
+        subprocess.run(["rsvg-convert", "-w", str(px), "-h", str(px), "-o", str(out / name), str(tmp / "icon.svg")], check=True)
 
 
 def licences():
@@ -171,8 +153,7 @@ def licences():
 
 
 if __name__ == "__main__":
-    ASSETS.mkdir(parents=True, exist_ok=True)
-    (ASSETS / "Contents.json").write_text(json.dumps({"info": {"author": "xcode", "version": 1}}, indent=2))
+    shutil.rmtree(APP / "Assets.xcassets", ignore_errors=True)
     print("fonts:", fonts())
     print("icons:", icons())
     photos()
