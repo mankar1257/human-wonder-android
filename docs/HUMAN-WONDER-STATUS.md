@@ -1,14 +1,14 @@
 # Human Wonder: status, builds and installs
 
-*13 November 2026. Covers the Android app (v2), the new iPhone app, and how to build and install both without paid accounts.*
+*13 November 2026 (updated 22:15). Covers the Android app (v2), the new iPhone app, and how to build and install both without paid accounts.*
 
 ## In short
 
 - **Android app (v2)** builds on the Mac with one double-click. The latest build (8 Nov, 11:31) has the smaller type, the unified look, the dunes welcome screen with the swipe-up, and the text-size and keyboard fixes. It has **not been installed on a phone yet**: no Android phone was connected during that build.
-- **iPhone app** is written: a SwiftUI version of the same app (same screens, fonts, icons, photos, Orbit 412 voice and the same model on the phone). It is on the Mac but **not built yet**, because building needs Xcode, and Xcode needs a newer macOS on this Mac.
+- **iPhone app** is built: a SwiftUI version of the same app (same screens, fonts, icons, photos, Orbit 412 voice and the same model on the phone). It compiled on the first try on 13 November, 22:12, with Xcode 27.2 on macOS 27.2.1, and produced `HumanWonder-iPhone.ipa` (401 MB). It has **not been installed on an iPhone yet**.
 - **Installing on iPhone costs nothing:** the app is signed with a free Apple ID through iloader or SideStore. The catch: it must be renewed every 7 days and fits 3 sideloaded apps per iPhone.
 - **GitHub is locked for billing** (since about 8 November), so GitHub's build machines run nothing for this account. Everything is built on the Mac instead. Pushing code still works.
-- **Next:** update macOS, install Xcode, double-click *Build Human Wonder for iPhone*, then install on an iPhone (section 4).
+- **Next:** install `HumanWonder-iPhone.ipa` on an iPhone (section 4) and check every screen.
 
 ## 1. What changed this week
 
@@ -74,7 +74,7 @@ Both need the Apple Developer Program, which costs ₹8,700 a year in India. Unt
     - If you'd rather not update yet: Xcode 26.3 runs on macOS Sequoia 15.6 or later. It is a free download from developer.apple.com/download after signing in with an Apple ID.
 2. **Install Xcode** from the Mac App Store (free). Keep about 15 GB free while it installs; this Mac had about 26 GB free on 13 November.
 3. **Open Xcode once:** agree to the licence and let it finish. Only iOS is needed, so skip the extra simulator downloads it offers.
-4. **Double-click Build Human Wonder for iPhone.command** in the project folder. The first build takes about 15–20 minutes (it builds llama.cpp for iPhone once); later builds take a few minutes. It produces `HumanWonder-iPhone.ipa` (about 440 MB).
+4. **Double-click Build Human Wonder for iPhone.command** in the project folder. The first build takes about 15–20 minutes (it builds llama.cpp for iPhone once); later builds take a few minutes. It produces `HumanWonder-iPhone.ipa` (about 400 MB).
 
 What the build does on its own:
 
@@ -90,7 +90,7 @@ It needs no admin password and no Apple developer account.
 | `tools/build-ios-xcode.log` | the app's compile output |
 | `tools/build-ios-llama.log` | the llama.cpp build |
 
-**Status:** written and copied to the Mac on 13 November. Not compiled yet: no Mac with Xcode was available, and GitHub's Macs are blocked (section 5). An independent check of the code found no certain compile errors, and four small hardening fixes were made after it. Those fixes are on GitHub (`ios` branch, `7e3073e`) and are copied to the Mac before the first build. Xcode 27's known breaking changes don't affect this app. Expect one round of small fixes after the first compile anyway, since nothing has been compiled yet.
+**Status:** built on 13 November at 22:12 (Xcode 27.2, macOS 27.2.1) on the first compile, with one harmless warning. The `.ipa` (401 MB) holds the app, the llama.cpp framework, the model, the fonts, icons, photos, the compiled sky shader and the licences. On this Mac's connection, downloads from GitHub stall, so the build now uses a copy of XcodeGen placed in `tools/`. Not yet installed on an iPhone; nothing has been tried on a phone yet.
 
 ## 4. Installing on an iPhone without paying
 
@@ -130,7 +130,7 @@ Each tester signs with their own Apple ID, so any number of people can test.
 |---|---|---|
 | `main` | design preview, docs (this document), memory and skill | `4c92ed7` |
 | `v2-offlinellm` | the Android app | `ba9b9f0` |
-| `ios` | the Android app plus the iPhone app (`ios/`) and its build script | `7e3073e` |
+| `ios` | the Android app plus the iPhone app (`ios/`) and its build script | `e2d06a8` |
 
 ## 6. Where things are on the Mac
 
@@ -153,9 +153,8 @@ Each tester signs with their own Apple ID, so any number of people can test.
 
 ## 8. Next steps
 
-- [ ] Update macOS (Tahoe 26.6 or later for the App Store's Xcode 27).
-- [ ] Install Xcode, open it once, and finish setup.
-- [ ] Double-click **Build Human Wonder for iPhone**. If it stops, send the message; the details are in `tools/build-ios.log`.
+- [x] Update macOS and install Xcode (macOS 27.2.1, Xcode 27.2).
+- [x] Build the iPhone app (`HumanWonder-iPhone.ipa`, 13 November).
 - [ ] Install on an iPhone (section 4) and send screenshots of each screen to check them against the Android app.
 - [ ] Android: plug in the phone, run **Build Human Wonder**, and check the phone screenshots and the 50 screen-check pictures.
 - [ ] Optional: clear the GitHub billing lock so builds and screen checks run on GitHub again.
