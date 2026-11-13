@@ -90,8 +90,13 @@ XG="$(find "$TOOLS/xcodegen-dist" -type f -name xcodegen -perm -u+x 2>/dev/null 
 if [ -z "$XG" ]; then
   say "Getting XcodeGen (one time, a few MB)"
   mkdir -p "$TOOLS"
-  fetch "$TOOLS/xcodegen.zip" "https://github.com/yonaskolb/XcodeGen/releases/latest/download/xcodegen.zip" \
-    || die "Couldn't download XcodeGen. Check the internet connection and double-click again."
+  if [ -f "$PROJECT/tools/xcodegen.zip" ]; then
+    # A copy placed next to this script (GitHub downloads can stall on this Mac's connection).
+    cp "$PROJECT/tools/xcodegen.zip" "$TOOLS/xcodegen.zip"
+  else
+    fetch "$TOOLS/xcodegen.zip" "https://github.com/yonaskolb/XcodeGen/releases/latest/download/xcodegen.zip" \
+      || die "Couldn't download XcodeGen. Check the internet connection and double-click again."
+  fi
   rm -rf "$TOOLS/xcodegen-dist"
   mkdir -p "$TOOLS/xcodegen-dist"
   unzip -q "$TOOLS/xcodegen.zip" -d "$TOOLS/xcodegen-dist"

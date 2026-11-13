@@ -26,3 +26,5 @@ ios/HumanWonder/Info.plist
 ios/HumanWonder/Model/
 ios/build/
 ios/build-tmp/
+tools/xcodegen.zip
+tools/build-ios*.log
