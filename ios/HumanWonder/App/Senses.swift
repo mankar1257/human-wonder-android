@@ -61,6 +61,8 @@ final class VoiceInput {
             unavailable = true
             return
         }
+        // A second tap while the permission prompts were open must not start a second recording.
+        guard !listening, !tapInstalled else { return }
         do {
             let session = AVAudioSession.sharedInstance()
             try session.setCategory(.record, mode: .measurement, options: [.duckOthers])
@@ -70,7 +72,13 @@ final class VoiceInput {
             request.requiresOnDeviceRecognition = true
             self.request = request
             let input = audio.inputNode
-            input.installTap(onBus: 0, bufferSize: 1024, format: input.outputFormat(forBus: 0)) { buffer, _ in
+            let format = input.outputFormat(forBus: 0)
+            guard format.sampleRate > 0, format.channelCount > 0 else { // no microphone
+                try? session.setActive(false, options: .notifyOthersOnDeactivation)
+                unavailable = true
+                return
+            }
+            input.installTap(onBus: 0, bufferSize: 1024, format: format) { buffer, _ in
                 request.append(buffer)
             }
             tapInstalled = true

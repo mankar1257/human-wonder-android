@@ -22,6 +22,7 @@ targets:
   HumanWonder:
     type: application
     platform: iOS
+    scheme: {}
     sources:
       - path: HumanWonder
         excludes:
@@ -51,6 +52,8 @@ targets:
         LSRequiresIPhoneOS: true
         ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
         CFBundleIcons:
           CFBundlePrimaryIcon:
             CFBundleIconFiles: [AppIcon60x60]
