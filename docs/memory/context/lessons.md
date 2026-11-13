@@ -59,6 +59,17 @@ density) and draws every screen at 5 phone set-ups into screens-check/. The clou
 the Mac-side VM have no Maven/Google access, so the Mac's own build is the only compiler: get an
 independent compile review of main-code changes before asking the owner to build.
 
+## 2026-11-13: iPhone without the paid Apple account
+- The owner's GitHub account is locked for billing (since ~Nov 8): no Actions run, Android or iOS.
+  Pushes still work. Don't plan on GitHub's Macs until they say it's fixed.
+- The iPhone app is a SwiftUI port on branch `ios` (folder ios/): same tokens, fonts, icons,
+  photos, persona and model (llama.cpp xcframework, Metal). Built on the owner's Mac by
+  "Build Human Wonder for iPhone.command" -> HumanWonder-iPhone.ipa (unsigned). Installed with
+  iloader ("Import IPA") or SideStore + LocalDevVPN, signed by the owner's free Apple ID (7 days,
+  3 apps). No asset catalog on purpose: actool would demand the 8 GB simulator runtime.
+- The Mac had ~7 GB free; Xcode needs ~15 GB. Ask before deleting anything; the Android build
+  needs ~/human-wonder-android-tools and ~/.gradle.
+
 ## Earlier lessons
 - Show the design in the preview before building (builds cost the owner 5-15 minutes).
 - Never reveal the model or how it works in any user-facing text, error, or status.

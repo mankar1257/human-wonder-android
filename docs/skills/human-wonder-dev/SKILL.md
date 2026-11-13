@@ -142,3 +142,11 @@ Orbit mark on every list row, sparkle icons on chips, rainbow-gradient avatars.
 - Candidate open-source bases (Apache-2.0, Kotlin/Compose/llama.cpp): jegly/OfflineLLM (zero
   network, bundled model, Room history, settings; minSdk 33), shubham0204/SmolChat-Android
   (ObjectBox history, drawer, model downloads).
+
+## iPhone (branch `ios`, folder ios/)
+- SwiftUI, iOS 17+, XcodeGen spec ios/project.yml; assets come from the Android app via
+  ios/tools/prepare_assets.py (static font weights HWGeist-*, 72 px template icons, photos,
+  app icon). Keep both apps' tokens, copy and flow identical.
+- Build on the Mac: double-click "Build Human Wonder for iPhone.command" (log: tools/build-ios.log,
+  tools/build-ios-xcode.log). Install with iloader or SideStore using the owner's free Apple ID.
+- `-hwDemo <scene>` launch argument opens one screen with sample data (ios/tools/screens.sh).
