@@ -40,6 +40,8 @@ data class ChatMessage(
     val text: String,
     val complete: Boolean = true,
     val time: Long = System.currentTimeMillis(),
+    /** A frame from Orbit's archive sent with this answer (an id in assets/frames/frames.json). */
+    val frameId: String? = null,
 )
 
 /** Everything the chat screen draws. */

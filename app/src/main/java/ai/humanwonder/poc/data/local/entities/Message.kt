@@ -24,5 +24,7 @@ data class Message(
     val role: String, // "user" | "assistant"
     val content: String,
     val timestamp: Long = System.currentTimeMillis(),
-    val tokenCount: Int = 0
+    val tokenCount: Int = 0,
+    /** The frame from Orbit's archive sent with an answer, if any (added in database version 2). */
+    val frameId: String? = null,
 )

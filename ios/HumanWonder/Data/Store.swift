@@ -20,6 +20,8 @@ struct StoredMessage: Codable, Identifiable, Equatable {
     let role: String
     let content: String
     let timestamp: Date
+    /// A frame from Orbit's archive sent with an answer (an id in frames/frames.json), if any.
+    var frameId: String?
 }
 
 struct Conversation: Codable, Identifiable, Equatable {
@@ -82,8 +84,10 @@ final class Store {
                 "title": c.title,
                 "createdAt": formatter.string(from: c.createdAt),
                 "updatedAt": formatter.string(from: c.updatedAt),
-                "messages": c.messages.map { m in
-                    ["role": m.role == "user" ? "you" : "Orbit 412", "content": m.content, "time": formatter.string(from: m.timestamp)]
+                "messages": c.messages.map { m -> [String: Any] in
+                    var item: [String: Any] = ["role": m.role == "user" ? "you" : "Orbit 412", "content": m.content, "time": formatter.string(from: m.timestamp)]
+                    if let frame = m.frameId { item["frame"] = frame }
+                    return item
                 },
             ]
         }

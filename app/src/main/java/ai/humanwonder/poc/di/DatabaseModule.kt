@@ -23,7 +23,7 @@ object DatabaseModule {
             context,
             ChatDatabase::class.java,
             "humanwonder_database"
-        ).build()
+        ).addMigrations(ChatDatabase.MIGRATION_1_2).build()
     }
 
     @Provides

@@ -18,7 +18,7 @@ enum Demo {
             id: "c1", title: "Liwa dunes tonight", createdAt: at(30), updatedAt: at(2),
             messages: [
                 StoredMessage(id: "m1", role: "user", content: "What are you seeing over Liwa dunes right now?", timestamp: at(4)),
-                StoredMessage(id: "m2", role: "assistant", content: "The dunes are a quiet sea of shadow tonight, Vivek. Their crests catch a thin silver line of moonlight, and far to the north the lights of Abu Dhabi glow like embers at the edge of the dark.", timestamp: at(4)),
+                StoredMessage(id: "m2", role: "assistant", content: "The dunes are a quiet sea of shadow tonight, Vivek. Their crests catch a thin silver line of moonlight, and far to the north the lights of Abu Dhabi glow like embers at the edge of the dark.", timestamp: at(4), frameId: "star-dunes"),
                 StoredMessage(id: "m3", role: "user", content: "Can you spot our campfire in the desert?", timestamp: at(2)),
                 StoredMessage(id: "m4", role: "assistant", content: "A single warm point, south of the last road. From 412 km up it is smaller than a star, but I see it. Keep it burning and I will look for it on my next pass.", timestamp: at(2)),
             ])

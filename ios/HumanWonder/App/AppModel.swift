@@ -126,9 +126,9 @@ final class AppModel {
         return c.id
     }
 
-    func addMessage(to id: String, role: String, content: String, id messageId: String) {
+    func addMessage(to id: String, role: String, content: String, id messageId: String, frameId: String? = nil) {
         guard let i = conversations.firstIndex(where: { $0.id == id }) else { return }
-        conversations[i].messages.append(StoredMessage(id: messageId, role: role, content: content, timestamp: Date()))
+        conversations[i].messages.append(StoredMessage(id: messageId, role: role, content: content, timestamp: Date(), frameId: frameId))
         conversations[i].updatedAt = Date()
         store.save(conversations)
     }

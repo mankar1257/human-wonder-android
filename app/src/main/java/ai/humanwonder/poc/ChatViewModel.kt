@@ -1,5 +1,7 @@
 package ai.humanwonder.poc
 
+import ai.humanwonder.poc.ai.FrameCatalog
+import ai.humanwonder.poc.ai.FramePicker
 import ai.humanwonder.poc.ai.InferenceEngine
 import ai.humanwonder.poc.ai.ModelManager
 import ai.humanwonder.poc.ai.Persona
@@ -25,6 +27,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalTime
 import java.util.UUID
 import javax.inject.Inject
 
@@ -64,7 +67,7 @@ class ChatViewModel @Inject constructor(
         // saved to Room under the same ids, so each line is shown once and never re-animates).
         val sessionIds = waiting.mapTo(HashSet()) { it.id }
         val messages = rows.filter { it.id !in sessionIds }
-            .map { ChatMessage(it.id, it.role == "user", it.content, complete = true, time = it.timestamp) } +
+            .map { ChatMessage(it.id, it.role == "user", it.content, complete = true, time = it.timestamp, frameId = it.frameId) } +
             waiting
         UiState(
             name = profile.name,
@@ -77,6 +80,9 @@ class ChatViewModel @Inject constructor(
         )
     }.combine(modelManager.modelState) { state, model -> state.copy(sky = model.toSky()) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, UiState(sky = modelManager.modelState.value.toSky()))
+
+    /** Orbit's archive of photos and loops (assets/frames). */
+    private val frames: FrameCatalog by lazy { FrameCatalog.load(getApplication<Application>()) }
 
     /** False until this screen has put its conversation into the native context once. */
     private var primed = false
@@ -131,13 +137,14 @@ class ChatViewModel @Inject constructor(
         tts?.stop()
         val userId = UUID.randomUUID().toString()
         val answerId = UUID.randomUUID().toString()
+        val frame = pickFrame(question)
         pending.update {
             it + ChatMessage(userId, fromUser = true, text = question) +
-                ChatMessage(answerId, fromUser = false, text = "", complete = false)
+                ChatMessage(answerId, fromUser = false, text = "", complete = false, frameId = frame?.id)
         }
         local.update { it.copy(generating = true) }
         activeAnswerId = answerId
-        val prompt = Persona.userPrompt(question, local.value.perspective, local.value.tone)
+        val prompt = Persona.userPrompt(question, local.value.perspective, local.value.tone, frame)
 
         viewModelScope.launch {
             try {
@@ -160,6 +167,23 @@ class ChatViewModel @Inject constructor(
             }
         }
     }
+
+    /**
+     * The frame from Orbit's archive to send with the answer to [question], chosen by the app before
+     * the model starts so the model can describe it (never one already sent in this conversation).
+     */
+    private fun pickFrame(question: String) = runCatching {
+        // Read the sources directly: the combined [ui] flow may lag one emission behind.
+        val lines = stored.value.map { ChatMessage(it.id, it.role == "user", it.content, frameId = it.frameId) } + pending.value
+        FramePicker.pick(
+            frames,
+            question = question,
+            context = listOfNotNull(lines.lastOrNull { it.fromUser }?.text, lines.lastOrNull { !it.fromUser }?.text).joinToString(" "),
+            shown = lines.mapNotNullTo(HashSet()) { it.frameId },
+            hour = LocalTime.now().hour,
+            city = settings.profile.value.city,
+        )
+    }.getOrNull()
 
     private suspend fun prepare(id: String, force: Boolean, tight: Boolean, skipId: String) {
         val p = settings.profile.value
@@ -212,6 +236,8 @@ class ChatViewModel @Inject constructor(
     private fun currentText(answerId: String): String =
         pending.value.firstOrNull { it.id == answerId }?.text.orEmpty()
 
+    private fun frameOf(answerId: String): String? = pending.value.firstOrNull { it.id == answerId }?.frameId
+
     private fun setAnswer(answerId: String, text: String, complete: Boolean) {
         pending.update { list -> list.map { m -> if (m.id == answerId) m.copy(text = text, complete = complete) else m } }
     }
@@ -226,13 +252,15 @@ class ChatViewModel @Inject constructor(
         val current = answerId == activeAnswerId
         endTurn(answerId)
         if (text.isBlank()) {
+            dropFrame(answerId)
             setAnswer(answerId, "…", complete = true)
             return
         }
         setAnswer(answerId, text, complete = true)
+        val frameId = frameOf(answerId)
         viewModelScope.launch {
             try {
-                chatRepository.addMessage(conversation, "assistant", text, id = answerId)
+                chatRepository.addMessage(conversation, "assistant", text, id = answerId, frameId = frameId)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Throwable) {
@@ -244,7 +272,13 @@ class ChatViewModel @Inject constructor(
 
     private fun failAnswer(answerId: String) {
         endTurn(answerId)
+        dropFrame(answerId)
         setAnswer(answerId, Persona.FADED_SIGNAL, complete = true)
+    }
+
+    /** No picture goes with an answer that did not arrive. */
+    private fun dropFrame(answerId: String) {
+        pending.update { list -> list.map { m -> if (m.id == answerId) m.copy(frameId = null) else m } }
     }
 
     fun stop() {

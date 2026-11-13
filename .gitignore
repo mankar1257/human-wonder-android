@@ -28,3 +28,7 @@ ios/build/
 ios/build-tmp/
 tools/xcodegen.zip
 tools/build-ios*.log
+
+# Downloaded NASA originals for Orbit's archive (tools/frames); the app uses the built copies.
+media-src/
+__pycache__/

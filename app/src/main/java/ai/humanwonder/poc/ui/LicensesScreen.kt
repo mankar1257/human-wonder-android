@@ -39,6 +39,7 @@ private val LICENSE_TITLES = mapOf(
     "OFL-geist.txt" to "Geist typeface (SIL Open Font License)",
     "OFL-jetbrainsmono.txt" to "JetBrains Mono typeface (SIL Open Font License)",
     "OFL-newsreader.txt" to "Newsreader typeface (SIL Open Font License)",
+    "NOTICE-orbit-archive.txt" to "Earth photographs (NASA)",
 )
 
 /** "Open-source licenses": every notice bundled with Human Wonder, as written. */

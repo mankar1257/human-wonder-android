@@ -23,7 +23,9 @@ data class ExportedChat(
 data class ExportedMessage(
     val role: String,
     val content: String,
-    val timestamp: Long
+    val timestamp: Long,
+    /** The frame from Orbit's archive sent with an answer, if any. */
+    val frame: String? = null,
 )
 
 @Serializable
@@ -83,12 +85,14 @@ class ChatRepository @Inject constructor(
         role: String,
         content: String,
         id: String = UUID.randomUUID().toString(),
+        frameId: String? = null,
     ): Message {
         val message = Message(
             id = id,
             conversationId = conversationId,
             role = role,
             content = content,
+            frameId = frameId,
         )
         messageDao.insert(message)
         conversationDao.incrementMessageCount(conversationId)
@@ -104,7 +108,7 @@ class ChatRepository @Inject constructor(
                 title = conv.title,
                 createdAt = conv.createdAt,
                 messages = messageDao.getMessagesForConversationSync(conv.id).map { msg ->
-                    ExportedMessage(role = msg.role, content = msg.content, timestamp = msg.timestamp)
+                    ExportedMessage(role = msg.role, content = msg.content, timestamp = msg.timestamp, frame = msg.frameId)
                 },
             )
         }

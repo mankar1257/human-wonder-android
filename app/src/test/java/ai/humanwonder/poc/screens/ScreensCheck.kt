@@ -205,6 +205,7 @@ abstract class ScreensCheck(private val phone: String) {
                 text = "The dunes are a quiet sea of shadow tonight, Vivek. Their crests catch a thin " +
                     "silver line of moonlight, and far to the north the lights of Abu Dhabi glow like " +
                     "embers at the edge of the dark.",
+                frameId = "star-dunes",
             ),
             ChatMessage("m3", fromUser = true, text = "Can you spot our campfire in the desert?"),
             ChatMessage(

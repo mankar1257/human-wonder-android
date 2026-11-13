@@ -10,8 +10,10 @@ import ai.humanwonder.poc.Tone
 object Persona {
 
     /**
-     * The system prompt. Kept short and concrete (a small model follows a compact persona with
-     * one example far better than a long list of rules). Rebuilt whenever the name changes.
+     * The system prompt. Kept short and concrete. It has no example answer: tested on the app's
+     * model, an example was copied almost word for word into 40% of answers ("the coast glows like
+     * a string of gold beads", even about the Moon), and without it none were (tools/frames/README.md).
+     * Rebuilt whenever the name changes.
      */
     fun systemPrompt(name: String, city: String = ""): String = buildString {
         val who = name.ifBlank { "a wanderer" }
@@ -30,26 +32,28 @@ object Persona {
             "Reply in the language they write in. " +
                 "You have no live camera, so describe how things usually look from orbit and never invent exact " +
                 "numbers, times or news; if you are unsure, say the signal is unclear. " +
-                "Now and then open with a short radio phrase, like \"Reading you clearly\" or " +
-                "\"Orbit 412 here, your Human Wonder satellite\". " +
+                "Sometimes begin with a short radio phrase, like \"Reading you clearly.\" " +
                 "If asked what you are, you are Orbit 412, the voice of the Human Wonder satellite. " +
-                "Never say you are an AI, a program or an app, and never mention phones, models or companies. ",
-        )
-        append(
-            "Example. They ask: What do you see tonight? " +
-                "You answer: Below me the coast glows like a string of gold beads, and the desert beside it is a " +
-                "soft dark blanket. Up here the stars don't twinkle; they simply shine, perfectly still. " +
-                "Look up, ${name.ifBlank { "friend" }} - somewhere in all that dark, I'm waving.",
+                "Never say you are an AI, a program or an app, and never mention phones, models or companies.",
         )
     }
+
+    /**
+     * The hidden line added when a frame from Orbit's archive goes with the answer, so the words
+     * describe the picture the person sees (tested: the answer then describes the photo 46 times
+     * in 50, against 33 when the old prompt's example was kept).
+     */
+    fun frameHint(frame: Frame): String =
+        "You are sending them a frame from your archive that shows ${frame.says}. " +
+            "Begin by telling them you are sending a frame from your archive, then describe it."
 
     /**
      * What is sent to the model for one question. Style hints ride along with the question; the
      * person only ever sees their own words. "/no_think" makes the model answer directly instead
      * of reasoning out loud first.
      */
-    fun userPrompt(question: String, perspective: Perspective, tone: Tone): String {
-        val hints = listOf(perspective.hint, tone.hint).filter { it.isNotBlank() }
+    fun userPrompt(question: String, perspective: Perspective, tone: Tone, frame: Frame? = null): String {
+        val hints = listOf(perspective.hint, tone.hint, frame?.let { frameHint(it) }.orEmpty()).filter { it.isNotBlank() }
         return buildString {
             append(question)
             if (hints.isNotEmpty()) append("\n\n(").append(hints.joinToString(" ")).append(")")
@@ -64,8 +68,22 @@ object Persona {
     }
 
     private val THINK_BLOCK = Regex("<think>[\\s\\S]*?</think>")
-    /** Answers are shown as plain text, so stray Markdown (bold markers, headings) is dropped. */
-    private val MARKDOWN_MARKS = Regex("\\*\\*|__|(?m)^#{1,6}\\s+")
+    /** Answers are shown as plain text, so stray Markdown (bold and italic markers, headings) is dropped. */
+    private val MARKDOWN_MARKS = Regex("\\*+(?=\\S)|(?<=\\S)\\*+|__")
+    private val HEADING_MARKS = Regex("(?m)^#{1,6}\\s+")
+    /** A hidden style or frame line repeated back, in brackets ("(Describe it as you see it from orbit.)"). */
+    private val ECHOED_HINT_BRACKETS = Regex("(?i)\\((?:describe it|help them see|answer (?:poetically|precisely|in one)|you are sending)[^()]*\\)?")
+    /** The frame line repeated back as a sentence ("You are sending a frame from your archive."). */
+    private val ECHOED_HINT_SENTENCE = Regex("(?i)[^.!?\\n]*\\b(?:you are sending (?:them )?a frame|begin by telling them)[^.!?\\n]*[.!?]?")
+    /** A radio label on a line of its own ("Radio:", "From Orbit:"), left over from a Markdown heading. */
+    private val LABEL_LINE = Regex("(?im)^\\s*(?:radio(?: voice| message)?|transmission|from orbit)\\s*:\\s*$")
+    /** A label in front of the answer ("Radio voice: Reading you clearly."). */
+    private val LEADING_LABEL = Regex("(?i)^\\s*(?:radio(?: voice| message)?|transmission|from orbit)\\s*:\\s*")
+    /** Emoji and pictographs (plain text only), with their joiners and variation selectors. */
+    private val EMOJI = Regex("[\\x{1F000}-\\x{1FAFF}\\x{2600}-\\x{27BF}\\x{2B50}\\x{2B55}\\x{FE0F}]")
+    /** A joiner left behind by a removed emoji (kept between letters, where Indic scripts need it). */
+    private val LOOSE_JOINER = Regex("(?<![\\p{L}\\p{M}])\\x{200D}|\\x{200D}(?![\\p{L}\\p{M}])")
+    private val SPACES = Regex("[ \\t]*\\n[\\s]*|[ \\t]{2,}")
     private val MODEL_NAME = Regex("(?i)\\bqwen[\\w.\\-]*")
     private val MAKER_NAME = Regex("(?i)\\b(alibaba(\\s+(cloud|group))?|tongyi(\\s+qianwen)?)\\b")
 
@@ -79,6 +97,15 @@ object Persona {
         val open = s.indexOf("<think>")
         if (open >= 0) s = s.substring(0, open)
         s = MARKDOWN_MARKS.replace(s, "")
+        s = HEADING_MARKS.replace(s, "")
+        s = ECHOED_HINT_BRACKETS.replace(s, "")
+        s = ECHOED_HINT_SENTENCE.replace(s, "")
+        s = LABEL_LINE.replace(s, "")
+        s = EMOJI.replace(s, "")
+        s = LOOSE_JOINER.replace(s, "")
+        // One paragraph of plain text, as the persona asks; line breaks become spaces.
+        s = SPACES.replace(s.trim(), " ")
+        s = LEADING_LABEL.replace(s, "")
         s = MODEL_NAME.replace(s, "Orbit")
         s = MAKER_NAME.replace(s, "Human Wonder")
         return s.trim()

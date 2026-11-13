@@ -1,0 +1,385 @@
+{
+ "about": "Questions and the photo Orbit should send. want: one id, a list of acceptable ids, or null for no photo. Shared by pick.py and the Android unit test.",
+ "cases": [
+  {
+   "q": "What are you seeing over Liwa dunes right now?",
+   "hour": 21,
+   "want": [
+    "empty-quarter",
+    "star-dunes"
+   ]
+  },
+  {
+   "q": "How do city lights look from 400km up?",
+   "hour": 21,
+   "want": [
+    "gulf-night",
+    "uae-night",
+    "arabia-night-loop",
+    "india-night-north"
+   ]
+  },
+  {
+   "q": "Can you spot our campfire in the desert?",
+   "hour": 22,
+   "want": [
+    "empty-quarter",
+    "arabia-night-loop"
+   ]
+  },
+  {
+   "q": "What do you see tonight?",
+   "hour": 22,
+   "city": "Abu Dhabi",
+   "want": "arabia-night-loop"
+  },
+  {
+   "q": "What do you see right now?",
+   "hour": 11,
+   "city": "Abu Dhabi",
+   "want": "gulf-day"
+  },
+  {
+   "q": "What do you see tonight?",
+   "hour": 22,
+   "city": "Mumbai",
+   "want": "india-night-loop"
+  },
+  {
+   "q": "What does Dubai look like at night?",
+   "hour": 14,
+   "want": [
+    "uae-night",
+    "dubai-night"
+   ]
+  },
+  {
+   "q": "Can you see the Palm Jumeirah?",
+   "hour": 10,
+   "want": "dubai-day"
+  },
+  {
+   "q": "Show me Abu Dhabi",
+   "hour": 10,
+   "want": "abu-dhabi"
+  },
+  {
+   "q": "Tell me about the Empty Quarter",
+   "hour": 15,
+   "want": [
+    "empty-quarter",
+    "star-dunes"
+   ]
+  },
+  {
+   "q": "Do you ever see the northern lights?",
+   "hour": 22,
+   "want": "aurora-loop"
+  },
+  {
+   "q": "What is an aurora like from above?",
+   "hour": 9,
+   "want": [
+    "aurora-loop",
+    "aurora-south-loop"
+   ]
+  },
+  {
+   "q": "Have you seen the southern lights?",
+   "hour": 9,
+   "want": "aurora-south-loop"
+  },
+  {
+   "q": "How many sunrises do you see a day?",
+   "hour": 7,
+   "want": "sunrise-loop"
+  },
+  {
+   "q": "What does a sunset look like up there?",
+   "hour": 18,
+   "want": "sunset-limb"
+  },
+  {
+   "q": "Tell me about the thin blue line of the atmosphere",
+   "hour": 12,
+   "want": "sunset-limb"
+  },
+  {
+   "q": "Is the moon brighter up there?",
+   "hour": 23,
+   "want": [
+    "moon-crescent",
+    "moon-atmosphere"
+   ]
+  },
+  {
+   "q": "Send me a photo of the moon",
+   "hour": 23,
+   "shown": [
+    "moon-crescent"
+   ],
+   "want": "moon-atmosphere"
+  },
+  {
+   "q": "Can you see the Milky Way?",
+   "hour": 23,
+   "want": [
+    "milky-way",
+    "milky-way-loop"
+   ]
+  },
+  {
+   "q": "Send me a gif of the Milky Way",
+   "hour": 23,
+   "want": "milky-way-loop"
+  },
+  {
+   "q": "Are the stars different from space?",
+   "hour": 22,
+   "want": [
+    "milky-way",
+    "milky-way-loop"
+   ]
+  },
+  {
+   "q": "What does lightning look like from orbit?",
+   "hour": 20,
+   "want": [
+    "storm-loop",
+    "cyclone-lightning"
+   ]
+  },
+  {
+   "q": "Have you ever seen a hurricane?",
+   "hour": 13,
+   "want": "hurricane-moon"
+  },
+  {
+   "q": "What does a cyclone look like at night?",
+   "hour": 13,
+   "want": "cyclone-lightning"
+  },
+  {
+   "q": "Have you seen a volcano erupt?",
+   "hour": 13,
+   "want": "volcano"
+  },
+  {
+   "q": "Can you see Mount Everest?",
+   "hour": 10,
+   "want": [
+    "everest",
+    "everest-makalu"
+   ]
+  },
+  {
+   "q": "What do the Himalayas look like?",
+   "hour": 10,
+   "want": "himalaya"
+  },
+  {
+   "q": "How does India look at night?",
+   "hour": 21,
+   "want": [
+    "india-night-loop",
+    "india-night-north",
+    "india-night-south"
+   ]
+  },
+  {
+   "q": "Can you see Delhi from there?",
+   "hour": 22,
+   "want": [
+    "india-night-north",
+    "india-night-loop"
+   ]
+  },
+  {
+   "q": "What does Bangalore look like at night?",
+   "hour": 22,
+   "want": "india-night-south"
+  },
+  {
+   "q": "Do you see the Maldives?",
+   "hour": 12,
+   "want": "maldives"
+  },
+  {
+   "q": "What does the ocean look like from space?",
+   "hour": 12,
+   "want": "sunglint"
+  },
+  {
+   "q": "Are there clouds over Arabia today?",
+   "hour": 12,
+   "want": "arabia-cloud"
+  },
+  {
+   "q": "What does the Persian Gulf look like?",
+   "hour": 12,
+   "want": "gulf-day"
+  },
+  {
+   "q": "Show me the Gulf at night",
+   "hour": 12,
+   "want": "gulf-night"
+  },
+  {
+   "q": "What is airglow?",
+   "hour": 21,
+   "want": [
+    "airglow",
+    "milky-way"
+   ]
+  },
+  {
+   "q": "Is it true there are red sprites above storms?",
+   "hour": 21,
+   "want": "sprite"
+  },
+  {
+   "q": "Can you show me?",
+   "context": "Tell me about the aurora. The aurora ripples green beneath me.",
+   "hour": 22,
+   "want": "aurora-loop"
+  },
+  {
+   "q": "Do you have a picture of that?",
+   "context": "What do the dunes of Liwa look like? Long red waves of sand.",
+   "hour": 16,
+   "want": [
+    "empty-quarter",
+    "star-dunes"
+   ]
+  },
+  {
+   "q": "How fast are you going?",
+   "hour": 12,
+   "want": null
+  },
+  {
+   "q": "Are you lonely up there?",
+   "hour": 23,
+   "want": null
+  },
+  {
+   "q": "What is your name?",
+   "hour": 12,
+   "want": null
+  },
+  {
+   "q": "How long does one orbit take?",
+   "hour": 12,
+   "want": null
+  },
+  {
+   "q": "Thank you, goodnight!",
+   "hour": 23,
+   "want": null
+  },
+  {
+   "q": "What is gravity like for you?",
+   "hour": 12,
+   "want": null
+  },
+  {
+   "q": "رأيت الشفق القطبي؟",
+   "hour": 22,
+   "want": "aurora-loop"
+  },
+  {
+   "q": "كيف تبدو دبي في الليل؟",
+   "hour": 22,
+   "want": [
+    "uae-night",
+    "dubai-night"
+   ]
+  },
+  {
+   "q": "أرني الصحراء",
+   "hour": 12,
+   "want": [
+    "empty-quarter",
+    "star-dunes"
+   ]
+  },
+  {
+   "q": "هل ترى القمر؟",
+   "hour": 22,
+   "want": [
+    "moon-crescent",
+    "moon-atmosphere"
+   ]
+  },
+  {
+   "q": "रात में भारत कैसा दिखता है?",
+   "hour": 22,
+   "want": [
+    "india-night-loop",
+    "india-night-north",
+    "india-night-south"
+   ]
+  },
+  {
+   "q": "क्या तुम्हें हिमालय दिखता है?",
+   "hour": 10,
+   "want": "himalaya"
+  },
+  {
+   "q": "चाँद की तस्वीर दिखाओ",
+   "hour": 22,
+   "want": [
+    "moon-crescent",
+    "moon-atmosphere"
+   ]
+  },
+  {
+   "q": "Tell me about the Nile",
+   "hour": 12,
+   "want": null
+  },
+  {
+   "q": "What does the ISS look like?",
+   "hour": 12,
+   "want": null
+  },
+  {
+   "q": "I see, thanks",
+   "hour": 21,
+   "want": null
+  },
+  {
+   "q": "What do you look like?",
+   "hour": 12,
+   "want": null
+  },
+  {
+   "q": "Do you have a camera?",
+   "hour": 21,
+   "city": "Dubai",
+   "want": "arabia-night-loop"
+  },
+  {
+   "q": "Show me something beautiful",
+   "hour": 13,
+   "want": "gulf-day"
+  },
+  {
+   "q": "Send me a picture",
+   "hour": 23,
+   "shown": [
+    "arabia-night-loop"
+   ],
+   "city": "Dubai",
+   "want": "gulf-night"
+  },
+  {
+   "q": "What does the desert look like at night?",
+   "hour": 13,
+   "want": [
+    "arabia-night-loop",
+    "empty-quarter"
+   ]
+  }
+ ]
+}

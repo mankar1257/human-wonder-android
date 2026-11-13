@@ -331,6 +331,7 @@ struct LicensesView: View {
         "OFL-geist.txt": "Geist typeface (SIL Open Font License)",
         "OFL-jetbrainsmono.txt": "JetBrains Mono typeface (SIL Open Font License)",
         "OFL-newsreader.txt": "Newsreader typeface (SIL Open Font License)",
+        "NOTICE-orbit-archive.txt": "Earth photographs (NASA)",
     ]
 
     private var texts: [(String, String)] {

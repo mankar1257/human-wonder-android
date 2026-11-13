@@ -35,6 +35,11 @@ targets:
       - path: HumanWonder/Resources/licenses
         type: folder
         buildPhase: resources
+      # Orbit's archive (photos, loops and frames.json): the Android app's folder, used as is, so
+      # both apps always ship the same pictures. It lands in the app as "frames/".
+      - path: ../app/src/main/assets/frames
+        type: folder
+        buildPhase: resources
       - path: HumanWonder/Model/hw-core.gguf
         buildPhase: resources
         optional: true

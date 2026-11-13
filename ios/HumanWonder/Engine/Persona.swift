@@ -44,7 +44,8 @@ enum Tone: String, CaseIterable, Codable {
 /// Orbit 412: the voice of Human Wonder. Everything the language model is told, and everything it
 /// says before the person sees it, goes through here (same rules as the Android app's Persona.kt).
 enum Persona {
-    /// The system prompt: short and concrete, with one example.
+    /// The system prompt: short and concrete. No example answer: tested on the app's model, an example
+    /// was copied almost word for word into 40% of answers; without it none were (tools/frames/README.md).
     static func systemPrompt(name: String, city: String) -> String {
         let who = name.isEmpty ? "a wanderer" : name
         var parts: [String] = []
@@ -57,18 +58,22 @@ enum Persona {
         if !name.isEmpty { parts.append("Call them \(name) now and then.") }
         parts.append("Reply in the language they write in.")
         parts.append("You have no live camera, so describe how things usually look from orbit and never invent exact numbers, times or news; if you are unsure, say the signal is unclear.")
-        parts.append("Now and then open with a short radio phrase, like \"Reading you clearly\" or \"Orbit 412 here, your Human Wonder satellite\".")
+        parts.append("Sometimes begin with a short radio phrase, like \"Reading you clearly.\"")
         parts.append("If asked what you are, you are Orbit 412, the voice of the Human Wonder satellite.")
         parts.append("Never say you are an AI, a program or an app, and never mention phones, models or companies.")
-        let friend = name.isEmpty ? "friend" : name
-        parts.append("Example. They ask: What do you see tonight? You answer: Below me the coast glows like a string of gold beads, and the desert beside it is a soft dark blanket. Up here the stars don't twinkle; they simply shine, perfectly still. Look up, \(friend) - somewhere in all that dark, I'm waving.")
         return parts.joined(separator: " ")
+    }
+
+    /// The hidden line added when a frame from Orbit's archive goes with the answer, so the words
+    /// describe the picture the person sees.
+    static func frameHint(_ frame: Frame) -> String {
+        "You are sending them a frame from your archive that shows \(frame.says). Begin by telling them you are sending a frame from your archive, then describe it."
     }
 
     /// What is sent for one question: style hints ride along; the person only sees their words.
     /// "/no_think" makes the model answer directly.
-    static func userPrompt(_ question: String, perspective: Perspective, tone: Tone) -> String {
-        let hints = [perspective.hint, tone.hint].filter { !$0.isEmpty }
+    static func userPrompt(_ question: String, perspective: Perspective, tone: Tone, frame: Frame? = nil) -> String {
+        let hints = [perspective.hint, tone.hint, frame.map(frameHint) ?? ""].filter { !$0.isEmpty }
         var s = question
         if !hints.isEmpty { s += "\n\n(" + hints.joined(separator: " ") + ")" }
         return s + " /no_think"
@@ -110,8 +115,18 @@ enum Persona {
     /// underlying model or maker replaced, so the app only ever presents itself as Human Wonder.
     static func visibleAnswer(_ text: String) -> String {
         var s = text
-        s = s.replacingOccurrences(of: "\\*\\*|__", with: "", options: .regularExpression)
+        s = s.replacingOccurrences(of: "\\*+(?=\\S)|(?<=\\S)\\*+|__", with: "", options: .regularExpression)
         s = s.replacingOccurrences(of: "(?m)^#{1,6}\\s+", with: "", options: .regularExpression)
+        // A hidden style or frame line repeated back, in brackets or as a sentence.
+        s = s.replacingOccurrences(of: "(?i)\\((?:describe it|help them see|answer (?:poetically|precisely|in one)|you are sending)[^()]*\\)?", with: "", options: .regularExpression)
+        s = s.replacingOccurrences(of: "(?i)[^.!?\\n]*\\b(?:you are sending (?:them )?a frame|begin by telling them)[^.!?\\n]*[.!?]?", with: "", options: .regularExpression)
+        // A radio label on a line of its own ("Radio:"), emoji (joiners kept between letters), then one plain paragraph.
+        s = s.replacingOccurrences(of: "(?im)^\\s*(?:radio(?: voice| message)?|transmission|from orbit)\\s*:\\s*$", with: "", options: .regularExpression)
+        s = s.replacingOccurrences(of: "[\\x{1F000}-\\x{1FAFF}\\x{2600}-\\x{27BF}\\x{2B50}\\x{2B55}\\x{FE0F}]", with: "", options: .regularExpression)
+        s = s.replacingOccurrences(of: "(?<![\\p{L}\\p{M}])\\x{200D}|\\x{200D}(?![\\p{L}\\p{M}])", with: "", options: .regularExpression)
+        s = s.trimmingCharacters(in: .whitespacesAndNewlines)
+        s = s.replacingOccurrences(of: "[ \\t]*\\n\\s*|[ \\t]{2,}", with: " ", options: .regularExpression)
+        s = s.replacingOccurrences(of: "(?i)^\\s*(?:radio(?: voice| message)?|transmission|from orbit)\\s*:\\s*", with: "", options: .regularExpression)
         s = s.replacingOccurrences(of: "(?i)\\bqwen[\\w.\\-]*", with: "Orbit", options: .regularExpression)
         s = s.replacingOccurrences(of: "(?i)\\b(alibaba(\\s+(cloud|group))?|tongyi(\\s+qianwen)?)\\b", with: "Human Wonder", options: .regularExpression)
         return s.trimmingCharacters(in: .whitespacesAndNewlines)

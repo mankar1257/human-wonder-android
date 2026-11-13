@@ -6,6 +6,7 @@ import ai.humanwonder.poc.R
 import ai.humanwonder.poc.SkyState
 import ai.humanwonder.poc.Tone
 import ai.humanwonder.poc.UiState
+import ai.humanwonder.poc.ai.FrameCatalog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.os.Build
@@ -360,6 +361,8 @@ private fun UserBubble(m: ChatMessage) {
 
 @Composable
 private fun OrbitAnswer(m: ChatMessage, streaming: Boolean) {
+    val context = LocalContext.current
+    val frame = remember(m.frameId) { m.frameId?.let { FrameCatalog.load(context).frame(it) } }
     Column(Modifier.fillMaxWidth()) {
         Row(Modifier.heightIn(min = 24.dp), verticalAlignment = Alignment.CenterVertically) {
             OrbitMark(24.dp, active = streaming)
@@ -374,6 +377,8 @@ private fun OrbitAnswer(m: ChatMessage, streaming: Boolean) {
             Spacer(Modifier.height(10.dp))
             SelectionContainer { Text(inkText(m.text, streaming), style = HWType.ChatBody) }
         }
+        // The frame arrives after the words, like the end of a transmission.
+        if (frame != null && m.complete && m.text.isNotEmpty()) FrameCard(frame)
         if (m.complete && m.text.isNotEmpty()) CopyAction(m.text)
     }
 }

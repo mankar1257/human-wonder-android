@@ -6,7 +6,7 @@ name: Build iPhone app
 on:
   push:
     branches: [ios]
-    paths: ["ios/**", ".github/workflows/ios.yml", "third_party/llama.cpp.commit"]
+    paths: ["ios/**", "app/src/main/assets/frames/**", ".github/workflows/ios.yml", "third_party/llama.cpp.commit"]
   workflow_dispatch:
 
 concurrency:

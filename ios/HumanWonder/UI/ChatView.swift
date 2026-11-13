@@ -272,6 +272,10 @@ private struct OrbitAnswer: View {
                     .padding(.top, 10)
                     .fixedSize(horizontal: false, vertical: true)
             }
+            // The frame arrives after the words, like the end of a transmission.
+            if line.complete && !line.text.isEmpty && line.text != "…", let frame = FrameCatalog.shared.frame(line.frameId) {
+                FrameCard(frame: frame)
+            }
             if line.complete && !line.text.isEmpty && line.text != "…" {
                 CopyAction(text: line.text)
             }

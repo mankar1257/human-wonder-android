@@ -1,0 +1,41 @@
+# Orbit's archive: astronaut photographs of Earth from the ISS Crew Earth Observations
+# collection (NASA JSC, Earth Science and Remote Sensing Unit, https://eol.jsc.nasa.gov).
+# NASA material is not protected by copyright; credit line used in the app:
+# "Image courtesy of the Earth Science and Remote Sensing Unit, NASA Johnson Space Center".
+#
+# still <MISSION> <FRAME>                 one photo, downloaded large and resized on the Mac
+# sheet <name> <MISSION> <FIRST> <LAST> <STEP>   every STEP-th frame of a time-lapse (small), to choose a loop
+# loop  <name> <MISSION> <FIRST> <LAST> <STEP>   consecutive frames for one short loop (small)
+
+still ISS063 81262
+still ISS038 16335
+still ISS020 39932
+still ISS069 92132
+still ISS071 675996
+still ISS027 34290
+still ISS069 3278
+still ISS069 22976
+still ISS045 668
+still ISS031 67020
+still ISS053 357550
+still ISS008 13304
+still ISS028 29679
+still ISS042 135100
+still ISS023 57948
+still ISS066 86970
+still ISS067 70919
+still ISS011 10509
+still ISS042 135015
+still ISS020 9048
+still ISS022 24557
+still ISS067 153817
+still ISS044 45215
+still ISS072 896652
+still ISS071 234765
+
+sheet aurora-canada    ISS060 68323 71000 15
+sheet aurora-australis ISS060 32432 32683 6
+sheet storms-city      ISS060 59387 60156 10
+sheet milky-way        ISS060 22351 22575 6
+sheet arabia-night     ISS060 5022 6021 12
+sheet south-asia-night ISS061 22294 22718 8

@@ -11,6 +11,8 @@ final class ChatModel {
         let fromUser: Bool
         var text: String
         var complete: Bool
+        /// A frame from Orbit's archive sent with this answer (an id in frames/frames.json).
+        var frameId: String? = nil
     }
 
     unowned let app: AppModel
@@ -49,9 +51,10 @@ final class ChatModel {
 
         let userId = UUID().uuidString
         let answerId = UUID().uuidString
+        let frame = pickFrame(for: question)
         withAnimation(.easeOut(duration: 0.45)) {
             lines.append(Line(id: userId, fromUser: true, text: question, complete: true))
-            lines.append(Line(id: answerId, fromUser: false, text: "", complete: false))
+            lines.append(Line(id: answerId, fromUser: false, text: "", complete: false, frameId: frame?.id))
         }
         input = ""
         generating = true
@@ -68,7 +71,7 @@ final class ChatModel {
         let history = (app.conversation(id)?.messages ?? []).map { (role: $0.role, content: $0.content) }
         app.addMessage(to: id, role: "user", content: question, id: userId)
         let system = Persona.systemPrompt(name: app.profile.name, city: app.profile.city)
-        let prompt = Persona.userPrompt(question, perspective: perspective, tone: tone)
+        let prompt = Persona.userPrompt(question, perspective: perspective, tone: tone, frame: frame)
 
         let sink = AnswerSink(model: self, answerId: answerId)
         task = Task { [weak self] in
@@ -84,6 +87,18 @@ final class ChatModel {
             guard let self else { return }
             if failed { self.fail(answerId) } else { self.finish(id, answerId, raw: raw) }
         }
+    }
+
+    /// The frame from Orbit's archive to send with the answer, chosen before the model starts so it
+    /// can describe it (never one already sent in this conversation).
+    private func pickFrame(for question: String) -> Frame? {
+        let lastQuestion = lines.last(where: { $0.fromUser })?.text ?? ""
+        let lastAnswer = lines.last(where: { !$0.fromUser })?.text ?? ""
+        return FramePicker.pick(FrameCatalog.shared, question: question,
+                                context: lastQuestion + " " + lastAnswer,
+                                shown: Set(lines.compactMap(\.frameId)),
+                                hour: Calendar.current.component(.hour, from: Date()),
+                                city: app.profile.city)
     }
 
     fileprivate func update(_ answerId: String, raw: String) {
@@ -104,8 +119,11 @@ final class ChatModel {
         let text = Persona.visibleAnswer(Persona.clean(raw, final: true))
         lines[i].text = text.isEmpty ? "…" : text
         lines[i].complete = true
-        guard !text.isEmpty else { return }
-        app.addMessage(to: conversation, role: "assistant", content: text, id: answerId)
+        guard !text.isEmpty else {
+            lines[i].frameId = nil
+            return
+        }
+        app.addMessage(to: conversation, role: "assistant", content: text, id: answerId, frameId: lines[i].frameId)
         if current {
             if app.profile.haptics { Haptics.landed() }
             if app.profile.readAloud { app.speaker.speak(text) }
@@ -118,6 +136,7 @@ final class ChatModel {
         guard let i = lines.firstIndex(where: { $0.id == answerId }) else { return }
         lines[i].text = Persona.fadedSignal
         lines[i].complete = true
+        lines[i].frameId = nil
     }
 
     /// The stop square: the answer ends with what has arrived.
@@ -143,7 +162,7 @@ final class ChatModel {
         newConversation()
         conversationId = id
         lines = (app.conversation(id)?.messages ?? []).map {
-            Line(id: $0.id, fromUser: $0.role == "user", text: $0.content, complete: true)
+            Line(id: $0.id, fromUser: $0.role == "user", text: $0.content, complete: true, frameId: $0.frameId)
         }
     }
 
