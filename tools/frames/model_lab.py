@@ -5,6 +5,12 @@ Three ways of getting a photo into an answer, on the same questions:
   pick-choice the model chooses in a second, grammar-constrained call (it can only output an id or none)
   app-picks   the app chooses (pick.py) and tells the model which photo is attached; the model presents it
 Usage: python3 model_lab.py <experiment> <out.jsonl> [seeds]
+
+Experiments: baseline, baseline-noex, baseline-s5, pick-tag, pick-choice, pick-forced,
+app-picks, app-picks-v2, app-picks-v3, app-picks-s1, app-picks-s2, app-picks-s3, app-picks-s5.
+The app ships app-picks-s5: no example answer in the system prompt, the shorter radio phrase, and
+the v2/s3 frame line. Results are in README.md. runlab.sh (in the same bundle on 13 Nov) started a
+llama-server with hw-core.gguf and ran these in time-boxed chunks.
 """
 import json
 import re
@@ -22,6 +28,9 @@ CASES = json.loads((HERE / "pick-cases.json").read_text(encoding="utf-8"))["case
 NAME = "Sam"
 
 
+EXAMPLE_VARIANT = {"v": "orig"}
+
+
 def system_prompt(name=NAME, extra=""):
     # Same words as Persona.systemPrompt (Android) / Persona.swift (iPhone).
     who = name or "a wanderer"
@@ -37,11 +46,20 @@ def system_prompt(name=NAME, extra=""):
     s += ("Reply in the language they write in. "
           "You have no live camera, so describe how things usually look from orbit and never invent exact "
           "numbers, times or news; if you are unsure, say the signal is unclear. "
-          "Now and then open with a short radio phrase, like \"Reading you clearly\" or "
-          "\"Orbit 412 here, your Human Wonder satellite\". "
+          + ("Sometimes begin with a short radio phrase, like \"Reading you clearly.\" " if EXAMPLE_VARIANT["v"] == "s5" else
+             "Now and then open with a short radio phrase, like \"Reading you clearly\" or "
+             "\"Orbit 412 here, your Human Wonder satellite\". ") +
           "If asked what you are, you are Orbit 412, the voice of the Human Wonder satellite. "
           "Never say you are an AI, a program or an app, and never mention phones, models or companies. ")
     s += extra
+    if EXAMPLE_VARIANT["v"] == "frame":
+        return s + ("When a frame from your archive comes with your answer, say you are sending it and describe it. "
+                    "Example. They ask: Can you see the sea? (Frame from your archive: the sea around two small islands, turned to silver by the Sun.) "
+                    "You answer: Sending you a frame from my archive: two little islands in a sea turned to silver by the Sun. "
+                    "From up here every current shows, like brushstrokes on a mirror. "
+                    f"Look closely, {name or 'friend'} - that thin line is a ship's wake.")
+    if EXAMPLE_VARIANT["v"] in ("none", "s5"):
+        return s
     s += ("Example. They ask: What do you see tonight? "
           "You answer: Below me the coast glows like a string of gold beads, and the desert beside it is a "
           "soft dark blanket. Up here the stars don't twinkle; they simply shine, perfectly still. "
@@ -87,6 +105,12 @@ TAG = re.compile(r"\[\s*frame\s*:\s*([a-z0-9\-]+)\s*\]", re.I)
 
 
 def run(exp, out_path, seeds):
+    if exp == "app-picks-s1":
+        EXAMPLE_VARIANT["v"] = "frame"
+    elif exp in ("app-picks-s5", "baseline-s5"):
+        EXAMPLE_VARIANT["v"] = "s5"
+    elif exp in ("app-picks-s2", "app-picks-s3", "baseline-noex"):
+        EXAMPLE_VARIANT["v"] = "none"
     ids = {f["id"] for f in CATALOG["frames"]}
     by_id = {f["id"]: f for f in CATALOG["frames"]}
     done = set()
@@ -102,7 +126,7 @@ def run(exp, out_path, seeds):
                 continue
             rec = {"exp": exp, "seed": seed, "q": q, "want": c["want"], "ctx": c.get("context") or None}
             t0 = time.time()
-            if exp == "baseline":
+            if exp in ("baseline", "baseline-noex", "baseline-s5"):
                 rec["answer"], _ = complete(chatml(system_prompt(), user_prompt(q)), seed)
             elif exp == "pick-tag":
                 extra = ("You keep an archive of frames from earlier passes: " + frame_list() + ". "
@@ -117,24 +141,35 @@ def run(exp, out_path, seeds):
                 got = rec["tag"] if rec["tag"] in ids else None
                 rec["got"] = got
                 rec["ok"] = want_ok(c["want"], got)
-            elif exp == "pick-choice":
+            elif exp in ("pick-choice", "pick-forced"):
                 options = "\n".join(f"{f['id']}: {f['caption']}" for f in CATALOG["frames"])
                 prompt = ("<|im_start|>system\nYou choose which photo from an archive best matches a question. "
-                          "Reply with the photo id only, or none if no photo fits.<|im_end|>\n"
+                          "Reply with the photo id only" + (", or none if no photo fits." if exp == "pick-choice" else ".") + "<|im_end|>\n"
                           f"<|im_start|>user\nPhotos:\n{options}\n\nQuestion: {q}\n"
                           + (f"Earlier in the conversation: {c['context']}\n" if c.get('context') else "")
                           + "Which photo id fits best? /no_think<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n")
-                grammar = "root ::= (" + " | ".join(f'"{i}"' for i in sorted(ids)) + ' | "none")'
+                grammar = "root ::= (" + " | ".join(f'"{i}"' for i in sorted(ids)) + (' | "none")' if exp == "pick-choice" else ")")
                 got, _ = complete(prompt, seed, n_predict=12, grammar=grammar, temperature=0.0 if seed == seeds[0] else 0.7)
                 got = got.strip()
                 rec["got"] = None if got == "none" else got
                 rec["ok"] = want_ok(c["want"], rec["got"])
-            elif exp == "app-picks":
+            elif exp.startswith("app-picks"):
                 f = pick.pick(CATALOG, q, c.get("context", ""), c.get("shown", []), c.get("hour"), c.get("city", ""))
                 hint = ""
-                if f:
+                if f and exp == "app-picks":
                     hint = (f"A frame from your archive is shown with your answer: {f['says']}. "
                             "Mention it in a few words as a frame from your archive, and describe what it shows.")
+                elif f and exp == "app-picks-v2":
+                    hint = (f"You are sending them a frame from your archive that shows {f['says']}. "
+                            "Begin by telling them you are sending a frame from your archive, then describe it.")
+                elif f and exp in ("app-picks-s3", "app-picks-s5"):
+                    hint = (f"You are sending them a frame from your archive that shows {f['says']}. "
+                            "Begin by telling them you are sending a frame from your archive, then describe it.")
+                elif f and exp in ("app-picks-s1", "app-picks-s2"):
+                    hint = f"Frame from your archive to send with this answer: {f['says']}."
+                elif f and exp == "app-picks-v3":
+                    hint = (f"With this answer you send a frame from your archive: {f['says']}. "
+                            "Say that you are sending it.")
                 rec["got"] = f["id"] if f else None
                 rec["hint"] = hint
                 rec["answer"], _ = complete(chatml(system_prompt(), user_prompt(q, hint)), seed)
