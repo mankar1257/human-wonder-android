@@ -1,0 +1,108 @@
+name: Build iPhone app
+
+# Builds Human Wonder for iPhone on GitHub's Mac machines: checks every screen in the iOS
+# simulator (screenshots + one real answer) and makes an unsigned .ipa for SideStore, which signs
+# it with the person's own free Apple ID when it installs it.
+on:
+  push:
+    branches: [ios]
+    paths: ["ios/**", ".github/workflows/ios.yml", "third_party/llama.cpp.commit"]
+  workflow_dispatch:
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MODEL_URL: https://huggingface.co/ggml-org/Qwen3-0.6B-GGUF/resolve/13ac06624948e4d8589cb4b6f90100837342fcb8/Qwen3-0.6B-Q4_0.gguf
+  MODEL_SHA256: da2572f16c06133561ce56accaa822216f2391ef4d37fba427801cd6736417d4
+
+jobs:
+  ipa:
+    runs-on: macos-15
+    timeout-minutes: 120
+    steps:
+      - name: Check out (with the pinned llama.cpp submodule)
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          submodules: recursive
+
+      - name: Tools
+        run: |
+          xcodebuild -version
+          sw_vers
+          brew install xcodegen > /dev/null
+          xcodegen --version
+
+      - name: Cache the llama.cpp framework
+        id: llama
+        uses: actions/cache@v4
+        with:
+          path: third_party/llama.cpp/build-apple/llama.xcframework
+          key: llama-xcframework-ios-${{ hashFiles('third_party/llama.cpp.commit') }}-${{ runner.os }}-v1
+
+      - name: Build the llama.cpp framework (iPhone + simulator)
+        if: steps.llama.outputs.cache-hit != 'true'
+        run: |
+          cd third_party/llama.cpp
+          ./build-xcframework.sh ios-sim ios-device 2>&1 | tail -40
+          ls build-apple
+
+      - name: Cache the model
+        id: model
+        uses: actions/cache@v4
+        with:
+          path: ios/HumanWonder/Model/hw-core.gguf
+          key: model-${{ env.MODEL_SHA256 }}
+
+      - name: Fetch the model
+        if: steps.model.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ios/HumanWonder/Model
+          curl -fL --retry 5 --retry-delay 5 -o ios/HumanWonder/Model/hw-core.gguf "$MODEL_URL"
+          echo "$MODEL_SHA256  ios/HumanWonder/Model/hw-core.gguf" | shasum -a 256 -c -
+
+      - name: Generate the Xcode project
+        run: cd ios && xcodegen generate
+
+      - name: Build for the simulator
+        run: |
+          ok=1
+          xcodebuild -project ios/HumanWonder.xcodeproj -scheme HumanWonder -configuration Release \
+            -sdk iphonesimulator -destination "generic/platform=iOS Simulator" -derivedDataPath build/sim \
+            CODE_SIGNING_ALLOWED=NO build > build-sim.log 2>&1 || ok=0
+          grep -E "error:|BUILD (SUCCEEDED|FAILED)" build-sim.log | sort -u | head -150 || true
+          [ "$ok" = 1 ]
+
+      - name: Check every screen in the simulator
+        run: bash ios/tools/screens.sh build/sim/Build/Products/Release-iphonesimulator/HumanWonder.app screens
+
+      - name: Build for iPhone (unsigned) and make the .ipa
+        run: |
+          ok=1
+          xcodebuild -project ios/HumanWonder.xcodeproj -scheme HumanWonder -configuration Release \
+            -sdk iphoneos -destination "generic/platform=iOS" -derivedDataPath build/device \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build > build-device.log 2>&1 || ok=0
+          grep -E "error:|BUILD (SUCCEEDED|FAILED)" build-device.log | sort -u | head -100 || true
+          [ "$ok" = 1 ]
+          mkdir -p ipa/Payload
+          cp -R build/device/Build/Products/Release-iphoneos/HumanWonder.app ipa/Payload/
+          cd ipa && zip -qry HumanWonder.ipa Payload && ls -lh HumanWonder.ipa
+
+      - name: Upload the screens
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iphone-screens
+          path: |
+            screens
+            build-sim.log
+            build-device.log
+          if-no-files-found: ignore
+
+      - name: Upload the .ipa
+        uses: actions/upload-artifact@v4
+        with:
+          name: HumanWonder-iPhone-ipa
+          path: ipa/HumanWonder.ipa
+          compression-level: 0

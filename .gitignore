@@ -20,3 +20,9 @@ tools/build.log
 # Screen check pictures and log (tools/build-on-mac.sh)
 screens-check/
 tools/screens-check.log
+# iPhone app: generated project, plist and the bundled model (fetched by the workflow)
+ios/HumanWonder.xcodeproj/
+ios/HumanWonder/Info.plist
+ios/HumanWonder/Model/
+ios/build/
+ios/build-tmp/
