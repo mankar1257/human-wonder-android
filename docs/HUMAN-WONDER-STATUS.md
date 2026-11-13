@@ -1,14 +1,37 @@
 # Human Wonder: status, builds and installs
 
-*13 November 2026 (updated 22:15). Covers the Android app (v2), the new iPhone app, and how to build and install both without paid accounts.*
+*14 November 2026 (updated 00:05). Covers the Android app (v2), the iPhone app, how to build and install both without paid accounts, and the new photos in the chat (in progress).*
 
 ## In short
 
 - **Android app (v2)** builds on the Mac with one double-click. The latest build (8 Nov, 11:31) has the smaller type, the unified look, the dunes welcome screen with the swipe-up, and the text-size and keyboard fixes. It has **not been installed on a phone yet**: no Android phone was connected during that build.
-- **iPhone app** is built: a SwiftUI version of the same app (same screens, fonts, icons, photos, Orbit 412 voice and the same model on the phone). It compiled on the first try on 13 November, 22:12, with Xcode 27.2 on macOS 27.2.1, and produced `HumanWonder-iPhone.ipa` (401 MB). It has **not been installed on an iPhone yet**.
+- **iPhone app** is built and **installed on an iPhone** with a free Apple ID (13 November). It is a SwiftUI version of the same app (same screens, fonts, icons, photos, Orbit 412 voice and the same model on the phone), built with Xcode 27.2 on macOS 27.2.1 as `HumanWonder-iPhone.ipa` (401 MB).
+- **New, in progress: Orbit sends pictures with its answers** (the designer's request). The code for both apps is written and reviewed; it is waiting for the photos to be downloaded on the Mac (see the next section).
 - **Installing on iPhone costs nothing:** the app is signed with a free Apple ID through iloader or SideStore. The catch: it must be renewed every 7 days and fits 3 sideloaded apps per iPhone.
 - **GitHub is locked for billing** (since about 8 November), so GitHub's build machines run nothing for this account. Everything is built on the Mac instead. Pushing code still works.
-- **Next:** install `HumanWonder-iPhone.ipa` on an iPhone (section 4) and check every screen.
+- **Next:** double-click **Get Orbit Photos.command** on the Mac, then build both apps with the pictures.
+
+## New: pictures from Orbit's archive (in progress)
+
+The designer asked for pictures or GIFs with Orbit's answers. Orbit 412 now sends a "frame from its archive" under an answer when the question is about something it can show.
+
+- **The pictures are real.** They are photographs taken by astronauts on the International Space Station, which flies at about 410 km, almost exactly Orbit's height. The "GIFs" are short loops cut from the station's time-lapses (aurora, a night pass over Arabia, one over India, lightning, the Milky Way, a sunrise). NASA material is free to use; the app credits NASA in the full-screen view and on the licences screen. Orbit calls them frames "from my archive", never photos it took itself.
+- **32 pictures** (25 photos, 7 loops) cover what people ask Orbit about: the Gulf and the Emirates by day and night, the Empty Quarter dunes, India at night, the Himalayas and Everest, sunsets and the thin blue line, the Moon, hurricanes, lightning, the Milky Way, airglow, a volcano, the Maldives and the sea.
+- **The app picks the picture, and the model presents it.** This was tested on the app's own model with 60 questions:
+
+| How the picture is chosen | Right picture (50 questions that have one) |
+|---|---|
+| The model tags its answer with a picture name | 7 of 100 (it also invented names like "504") |
+| The model answers a separate question that only allows a name or "none" | 3 of 50 |
+| **The app's keyword rules** (English, Arabic, Hindi) | **50 of 50** (and none for all 10 that should get none) |
+
+- **Better answers too.** The example answer in Orbit's instructions was being copied into 40% of all answers ("the coast glows like a string of gold beads", even about the Moon). It is gone. With a picture, the model is told what the picture shows, and the answer now describes it 46 times in 50, with no copying at all.
+- **On screen:** the picture fades in under the answer once the words have arrived, with the line "From Orbit's archive" and the picture's title. Tap it for full screen with the credit. Loops play while on screen and hold still when the phone's animations are turned off. The picture is saved with the conversation.
+- **What's left:** download the photos on the Mac (one double-click, below), choose the best few seconds of each time-lapse for the loops, build the app files (about 15 MB in total), then build both apps and check.
+
+**To do on the Mac:** double-click **Get Orbit Photos.command** in `~/Desktop/stitch-mcp/human-wonder-v2/`. It downloads the 25 photos and about 470 small time-lapse frames from NASA's astronaut photo archive (eol.jsc.nasa.gov), roughly 150 to 300 MB. It keeps only resized copies (about 30 MB) in `media-src/` and writes `tools/frames/fetch.log`.
+
+Details, numbers and the test method: `tools/frames/README.md` on the `ios` branch.
 
 ## 1. What changed this week
 
@@ -141,6 +164,8 @@ Each tester signs with their own Apple ID, so any number of people can test.
 | iPhone build | `Build Human Wonder for iPhone.command` |
 | Android app file | `HumanWonder-POC.apk` |
 | iPhone app file (after the build) | `HumanWonder-iPhone.ipa` |
+| Photo download for Orbit's archive | `Get Orbit Photos.command` (writes `media-src/`, log in `tools/frames/fetch.log`) |
+| Picture list, rules and test results | `tools/frames/` (`README.md`, `frames.json`, `manifest.txt`) |
 | Build tools (Android SDK, NDK, CMake, XcodeGen) | `~/human-wonder-android-tools/` |
 | Memory and skill notes | `~/Desktop/stitch-mcp/memory/`, `~/Desktop/stitch-mcp/skills/` |
 | This document | `~/Desktop/stitch-mcp/human-wonder-v2/docs/HUMAN-WONDER-STATUS.md` (and `.pdf`) |
@@ -150,12 +175,16 @@ Each tester signs with their own Apple ID, so any number of people can test.
 - Nothing leaves the phone: no internet use while chatting. The profile and conversations are stored only on the phone.
 - The app never names the model or its maker, and never says "AI", "app", "model" or "on-device". It only presents itself as Human Wonder and Orbit 412.
 - Free tools only. No paid accounts are needed to build or test.
+- Pictures in the chat are NASA astronaut photographs that ship inside the app (nothing is downloaded on the phone). NASA is credited; Orbit calls them frames from its archive.
 
 ## 8. Next steps
 
 - [x] Update macOS and install Xcode (macOS 27.2.1, Xcode 27.2).
 - [x] Build the iPhone app (`HumanWonder-iPhone.ipa`, 13 November).
-- [ ] Install on an iPhone (section 4) and send screenshots of each screen to check them against the Android app.
+- [x] Install on an iPhone (section 4) with a free Apple ID (13 November).
+- [ ] Double-click **Get Orbit Photos.command** so the pictures for Orbit's answers can be built.
+- [ ] Build both apps with the pictures and check them (Android: **Build Human Wonder**; iPhone: **Build Human Wonder for iPhone**, then install the new `.ipa` through SideStore).
+- [ ] Send screenshots of each iPhone screen to check them against the Android app.
 - [ ] Android: plug in the phone, run **Build Human Wonder**, and check the phone screenshots and the 50 screen-check pictures.
 - [ ] Optional: clear the GitHub billing lock so builds and screen checks run on GitHub again.
 - [ ] Later, for real users: the Apple Developer Program (App Store and TestFlight) and a Google Play listing.
