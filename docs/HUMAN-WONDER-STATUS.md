@@ -90,7 +90,7 @@ It needs no admin password and no Apple developer account.
 | `tools/build-ios-xcode.log` | the app's compile output |
 | `tools/build-ios-llama.log` | the llama.cpp build |
 
-**Status:** written and copied to the Mac on 13 November. Not compiled yet: no Mac with Xcode was available, and GitHub's Macs are blocked (section 5). A second, independent check of the code is under way. Expect one round of small fixes after the first compile.
+**Status:** written and copied to the Mac on 13 November. Not compiled yet: no Mac with Xcode was available, and GitHub's Macs are blocked (section 5). An independent check of the code found no certain compile errors, and four small hardening fixes were made after it. Those fixes are on GitHub (`ios` branch, `7e3073e`) and are copied to the Mac before the first build. Xcode 27's known breaking changes don't affect this app. Expect one round of small fixes after the first compile anyway, since nothing has been compiled yet.
 
 ## 4. Installing on an iPhone without paying
 
@@ -128,9 +128,9 @@ Each tester signs with their own Apple ID, so any number of people can test.
 
 | Branch | Holds | Latest commit |
 |---|---|---|
-| `main` | design preview, docs, memory and skill | `a18d641` |
+| `main` | design preview, docs (this document), memory and skill | `4c92ed7` |
 | `v2-offlinellm` | the Android app | `ba9b9f0` |
-| `ios` | the Android app plus the iPhone app (`ios/`) and its build script | `6a7b2e4` |
+| `ios` | the Android app plus the iPhone app (`ios/`) and its build script | `7e3073e` |
 
 ## 6. Where things are on the Mac
 
