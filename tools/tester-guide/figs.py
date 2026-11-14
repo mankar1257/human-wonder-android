@@ -149,13 +149,16 @@ def localdevvpn():
 
 
 def download_iloader():
-    rows_ = [("iloader-darwin-universal.dmg", "the Mac version", True), ("iloader-windows-x64-setup.exe", "", False), ("iloader-linux-amd64.deb", "", False), ("Source code (zip)", "", False)]
-    files = "".join(f'<div class="file{" hl" if h else ""}"><div class="docico"></div><span>{n}</span><span class="sz">{s}</span></div>' for n, s, h in rows_)
-    win = f'''<div class="mac" style="width:620px"><div class="bar"><i></i><i></i><i></i><div class="url">github.com/nab138/iloader/releases</div></div>
-      <div class="body"><div class="big" style="margin-bottom:4px">iloader</div><div class="note" style="margin-bottom:14px">Latest release</div>
-      <div style="font-weight:600;font-size:12px;margin-bottom:6px">▾ Assets</div>{files}{badge(1, 96, 586)}</div></div>'''
-    body = f'<div class="fig">{col(win, "On the releases page, under <b>Assets</b>, click the file ending in <b>darwin-universal.dmg</b>. File names may differ slightly.")}</div>'
-    return render("02-download-iloader", body, 760, 520)
+    win = f'''<div class="mac" style="width:640px"><div class="bar"><i></i><i></i><i></i><div class="url">github.com/nab138/iloader/releases/latest/download/iloader-darwin-universal.dmg</div><span style="margin-left:10px;font-size:15px">⤓</span></div>
+      <div class="body" style="height:130px">
+        <div class="note" style="margin-bottom:10px;max-width:260px;line-height:1.4">Click the link in this guide. The download starts by itself.</div>
+        <div style="position:absolute;right:14px;top:10px;width:300px;background:#f7f7f7;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.16);padding:10px">
+          <div style="font-weight:600;font-size:12px;margin-bottom:8px">Downloads</div>
+          <div class="file hl" style="border-bottom:0"><div class="docico"></div><span>iloader-darwin-universal.dmg</span><span class="sz">✓</span></div>
+        </div>
+        {badge(1, 4, 318)}</div></div>'''
+    body = f'<div class="fig">{col(win.replace("max-width: 230px", ""), "<span style=\'display:inline-block;max-width:460px\'>The file <b>iloader-darwin-universal.dmg</b> lands in your <b>Downloads</b> folder</span>")}</div>'
+    return render("02-download-iloader", body, 780, 420)
 
 
 def install_iloader():

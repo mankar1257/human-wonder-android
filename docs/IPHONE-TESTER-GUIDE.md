@@ -1,18 +1,20 @@
 # How to put Human Wonder on your iPhone
 
-*A step-by-step guide for testers. You need a Mac, your iPhone and its cable. It is free and takes about 20 minutes the first time.*
+*A step-by-step guide for testers of the Human Wonder iPhone app. You need a Mac, your iPhone and its cable. About 20 minutes the first time.*
 
 ![The whole idea in one picture: the Mac installs the app on the iPhone through the cable](img/iphone-guide-01-overview.png)
 
 ## What you are about to do, in plain words
 
-Human Wonder is not in the App Store yet, so we send it to you as a file called **HumanWonder-iPhone.ipa**. An iPhone only runs such a file once it has been "signed" with an Apple ID. A free Mac app called **iloader** does that with **your own Apple ID** and puts the app on your iPhone through the cable. Nothing to pay, and no other apps needed.
+Human Wonder is in testing and not in the App Store yet. You receive the test build as a file, **HumanWonder-iPhone.ipa**, and install it on your iPhone from your Mac. This is a common way to test an iOS app on a real device before release.
+
+Apple requires every app to be signed before an iPhone will run it. For a test build installed this way, the signature comes from **your own Apple ID**, so the app is registered to you and your device. **iloader**, an open-source Mac app, does the signing for you and installs the app through the cable. Nothing else is needed on the iPhone.
 
 The pictures in this guide are simplified drawings. Your screens may look a little different, but the buttons have the same names.
 
 ## Before you start: check you have these
 
-- ☐ An iPhone on **iOS 17 or newer** (Settings → General → About → iOS Version), with **2 GB free**.
+- ☐ An iPhone on **iOS 17 or newer** (Settings → General → About → iOS Version), with **2 GB of storage available**.
 - ☐ A **Mac** and the iPhone's **charging cable**.
 - ☐ Your **Apple ID** email and password. Keep your other Apple device or phone nearby for the 6-digit code.
 - ☐ The file **HumanWonder-iPhone.ipa** (about 400 MB) saved on the Mac, for example in **Downloads**.
@@ -23,10 +25,15 @@ The pictures in this guide are simplified drawings. Your screens may look a litt
 
 ### Step 1 · Download iloader
 
-- On the Mac, open Safari and go to **github.com/nab138/iloader/releases**
-- Under the newest version, find **Assets** and click the file whose name ends in **darwin-universal.dmg**. It goes into your **Downloads** folder.
+- On the Mac, click this link to download iloader for Mac:
 
-![The iloader download page, with the Mac file ringed](img/iphone-guide-02-download-iloader.png)
+  **[Download iloader for Mac](https://github.com/nab138/iloader/releases/latest/download/iloader-darwin-universal.dmg)**
+
+  (github.com/nab138/iloader/releases/latest/download/iloader-darwin-universal.dmg)
+
+- The file **iloader-darwin-universal.dmg** lands in your **Downloads** folder. The link always gives the newest version. iloader's official home is github.com/nab138/iloader.
+
+![The download finishes in the Downloads folder](img/iphone-guide-02-download-iloader.png)
 
 ### Step 2 · Install iloader and open it
 
@@ -93,7 +100,7 @@ The iPhone needs internet for this step.
 
 ## Every 7 days: renew it (5 minutes, with the cable)
 
-Apple lets an app signed with a free Apple ID run for **7 days**. After that Human Wonder simply won't open until it is renewed. To renew it:
+A test build signed with a personal Apple ID stays valid for **7 days**; this is Apple's rule for apps installed for testing. After that Human Wonder won't open until it is renewed. To renew it:
 
 - Do **Step 3** and **Step 4** again with the same file. You don't need to repeat Part 1 or Part 3.
 - Your **conversations stay**; only the 7 days start again.
@@ -101,7 +108,7 @@ Apple lets an app signed with a free Apple ID run for **7 days**. After that Hum
 Good to know:
 
 - **New versions:** when we send you a new `.ipa`, do Step 3 and Step 4 with the new file. It replaces the old version and keeps your conversations.
-- **Free Apple ID limits:** up to **3 apps** installed this way at the same time, and up to **10 new app installs per week**.
+- **Apple's limits for test installs on a personal Apple ID:** up to **3 apps** installed this way at the same time, and up to **10 new app installs per week**.
 
 ## If something goes wrong
 
@@ -112,10 +119,10 @@ Good to know:
 | iloader asks about Developer Mode | Do **Step 6** on the iPhone, then try again. |
 | iPhone: "Untrusted Developer" | Do **Step 5**. |
 | iPhone: "Developer Mode required" | Do **Step 6**. |
-| iloader: "Maximum number of App IDs" | You've reached the free weekly limit. Wait a few days, or delete an app you installed this way more than 7 days ago. |
+| iloader: "Maximum number of App IDs" | You've reached Apple's weekly limit for test installs. Wait a few days, or delete an app you installed this way more than 7 days ago. |
 | Human Wonder opened before but now closes straight away | The 7 days are up: renew it (Step 3 and Step 4). |
 | Still stuck | Take a screenshot (side button + volume up) and send it to the person who sent you this guide. |
 
 ## About your Apple ID
 
-iloader uses your Apple ID only to ask Apple to sign the app for **your own** iPhone. Everyone uses their own Apple ID. Human Wonder itself never asks for an account and works offline.
+iloader uses your Apple ID only to ask Apple to sign the test build for **your own** iPhone; your password goes to Apple, not to us. Every tester uses their own Apple ID. Human Wonder itself never asks for an account and works offline.
