@@ -1,18 +1,12 @@
 # How to put Human Wonder on your iPhone
 
-*A step-by-step guide for testers. You need a Mac, your iPhone and its cable. It is free and takes about 30 minutes the first time. After that, new versions take 2 minutes and no cable.*
+*A step-by-step guide for testers. You need a Mac, your iPhone and its cable. It is free and takes about 20 minutes the first time.*
 
-![The whole idea in one picture: the Mac is used once with the cable, then everything happens on the iPhone](img/iphone-guide-01-overview.png)
+![The whole idea in one picture: the Mac installs the app on the iPhone through the cable](img/iphone-guide-01-overview.png)
 
 ## What you are about to do, in plain words
 
-Human Wonder is not in the App Store yet, so we send it to you as a file called **HumanWonder-iPhone.ipa**. An iPhone only runs such a file once it has been "signed" with an Apple ID, so you will sign it with **your own Apple ID**, free of charge, using three small helper apps:
-
-| Helper | Where it goes | What it does |
-|---|---|---|
-| **LocalDevVPN** | iPhone (App Store) | A switch SideStore needs to install apps. It does not touch your internet traffic. |
-| **iloader** | Mac (used once) | Puts SideStore on your iPhone through the cable. |
-| **SideStore** | iPhone | Installs Human Wonder from the file, and keeps it working week after week. |
+Human Wonder is not in the App Store yet, so we send it to you as a file called **HumanWonder-iPhone.ipa**. An iPhone only runs such a file once it has been "signed" with an Apple ID. A free Mac app called **iloader** does that with **your own Apple ID** and puts the app on your iPhone through the cable. Nothing to pay, and no other apps needed.
 
 The pictures in this guide are simplified drawings. Your screens may look a little different, but the buttons have the same names.
 
@@ -21,65 +15,55 @@ The pictures in this guide are simplified drawings. Your screens may look a litt
 - ☐ An iPhone on **iOS 17 or newer** (Settings → General → About → iOS Version), with **2 GB free**.
 - ☐ A **Mac** and the iPhone's **charging cable**.
 - ☐ Your **Apple ID** email and password. Keep your other Apple device or phone nearby for the 6-digit code.
-- ☐ **Wi-Fi** on both the Mac and the iPhone.
-- ☐ The file **HumanWonder-iPhone.ipa** (about 400 MB), from the person who sent you this guide.
+- ☐ The file **HumanWonder-iPhone.ipa** (about 400 MB) saved on the Mac, for example in **Downloads**.
 
 ---
 
-## Part 1 · On the iPhone (2 minutes)
+## Part 1 · Get iloader on the Mac (5 minutes)
 
-### Step 1 · Install LocalDevVPN and switch it on
-
-- Open the **App Store**, search for **LocalDevVPN**, tap **Get**.
-- Open LocalDevVPN and tap **Connect**.
-- iPhone asks to add a VPN configuration: tap **Allow**, then type your iPhone passcode.
-
-![Install LocalDevVPN, tap Connect, tap Allow](img/iphone-guide-02-localdevvpn.png)
-
-✅ **It worked when** LocalDevVPN says **Connected**.
-
----
-
-## Part 2 · On the Mac (10 minutes, with the cable)
-
-### Step 2 · Download iloader
+### Step 1 · Download iloader
 
 - On the Mac, open Safari and go to **github.com/nab138/iloader/releases**
 - Under the newest version, find **Assets** and click the file whose name ends in **darwin-universal.dmg**. It goes into your **Downloads** folder.
 
-![The iloader download page, with the Mac file ringed](img/iphone-guide-03-download-iloader.png)
+![The iloader download page, with the Mac file ringed](img/iphone-guide-02-download-iloader.png)
 
-### Step 3 · Install iloader and open it
+### Step 2 · Install iloader and open it
 
 - Open **Downloads** and double-click the file you just downloaded. A window opens.
 - Drag the **iloader** icon onto the **Applications** folder.
 - Open **iloader** from your Applications folder (or press ⌘ Space, type *iloader*, press Return).
 - If the Mac says iloader "can't be opened" or "was blocked": open **System Settings → Privacy & Security**, scroll down and click **Open Anyway**, then confirm.
 
-![Drag iloader into Applications; Open Anyway if the Mac blocks it](img/iphone-guide-04-install-iloader.png)
+![Drag iloader into Applications; Open Anyway if the Mac blocks it](img/iphone-guide-03-install-iloader.png)
 
-### Step 4 · Connect the iPhone with the cable
+---
+
+## Part 2 · Install Human Wonder (10 minutes, with the cable)
+
+### Step 3 · Connect the iPhone with the cable
 
 - Plug the iPhone into the Mac and **unlock** the iPhone.
 - If the iPhone asks **Trust This Computer?**, tap **Trust** and type your passcode.
 
-![The iPhone asks to trust the Mac: tap Trust](img/iphone-guide-05-trust-computer.png)
+![The iPhone asks to trust the Mac: tap Trust](img/iphone-guide-04-trust-computer.png)
 
-### Step 5 · Sign in and install SideStore
+### Step 4 · Sign in to iloader and install the file
 
 - In iloader, sign in with **your Apple ID** email and password, then type the 6-digit code Apple sends to your other device.
-- Pick your iPhone and click **Install SideStore (Stable)**.
-- Wait until iloader says it is **done** (a few minutes). **Keep the cable plugged in until then.**
+- Pick your iPhone. **Skip "Install SideStore"**: choose the option for your own file instead (it may be called **Import IPA** or **Install other IPA**).
+- Choose **HumanWonder-iPhone.ipa** and click **Open**.
+- Wait until iloader says it is **done**. The file is large, so this takes a few minutes. **Keep the cable plugged in until then.**
 
-![Sign in to iloader, then click Install SideStore (Stable)](img/iphone-guide-06-iloader.png)
+![Sign in, choose Import IPA, pick HumanWonder-iPhone.ipa](img/iphone-guide-05-iloader-ipa.png)
 
-✅ **It worked when** a **SideStore** icon appears on your iPhone's Home Screen. It will not open yet; that is normal and Part 3 fixes it.
+✅ **It worked when** iloader says it is done and the **Human Wonder** icon appears on your iPhone. It won't open yet; that's normal, and Part 3 fixes it. You can unplug the cable now.
 
 ---
 
-## Part 3 · On the iPhone: let SideStore run (5 minutes)
+## Part 3 · On the iPhone: allow it to run (5 minutes, once)
 
-### Step 6 · Trust your Apple ID as a "developer"
+### Step 5 · Trust your Apple ID as a "developer"
 
 The iPhone needs internet for this step.
 
@@ -87,68 +71,37 @@ The iPhone needs internet for this step.
 - Under **Developer App**, tap the line with your Apple ID email.
 - Tap **Trust "Apple Development: …"**, then tap **Trust** again.
 
-![Settings, General, VPN & Device Management, your Apple ID, Trust](img/iphone-guide-07-trust-developer.png)
+![Settings, General, VPN & Device Management, your Apple ID, Trust](img/iphone-guide-06-trust-developer.png)
 
-### Step 7 · Turn on Developer Mode
+### Step 6 · Turn on Developer Mode
 
 - Open **Settings → Privacy & Security**, scroll to the **very bottom**, tap **Developer Mode**.
 - Switch it on and tap **Restart**. The iPhone restarts.
 - After it restarts, unlock it: a message asks **Turn On Developer Mode?** Tap **Turn On** and type your passcode.
 
-![Privacy & Security, Developer Mode, Restart, then Turn On](img/iphone-guide-08-developer-mode.png)
+![Privacy & Security, Developer Mode, Restart, then Turn On](img/iphone-guide-07-developer-mode.png)
 
-### Step 8 · Set up SideStore
+### Step 7 · Open Human Wonder
 
-- Open **LocalDevVPN** and make sure it says **Connected** (tap **Connect** if not).
-- Open **SideStore**. When it asks to find devices on your local network, tap **Allow**. Allow notifications too.
-- Go to the **Settings** tab inside SideStore and **sign in with the same Apple ID** you used in iloader.
-- Go to the **My Apps** tab and tap the **7 DAYS** button next to SideStore. Wait a moment.
+- Tap **Human Wonder** on your Home Screen.
 
-![SideStore: Allow, sign in, then tap 7 DAYS](img/iphone-guide-09-sidestore-setup.png)
-
-✅ **It worked when** the button next to SideStore still says **7 DAYS** after a moment and no error appears. **You can unplug the cable now.** You won't need the Mac again for normal use.
-
----
-
-## Part 4 · Install Human Wonder (5 minutes, no cable)
-
-### Step 9 · Put the file on the iPhone
-
-Use whichever is easier:
-
-- **From the Mac with AirDrop:** right-click **HumanWonder-iPhone.ipa** → **Share** → **AirDrop** → your iPhone. On the iPhone, choose **Open with SideStore** if it offers it, otherwise **Save to Files**.
-- **From a link we sent you:** open the link on the iPhone and save the file to **Files**.
-
-![AirDrop the file from the Mac to the iPhone](img/iphone-guide-10-airdrop.png)
-
-### Step 10 · Install it with SideStore
-
-- Check that **LocalDevVPN** says **Connected**.
-- Open **SideStore** → **My Apps** → tap **+** at the top left.
-- Choose **HumanWonder-iPhone.ipa** (look in **Downloads** in the Files window).
-- Wait while it installs. The file is large, so this takes a few minutes. **Keep SideStore open until it finishes.**
-- Open **Human Wonder** from your Home Screen.
-
-![Tap +, choose the file, wait, then open Human Wonder](img/iphone-guide-11-install-app.png)
+![Tap Human Wonder on the Home Screen](img/iphone-guide-08-open-app.png)
 
 ✅ **It worked when** Human Wonder opens and greets you. The first start can take a little longer while it gets ready. After that, it works **without internet**.
 
 ---
 
-## Keeping it working (once a week, 30 seconds)
+## Every 7 days: renew it (5 minutes, with the cable)
 
-Apps signed with a free Apple ID last **7 days**. SideStore renews them by itself in the background when LocalDevVPN is connected and the iPhone is on Wi-Fi. To be safe, once a week:
+Apple lets an app signed with a free Apple ID run for **7 days**. After that Human Wonder simply won't open until it is renewed. To renew it:
 
-- Open **LocalDevVPN** → it should say **Connected**.
-- Open **SideStore** → **My Apps** → tap **Refresh All**. The days go back to 7.
-
-![LocalDevVPN Connected, then Refresh All in SideStore](img/iphone-guide-12-weekly-refresh.png)
+- Do **Step 3** and **Step 4** again with the same file. You don't need to repeat Part 1 or Part 3.
+- Your **conversations stay**; only the 7 days start again.
 
 Good to know:
 
-- **New versions:** when we send you a new `.ipa`, just do Part 4 again. It replaces the old version and keeps your conversations.
-- **If SideStore itself ran out and won't open:** do Step 5 again on the Mac with the cable. Your apps and conversations stay.
-- **Free Apple ID limits:** up to **3 apps** installed this way at the same time (SideStore counts as one), and up to **10 new app installs per week**.
+- **New versions:** when we send you a new `.ipa`, do Step 3 and Step 4 with the new file. It replaces the old version and keeps your conversations.
+- **Free Apple ID limits:** up to **3 apps** installed this way at the same time, and up to **10 new app installs per week**.
 
 ## If something goes wrong
 
@@ -156,13 +109,13 @@ Good to know:
 |---|---|
 | iloader: "Failed to fetch URL Bag", or another network error when signing in | Turn off any VPN or firewall app on the Mac, or connect the Mac to a different network (your phone's hotspot works), then sign in again. |
 | iloader doesn't show your iPhone | Unlock the iPhone, tap **Trust**, try another cable or USB port. |
-| iPhone: "Untrusted Developer" | Do **Step 6**. |
-| iPhone: "Developer Mode required" | Do **Step 7**. |
-| SideStore can't install or refresh | Open LocalDevVPN and tap **Connect**, check you're on Wi-Fi, try again. |
-| SideStore: "Maximum number of App IDs" | You've reached the free weekly limit. Wait a few days, or delete an app you installed with SideStore more than 7 days ago. |
-| Human Wonder opened before but now closes straight away | It ran out: connect LocalDevVPN and tap **Refresh All** in SideStore. |
+| iloader asks about Developer Mode | Do **Step 6** on the iPhone, then try again. |
+| iPhone: "Untrusted Developer" | Do **Step 5**. |
+| iPhone: "Developer Mode required" | Do **Step 6**. |
+| iloader: "Maximum number of App IDs" | You've reached the free weekly limit. Wait a few days, or delete an app you installed this way more than 7 days ago. |
+| Human Wonder opened before but now closes straight away | The 7 days are up: renew it (Step 3 and Step 4). |
 | Still stuck | Take a screenshot (side button + volume up) and send it to the person who sent you this guide. |
 
 ## About your Apple ID
 
-iloader and SideStore use your Apple ID only to ask Apple to sign apps for **your own** iPhone. Everyone uses their own Apple ID. Human Wonder itself never asks for an account and works offline.
+iloader uses your Apple ID only to ask Apple to sign the app for **your own** iPhone. Everyone uses their own Apple ID. Human Wonder itself never asks for an account and works offline.

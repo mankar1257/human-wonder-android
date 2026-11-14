@@ -155,7 +155,7 @@ def download_iloader():
       <div class="body"><div class="big" style="margin-bottom:4px">iloader</div><div class="note" style="margin-bottom:14px">Latest release</div>
       <div style="font-weight:600;font-size:12px;margin-bottom:6px">▾ Assets</div>{files}{badge(1, 96, 586)}</div></div>'''
     body = f'<div class="fig">{col(win, "On the releases page, under <b>Assets</b>, click the file ending in <b>darwin-universal.dmg</b>. File names may differ slightly.")}</div>'
-    return render("03-download-iloader", body, 760, 520)
+    return render("02-download-iloader", body, 760, 520)
 
 
 def install_iloader():
@@ -171,7 +171,7 @@ def install_iloader():
       <div style="display:inline-block;border:0.5px solid #bbb;border-radius:6px;padding:5px 12px;font-size:12px;position:relative" class="hl">Open Anyway</div>
       {badge(2, 92, 128)}</div></div>'''
     body = f'<div class="fig">{col(dmg, "Open the downloaded file and drag <b>iloader</b> onto <b>Applications</b>")}{col(sec, "Only if macOS blocks it: <b>System Settings → Privacy &amp; Security → Open Anyway</b>")}</div>'
-    return render("04-install-iloader", body, 820, 380)
+    return render("03-install-iloader", body, 820, 380)
 
 
 def trust_computer():
@@ -179,7 +179,7 @@ def trust_computer():
     ph = phone('<div style="flex:1"></div>' + alert("Trust This Computer?", "Your settings and data will be accessible from this computer when connected.", ["Trust", "Don’t Trust"], hl=0, stack=True) + badge(1, 268, 196), "white")
     body = f'''<div class="fig" style="align-items:center">{col(mac, "")}<div class="col"><div style="width:110px;height:6px;border-radius:3px;background:#bfc6cb"></div><div class="note">cable</div></div>
       {col(ph, "Unlock the iPhone, tap <b>Trust</b>, then enter your passcode")}</div>'''
-    return render("05-trust-computer", body, 820, 640)
+    return render("04-trust-computer", body, 820, 640)
 
 
 def iloader_app():
@@ -209,7 +209,7 @@ def trust_developer():
     p3 = phone('<div class="nav">‹ General</div><div class="title" style="font-size:16px">VPN &amp; Device Management</div>' + rows([("VPN", {"v": "Connected"})]) + '<div class="gh">Developer App</div>' + rows([("Apple Development: your-name@…", {"hl": True})]) + badge(3, 186, 198))
     p4 = phone('<div class="nav">‹ Back</div><div style="padding:6px 14px;font-size:11px;color:#333;line-height:1.4">Apps from developer “Apple Development: your-name@…” are not trusted on this iPhone.</div>' + rows([("Trust “Apple Development: your-name@…”", {"color": "#0a84ff", "chev": False})]) + alert("Trust “Apple Development: your-name@…” Apps on This iPhone", "", ["Cancel", "Trust"], hl=1) + badge(4, 286, 168))
     body = f'<div class="fig">{col(p1, "Open <b>Settings</b> → <b>General</b>")}{col(p2, "Tap <b>VPN &amp; Device Management</b>")}{col(p3, "Tap your Apple ID under <b>Developer App</b>")}{col(p4, "Tap <b>Trust</b> (twice). The iPhone needs internet.")}</div>'
-    return render("07-trust-developer", body, 1200, 640)
+    return render("06-trust-developer", body, 1200, 640)
 
 
 def developer_mode():
@@ -217,7 +217,7 @@ def developer_mode():
     p2 = phone('<div class="nav">‹ Privacy &amp; Security</div><div class="title" style="font-size:17px">Developer Mode</div>' + rows([("Developer Mode", {"toggle": True})]) + alert("Turn On Developer Mode?", "You need to restart your iPhone to turn this on.", ["Cancel", "Restart"], hl=1) + badge(2, 286, 168))
     p3 = phone('<div style="flex:1;display:flex;align-items:flex-end;justify-content:center;padding-bottom:28px;color:#fff;font-size:11px">After the restart, unlock the iPhone</div>' + alert("Turn On Developer Mode?", "Turning on Developer Mode reduces the security of your iPhone.", ["Cancel", "Turn On"], hl=1) + badge(3, 286, 168), "dark")
     body = f'<div class="fig">{col(p1, "<b>Settings → Privacy &amp; Security</b> → <b>Developer Mode</b>")}{ARROW}{col(p2, "Switch it on, tap <b>Restart</b>")}{ARROW}{col(p3, "Tap <b>Turn On</b>, then enter your passcode")}</div>'
-    return render("08-developer-mode", body, 1000, 640)
+    return render("07-developer-mode", body, 1000, 640)
 
 
 def sidestore_setup():
@@ -258,9 +258,57 @@ def weekly():
     return render("12-weekly-refresh", body, 760, 640)
 
 
+# ---------- simple path: iloader installs the .ipa directly ----------
+
+def overview_simple():
+    mac = '<div class="mac" style="width:220px"><div class="bar"><i></i><i></i><i></i><span>iloader</span></div><div class="body" style="height:120px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px"><div class="big">Your Mac</div><div class="note">iloader + the .ipa file</div></div></div>'
+    ph = phone('<div style="padding:40px 16px;text-align:center"><div class="hwicon" style="margin:0 auto"></div><div style="margin-top:8px;font-size:12px;font-weight:600">Human Wonder</div><div class="note" style="margin-top:14px">works offline</div></div>', "white", height=270)
+    body = f'''<div class="fig" style="align-items:center">
+      {col(mac, "<b>On the Mac:</b> iloader signs the app with your Apple ID")}
+      <div class="col" style="align-self:center;margin-bottom:40px"><div class="arrow" style="margin:0">⟶</div><div class="note">cable</div></div>
+      {col(ph, "<b>On the iPhone:</b> Human Wonder, ready to use")}
+    </div>'''
+    return render("01-overview", body, 820, 520)
+
+
+def iloader_ipa():
+    signin = f'''<div class="mac" style="width:300px"><div class="bar"><i></i><i></i><i></i><span>iloader</span></div>
+      <div class="body" style="height:240px;display:flex;flex-direction:column;gap:10px">
+        <div class="big">Sign in with your Apple ID</div>
+        <div style="border:0.5px solid #c7c7cc;border-radius:7px;padding:7px 9px;color:#999">your-name@example.com</div>
+        <div style="border:0.5px solid #c7c7cc;border-radius:7px;padding:7px 9px;color:#999">••••••••••</div>
+        <div class="btn hl" style="width:110px;padding:7px">Sign in</div>
+        <div class="note">Then type the 6-digit code Apple shows on your other device.</div>
+        {badge(1, 118, 120)}</div></div>'''
+    pick = f'''<div class="mac" style="width:300px"><div class="bar"><i></i><i></i><i></i><span>iloader</span></div>
+      <div class="body" style="height:240px;display:flex;flex-direction:column;gap:9px">
+        <div class="note">Device</div>
+        <div style="border:0.5px solid #c7c7cc;border-radius:7px;padding:7px 9px">Your iPhone ▾</div>
+        <div style="border:0.5px solid #c7c7cc;border-radius:12px;padding:9px;text-align:center;color:#555;font-size:12px">Install SideStore</div>
+        <div class="btn hl">Import IPA</div>
+        <div class="note">Skip SideStore. Use the option for your own .ipa file (it may say “Import IPA” or “Install other IPA”).</div>
+        {badge(2, 122, 270)}</div></div>'''
+    choose = f'''<div class="mac" style="width:300px"><div class="bar"><i></i><i></i><i></i><span>Choose a file</span></div>
+      <div class="body" style="height:240px;display:flex;flex-direction:column;gap:6px">
+        <div class="note" style="margin-bottom:4px">Downloads</div>
+        <div class="file hl"><div class="docico"></div><span>HumanWonder-iPhone.ipa</span><span class="sz">400 MB</span></div>
+        <div class="file"><div class="docico"></div><span>iloader-darwin-universal.dmg</span></div>
+        <div style="margin-top:auto;display:flex;justify-content:flex-end;gap:8px"><div style="border:0.5px solid #bbb;border-radius:6px;padding:4px 12px;font-size:12px">Cancel</div><div class="btn" style="padding:4px 14px;font-size:12px;border-radius:6px">Open</div></div>
+        {badge(3, 22, 268)}</div></div>'''
+    body = f'<div class="fig">{col(signin, "Sign in with <b>your</b> Apple ID")}{ARROW}{col(pick, "Choose your iPhone, then <b>Import IPA</b>")}{ARROW}{col(choose, "Pick <b>HumanWonder-iPhone.ipa</b> and wait until it is done")}</div>'
+    return render("05-iloader-ipa", body, 1160, 420)
+
+
+def open_app():
+    p = phone('<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px 6px;padding:14px 10px">' + "".join('<div class="col" style="gap:0"><div class="appico" style="background:#d9dee3;width:44px;height:44px"></div></div>' for _ in range(6)) + '<div class="col hl" style="gap:0;padding:2px;position:relative"><div class="hwicon" style="width:44px;height:44px"></div><div class="label">Human Wonder</div></div></div>' + badge(1, 110, 180), "dark")
+    body = f'<div class="fig">{col(p, "Tap <b>Human Wonder</b> on the Home Screen")}</div>'
+    return render("08-open-app", body, 420, 640)
+
+
 if __name__ == "__main__":
-    for f in (overview, localdevvpn, download_iloader, install_iloader, trust_computer, iloader_app,
-              trust_developer, developer_mode, sidestore_setup, airdrop, install_app, weekly):
+    # The guide follows the simple path: iloader installs the .ipa directly over the cable.
+    for f in (overview_simple, download_iloader, install_iloader, trust_computer, iloader_ipa,
+              trust_developer, developer_mode, open_app):
         p = f()
         from PIL import Image
         print(p.name, Image.open(p).size, p.stat().st_size // 1024, "KB")
