@@ -109,7 +109,8 @@
    "hour": 23,
    "want": [
     "moon-crescent",
-    "moon-atmosphere"
+    "moon-atmosphere",
+    "moon-clouds"
    ]
   },
   {
@@ -118,7 +119,10 @@
    "shown": [
     "moon-crescent"
    ],
-   "want": "moon-atmosphere"
+   "want": [
+    "moon-atmosphere",
+    "moon-clouds"
+   ]
   },
   {
    "q": "Can you see the Milky Way?",
@@ -152,7 +156,7 @@
   {
    "q": "Have you ever seen a hurricane?",
    "hour": 13,
-   "want": "hurricane-moon"
+   "want": "cyclone-lightning"
   },
   {
    "q": "What does a cyclone look like at night?",
@@ -308,7 +312,8 @@
    "hour": 22,
    "want": [
     "moon-crescent",
-    "moon-atmosphere"
+    "moon-atmosphere",
+    "moon-clouds"
    ]
   },
   {
@@ -330,7 +335,8 @@
    "hour": 22,
    "want": [
     "moon-crescent",
-    "moon-atmosphere"
+    "moon-atmosphere",
+    "moon-clouds"
    ]
   },
   {

@@ -303,7 +303,13 @@
     "city lights": 1,
     "دبي": 3,
     "दुबई": 3
-   }
+   },
+   "crop": [
+    0.02,
+    0.0,
+    0.98,
+    0.96
+   ]
   },
   {
    "id": "gulf-day",
@@ -326,7 +332,13 @@
     "planet": 1,
     "الخليج": 3,
     "السعودية": 2
-   }
+   },
+   "crop": [
+    0.0,
+    0.1,
+    0.9,
+    1.0
+   ]
   },
   {
    "id": "arabia-cloud",
@@ -334,7 +346,7 @@
    "time": "day",
    "source": "ISS071-E-675996",
    "caption": "A towering cloud over Arabia",
-   "says": "one tall cloud rising over the Arabian Peninsula, casting a long shadow, with black space above the horizon",
+   "says": "one tall cloud building over the Arabian Peninsula near the Gulf shore, its shadow falling on the haze below",
    "keys": {
     "cloud": 3,
     "clouds": 3,
@@ -348,6 +360,16 @@
     "غيوم": 3,
     "बादल": 3,
     "मौसम": 2
+   },
+   "crop": [
+    0.3,
+    0.05,
+    0.75,
+    0.5
+   ],
+   "enhance": {
+    "contrast": 1.15,
+    "color": 1.1
    }
   },
   {
@@ -378,7 +400,13 @@
     "الربع الخالي": 3,
     "रेगिस्तान": 3,
     "रेत": 3
-   }
+   },
+   "crop": [
+    0.02,
+    0.0,
+    0.98,
+    0.96
+   ]
   },
   {
    "id": "star-dunes",
@@ -506,7 +534,13 @@
     "peak": 1,
     "peaks": 2,
     "एवरेस्ट": 3
-   }
+   },
+   "crop": [
+    0.02,
+    0.0,
+    0.98,
+    0.96
+   ]
   },
   {
    "id": "india-night-north",
@@ -530,7 +564,13 @@
     "दिल्ली": 3,
     "इंडिया": 3,
     "الهند": 3
-   }
+   },
+   "crop": [
+    0.0,
+    0.05,
+    0.7,
+    0.75
+   ]
   },
   {
    "id": "india-night-south",
@@ -579,7 +619,13 @@
     "शाम": 2,
     "غروب": 3,
     "الغروب": 3
-   }
+   },
+   "crop": [
+    0.02,
+    0.0,
+    0.98,
+    0.96
+   ]
   },
   {
    "id": "moon-crescent",
@@ -623,25 +669,22 @@
    }
   },
   {
-   "id": "hurricane-moon",
+   "id": "moon-clouds",
    "kind": "photo",
-   "time": "day",
+   "time": "any",
    "source": "ISS011-E-10509",
-   "caption": "A hurricane's eye and a rising Moon",
-   "says": "the eye of a hurricane like a dimple in the clouds, with the Moon rising beyond the horizon",
+   "caption": "The Moon over the cloud tops",
+   "says": "the Moon rising above the blue edge of the atmosphere, with bright cloud tops spread out below",
    "keys": {
-    "hurricane": 3,
-    "cyclone": 3,
-    "typhoon": 3,
-    "eye": 2,
-    "storm": 2,
-    "storms": 2,
-    "wind": 1,
-    "तूफान": 3,
-    "चक्रवात": 3,
-    "إعصار": 3,
-    "اعصار": 3,
-    "عاصفة": 2
+    "moon": 3,
+    "moonrise": 3,
+    "lunar": 3,
+    "clouds": 1,
+    "cloud tops": 2,
+    "चाँद": 3,
+    "चांद": 3,
+    "قمر": 3,
+    "القمر": 3
    }
   },
   {
@@ -653,8 +696,8 @@
    "says": "a cyclone at night, its eye lit from inside by lightning, with a band of airglow along the horizon",
    "keys": {
     "cyclone": 3,
-    "hurricane": 2,
-    "typhoon": 2,
+    "hurricane": 3,
+    "typhoon": 3,
     "lightning": 2,
     "storm": 2,
     "thunder": 1,
@@ -662,7 +705,8 @@
     "चक्रवात": 3,
     "बिजली": 2,
     "إعصار": 3,
-    "برق": 2
+    "برق": 2,
+    "تيفون": 3
    }
   },
   {
@@ -684,15 +728,21 @@
     "ज्वालामुखी": 3,
     "بركان": 3,
     "البركان": 3
-   }
+   },
+   "crop": [
+    0.02,
+    0.0,
+    0.98,
+    0.96
+   ]
   },
   {
    "id": "maldives",
    "kind": "photo",
    "time": "day",
    "source": "ISS022-E-24557",
-   "caption": "An atoll in the Maldives",
-   "says": "an atoll in the Maldives, rings of reef and tiny islands in sunlit water",
+   "caption": "Malé Atoll in the Maldives",
+   "says": "Malé Atoll in the Maldives, small islands and reefs with sunlight glinting off the sea and its tidal currents",
    "keys": {
     "maldives": 3,
     "atoll": 3,
@@ -708,7 +758,13 @@
     "جزيرة": 2,
     "جزر": 2,
     "المالديف": 3
-   }
+   },
+   "crop": [
+    0.02,
+    0.0,
+    0.98,
+    0.96
+   ]
   },
   {
    "id": "sunglint",
@@ -741,7 +797,7 @@
    "time": "night",
    "source": "ISS044-E-45215",
    "caption": "The Milky Way above the airglow",
-   "says": "the bright core of the Milky Way above a green and gold band of airglow, with a lightning flash below",
+   "says": "the bright core of the Milky Way above a red-gold band of airglow and the thin glowing edge of the Earth",
    "keys": {
     "milky way": 3,
     "galaxy": 3,
@@ -760,7 +816,13 @@
     "النجوم": 3,
     "مجرة": 3,
     "درب التبانة": 3
-   }
+   },
+   "crop": [
+    0.0,
+    0.24,
+    0.6,
+    0.84
+   ]
   },
   {
    "id": "airglow",
@@ -776,7 +838,13 @@
     "pacific": 3,
     "night sky": 1,
     "stars": 1
-   }
+   },
+   "crop": [
+    0.1,
+    0.25,
+    0.85,
+    1.0
+   ]
   },
   {
    "id": "sprite",
@@ -784,7 +852,7 @@
    "time": "night",
    "source": "ISS071-E-234765",
    "caption": "A red sprite above a storm",
-   "says": "a red sprite, a rare jellyfish of red light flashing high above a thunderstorm",
+   "says": "a red sprite, a rare flash of red light high above a thunderstorm, over the lights of North American towns",
    "keys": {
     "sprite": 3,
     "sprites": 3,
@@ -792,13 +860,19 @@
     "jellyfish": 2,
     "lightning": 1,
     "thunderstorm": 1
-   }
+   },
+   "crop": [
+    0.35,
+    0.18,
+    0.95,
+    0.78
+   ]
   },
   {
    "id": "aurora-loop",
    "kind": "loop",
    "time": "night",
-   "source": "ISS060-E-68323..71000",
+   "source": "ISS060-E-69100..69219",
    "caption": "Northern lights over Canada",
    "says": "the northern lights rippling green below me as I cross Canada",
    "keys": {
@@ -817,15 +891,33 @@
     "الشفق": 3,
     "شفق": 3,
     "الشفق القطبي": 3
+   },
+   "loop": {
+    "dir": "aurora-loop",
+    "first": 69100,
+    "last": 69219,
+    "step": 2,
+    "fps": 12
+   },
+   "crop": [
+    0.0,
+    0.0,
+    0.8,
+    0.8
+   ],
+   "enhance": {
+    "brightness": 1.6,
+    "contrast": 1.1,
+    "color": 1.15
    }
   },
   {
    "id": "aurora-south-loop",
    "kind": "loop",
    "time": "night",
-   "source": "ISS060-E-32432..32683",
+   "source": "ISS060-E-32528..32630",
    "caption": "Southern lights over the ocean",
-   "says": "the southern lights glowing over a cloudy ocean far to the south",
+   "says": "the southern lights glowing green over a cloudy ocean, with a solar panel catching the light in front",
    "keys": {
     "aurora australis": 3,
     "southern lights": 3,
@@ -837,13 +929,30 @@
     "southern ocean": 3,
     "शफक": 2,
     "الشفق الجنوبي": 3
+   },
+   "loop": {
+    "dir": "aurora-south-loop",
+    "first": 32528,
+    "last": 32630,
+    "step": 2,
+    "fps": 12,
+    "mode": "pingpong"
+   },
+   "crop": [
+    0.1,
+    0.12,
+    0.9,
+    0.84
+   ],
+   "enhance": {
+    "brightness": 1.15
    }
   },
   {
    "id": "sunrise-loop",
    "kind": "loop",
    "time": "any",
-   "source": "ISS060-E-68323..71000",
+   "source": "ISS060-E-59985..60104",
    "caption": "A sunrise from orbit",
    "says": "a sunrise racing up over the curve of the Earth, the first light spreading along the horizon",
    "keys": {
@@ -858,13 +967,29 @@
     "شروق": 3,
     "الشروق": 3,
     "الفجر": 3
+   },
+   "loop": {
+    "dir": "sunrise-loop",
+    "first": 59985,
+    "last": 60104,
+    "step": 2,
+    "fps": 12
+   },
+   "crop": [
+    0.0,
+    0.04,
+    0.9,
+    0.94
+   ],
+   "enhance": {
+    "brightness": 1.25
    }
   },
   {
    "id": "storm-loop",
    "kind": "loop",
    "time": "night",
-   "source": "ISS060-E-59387..60156",
+   "source": "ISS060-E-59690..59809",
    "caption": "Lightning between city lights",
    "says": "lightning flickering inside storm clouds while city lights slide past beneath them",
    "keys": {
@@ -882,13 +1007,30 @@
     "البرق": 3,
     "رعد": 3,
     "عاصفة": 2
+   },
+   "loop": {
+    "dir": "storm-loop",
+    "first": 59690,
+    "last": 59809,
+    "step": 2,
+    "fps": 12
+   },
+   "crop": [
+    0.05,
+    0.08,
+    0.95,
+    0.98
+   ],
+   "enhance": {
+    "brightness": 1.5,
+    "contrast": 1.1
    }
   },
   {
    "id": "milky-way-loop",
    "kind": "loop",
    "time": "night",
-   "source": "ISS060-E-22351..22575",
+   "source": "ISS060-E-22351..22410",
    "caption": "The Milky Way drifting by",
    "says": "the Milky Way drifting slowly over the night side of the Earth",
    "keys": {
@@ -903,13 +1045,29 @@
     "مجرة": 3,
     "درب التبانة": 3,
     "نجوم": 2
+   },
+   "loop": {
+    "dir": "milky-way-loop",
+    "first": 22351,
+    "last": 22410,
+    "step": 1,
+    "fps": 12
+   },
+   "crop": [
+    0.0,
+    0.3,
+    0.7,
+    1.0
+   ],
+   "enhance": {
+    "brightness": 1.35
    }
   },
   {
    "id": "arabia-night-loop",
    "kind": "loop",
    "time": "night",
-   "source": "ISS060-E-5022..6021",
+   "source": "ISS060-E-5740..5859",
    "caption": "A night pass over Arabia",
    "says": "a night pass over Arabia and the Gulf, town lights sliding by across the dark desert",
    "keys": {
@@ -927,13 +1085,29 @@
     "الرياض": 3,
     "الخليج": 2,
     "dark desert": 3
+   },
+   "loop": {
+    "dir": "arabia-night-loop",
+    "first": 5740,
+    "last": 5859,
+    "step": 2,
+    "fps": 12
+   },
+   "crop": [
+    0.1,
+    0.3,
+    0.8,
+    1.0
+   ],
+   "enhance": {
+    "brightness": 1.2
    }
   },
   {
    "id": "india-night-loop",
    "kind": "loop",
    "time": "night",
-   "source": "ISS061-E-22294..22718",
+   "source": "ISS061-E-22398..22517",
    "caption": "A night pass over South Asia",
    "says": "a night pass over South Asia, the lights of India sliding beneath me",
    "keys": {
@@ -949,6 +1123,23 @@
     "मुंबई": 3,
     "इंडिया": 3,
     "الهند": 3
+   },
+   "loop": {
+    "dir": "india-night-loop",
+    "first": 22398,
+    "last": 22517,
+    "step": 2,
+    "fps": 12
+   },
+   "crop": [
+    0.0,
+    0.2,
+    0.8,
+    1.0
+   ],
+   "enhance": {
+    "brightness": 2.2,
+    "contrast": 1.15
    }
   }
  ]

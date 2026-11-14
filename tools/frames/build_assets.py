@@ -11,7 +11,9 @@ and the credit notice NOTICE-orbit-archive.txt into both apps' licence folders.
 
 Per-frame options in tools/frames/frames.json (build only, not shipped):
   "crop": [left, top, right, bottom] as fractions of the original, applied before resizing
-  "loop": {"dir": "<media-src/loops folder>", "first": n, "last": n, "step": n, "fps": 12}
+  "loop": {"dir": "<media-src/loops folder>", "first": n, "last": n, "step": n, "fps": 12,
+           "mode": "pingpong" to play forward then back instead of cross-fading the ends}
+  "enhance": {"brightness": x, "contrast": x, "color": x} for dim night frames
 """
 import json
 import sys
@@ -81,12 +83,16 @@ def loop(frame, media: Path) -> Path:
         img = Image.open(f).convert("RGB")
         img = enhance(crop_to(img, frame.get("crop"), aspect), frame.get("enhance"))
         imgs.append(img.resize(LOOP_SIZE, Image.LANCZOS))
-    # Seamless: the last CROSSFADE frames dissolve into the first ones, which are then dropped.
-    n = len(imgs)
-    for i in range(CROSSFADE):
-        a = (i + 1) / (CROSSFADE + 1)
-        imgs[n - CROSSFADE + i] = Image.blend(imgs[n - CROSSFADE + i], imgs[i], a)
-    imgs = imgs[CROSSFADE:]
+    if spec.get("mode") == "pingpong":
+        # Forward then back: no seam at all, for scenes where a cross-fade would show a ghost.
+        imgs = imgs + imgs[-2:0:-1]
+    else:
+        # Seamless: the last CROSSFADE frames dissolve into the first ones, which are then dropped.
+        n = len(imgs)
+        for i in range(CROSSFADE):
+            a = (i + 1) / (CROSSFADE + 1)
+            imgs[n - CROSSFADE + i] = Image.blend(imgs[n - CROSSFADE + i], imgs[i], a)
+        imgs = imgs[CROSSFADE:]
     fps = spec.get("fps", 12)
     out = OUT / f"{frame['id']}.webp"
     imgs[0].save(out, "WEBP", save_all=True, append_images=imgs[1:], duration=round(1000 / fps), loop=0,

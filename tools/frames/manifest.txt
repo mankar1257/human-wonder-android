@@ -39,3 +39,12 @@ sheet storms-city      ISS060 59387 60156 10
 sheet milky-way        ISS060 22351 22575 6
 sheet arabia-night     ISS060 5022 6021 12
 sheet south-asia-night ISS061 22294 22718 8
+
+# Loops chosen from the sheets (14 Nov): consecutive frames, every 2nd unless noted.
+loop aurora-loop       ISS060 69100 69219 2
+loop aurora-south-loop ISS060 32528 32630 2
+loop storm-loop        ISS060 59690 59809 2
+loop milky-way-loop    ISS060 22351 22410 1
+loop arabia-night-loop ISS060 5740 5859 2
+loop india-night-loop  ISS061 22398 22517 2
+loop sunrise-loop      ISS060 59985 60104 2
