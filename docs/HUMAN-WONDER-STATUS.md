@@ -1,17 +1,17 @@
 # Human Wonder: status, builds and installs
 
-*14 November 2026 (updated 00:05). Covers the Android app (v2), the iPhone app, how to build and install both without paid accounts, and the new photos in the chat (in progress).*
+*14 November 2026 (updated 10:30). Covers the Android app (v2), the iPhone app, how to build and install both without paid accounts, and the new pictures in the chat.*
 
 ## In short
 
 - **Android app (v2)** builds on the Mac with one double-click. The latest build (8 Nov, 11:31) has the smaller type, the unified look, the dunes welcome screen with the swipe-up, and the text-size and keyboard fixes. It has **not been installed on a phone yet**: no Android phone was connected during that build.
 - **iPhone app** is built and **installed on an iPhone** with a free Apple ID (13 November). It is a SwiftUI version of the same app (same screens, fonts, icons, photos, Orbit 412 voice and the same model on the phone), built with Xcode 27.2 on macOS 27.2.1 as `HumanWonder-iPhone.ipa` (401 MB).
-- **New, in progress: Orbit sends pictures with its answers** (the designer's request). The code for both apps is written and reviewed; it is waiting for the photos to be downloaded on the Mac (see the next section).
+- **New: Orbit sends pictures with its answers** (the designer's request). The 32 pictures are built into both apps. The iPhone app with pictures built cleanly on 14 November, 10:25; the Android build with pictures is next.
 - **Installing on iPhone costs nothing:** the app is signed with a free Apple ID through iloader or SideStore. The catch: it must be renewed every 7 days and fits 3 sideloaded apps per iPhone.
 - **GitHub is locked for billing** (since about 8 November), so GitHub's build machines run nothing for this account. Everything is built on the Mac instead. Pushing code still works.
-- **Next:** double-click **Get Orbit Photos.command** on the Mac, then build both apps with the pictures.
+- **Next:** install the new `HumanWonder-iPhone.ipa` through SideStore and try the pictures; build the Android app with **Build Human Wonder**.
 
-## New: pictures from Orbit's archive (in progress)
+## New: pictures from Orbit's archive
 
 The designer asked for pictures or GIFs with Orbit's answers. Orbit 412 now sends a "frame from its archive" under an answer when the question is about something it can show.
 
@@ -27,11 +27,12 @@ The designer asked for pictures or GIFs with Orbit's answers. Orbit 412 now send
 
 - **Better answers too.** The example answer in Orbit's instructions was being copied into 40% of all answers ("the coast glows like a string of gold beads", even about the Moon). It is gone. With a picture, the model is told what the picture shows, and the answer now describes it 46 times in 50, with no copying at all.
 - **On screen:** the picture fades in under the answer once the words have arrived, with the line "From Orbit's archive" and the picture's title. Tap it for full screen with the credit. Loops play while on screen and hold still when the phone's animations are turned off. The picture is saved with the conversation.
-- **What's left:** download the photos on the Mac (one double-click, below), choose the best few seconds of each time-lapse for the loops, build the app files (about 15 MB in total), then build both apps and check.
+- **Done on 14 November:** the photos and time-lapse frames were downloaded on the Mac (two runs of **Get Orbit Photos.command**, 910 files). Every photo was checked by eye, and cropped where needed to leave out station hardware and a NASA logo. The best 4 to 7 seconds of each time-lapse became a loop that plays with no visible jump. In total, 10.6 MB of pictures ship in `app/src/main/assets/frames/`, and the iPhone app bundles the same folder. The iPhone app built with them on the first try.
+- **Still to check:** the Android build and its automatic checks, and the pictures on a real iPhone.
 
-**To do on the Mac:** double-click **Get Orbit Photos.command** in `~/Desktop/stitch-mcp/human-wonder-v2/`. It downloads the 25 photos and about 470 small time-lapse frames from NASA's astronaut photo archive (eol.jsc.nasa.gov), roughly 150 to 300 MB. It keeps only resized copies (about 30 MB) in `media-src/` and writes `tools/frames/fetch.log`.
+**To redo the pictures:** change `tools/frames/frames.json` or `manifest.txt`, double-click **Get Orbit Photos.command** (it downloads only what is missing into `media-src/`, now 76 MB), then run `python3 tools/frames/build_assets.py`.
 
-Details, numbers and the test method: `tools/frames/README.md` on the `ios` branch.
+Details, numbers and the test method: `tools/frames/README.md` (GitHub branch `orbit-archive`).
 
 ## 1. What changed this week
 
@@ -154,6 +155,7 @@ Each tester signs with their own Apple ID, so any number of people can test.
 | `main` | design preview, docs (this document), memory and skill | `4c92ed7` |
 | `v2-offlinellm` | the Android app | `ba9b9f0` |
 | `ios` | the Android app plus the iPhone app (`ios/`) and its build script | `e2d06a8` |
+| `orbit-archive` | `ios` plus the pictures in the chat (tools, pictures, both apps) | `94b5ae0` |
 
 ## 6. Where things are on the Mac
 
@@ -182,8 +184,10 @@ Each tester signs with their own Apple ID, so any number of people can test.
 - [x] Update macOS and install Xcode (macOS 27.2.1, Xcode 27.2).
 - [x] Build the iPhone app (`HumanWonder-iPhone.ipa`, 13 November).
 - [x] Install on an iPhone (section 4) with a free Apple ID (13 November).
-- [ ] Double-click **Get Orbit Photos.command** so the pictures for Orbit's answers can be built.
-- [ ] Build both apps with the pictures and check them (Android: **Build Human Wonder**; iPhone: **Build Human Wonder for iPhone**, then install the new `.ipa` through SideStore).
+- [x] Download the pictures for Orbit's answers (**Get Orbit Photos.command**, 14 November).
+- [x] Build the iPhone app with the pictures (14 November, 10:25).
+- [ ] Install the new `.ipa` through SideStore and try the pictures.
+- [ ] Build the Android app with the pictures (**Build Human Wonder**) and check its screen pictures.
 - [ ] Send screenshots of each iPhone screen to check them against the Android app.
 - [ ] Android: plug in the phone, run **Build Human Wonder**, and check the phone screenshots and the 50 screen-check pictures.
 - [ ] Optional: clear the GitHub billing lock so builds and screen checks run on GitHub again.
